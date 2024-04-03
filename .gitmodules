@@ -1,0 +1,3 @@
+[submodule "UsingRaplInterface/src/rapl-interface"]
+	path = UsingRaplInterface/src/rapl-interface
+	url = git@github.com-aau:cs-23-pt-9-01/rapl-interface.git
