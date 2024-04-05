@@ -12,7 +12,21 @@
 #include <immintrin.h>
 #include <math.h>
 #include <stdio.h>
-#include "NBody.h"
+
+void start_rapl();
+void stop_rapl();
+
+////////////////////////////////////////////////////////////////////////////////////////
+// intptr_t should be the native integer type on most sane systems.
+typedef intptr_t intnative_t;
+
+typedef struct{
+    double position[3], velocity[3], mass;
+} body;
+
+#define SOLAR_MASS (4*M_PI*M_PI)
+#define DAYS_PER_YEAR 365.24
+#define BODIES_COUNT 5
 
 static body solar_Bodies[]={
     {    // Sun
@@ -213,11 +227,19 @@ static void output_Energy(body bodies[]){
     // Output the total energy of the system.
     printf("%.9f\n", energy);
 }
+////////////////////////////////////////////////////////////////////////////////////////
 
+int main(int argc, char *argv[]){
+    int count = atoi(argv[1]);
+    intnative_t n = atoi(argv[2]);
 
-int NBody(intnative_t n){
-    offset_Momentum(solar_Bodies);
-    output_Energy(solar_Bodies);
-    for(; n--; advance(solar_Bodies));
-    output_Energy(solar_Bodies);
+    for (int i = 0; i < count; i++) {
+        start_rapl();
+        offset_Momentum(solar_Bodies);
+        output_Energy(solar_Bodies);
+        for(intnative_t j=n; j--; advance(solar_Bodies));
+        output_Energy(solar_Bodies);
+        stop_rapl();
+    }
+    return 0;
 }

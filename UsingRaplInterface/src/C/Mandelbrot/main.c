@@ -17,9 +17,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <emmintrin.h>
-#include "Mandelbrot.h"
 
+void start_rapl();
+void stop_rapl();
 
+////////////////////////////////////////////////////////////////////////////////////////
 long numDigits(long n)
 {
     long len = 0;
@@ -119,77 +121,84 @@ unsigned long mand64(__m128d *init_r, __m128d init_i)
 
 
 
-int Mandelbrot(long wid_ht)
+int main(int argc, char ** argv)
 {
-    wid_ht = (wid_ht+7) & ~7;
+    // get width/height from arguments
+    int count = atoi(argv[1]);
+    long wid_ht = atoi(argv[2]);
+
+    for (int i = 0; i < count; i++) {
+        start_rapl();
+        wid_ht = (wid_ht+7) & ~7;
+        // allocate memory for header and pixels
+
+        long headerLength = numDigits(wid_ht)*2+5;
+        long pad = ((headerLength + 7) & ~7) - headerLength; // pad aligns pixels on 8
+        long dataLength = headerLength + wid_ht*(wid_ht>>3);
+        unsigned char * const buffer = malloc(pad + dataLength);
+        unsigned char * const header = buffer + pad;
+        unsigned char * const pixels = header + headerLength;
 
 
-    // allocate memory for header and pixels
+        // generate the bitmap header
 
-    long headerLength = numDigits(wid_ht)*2+5;
-    long pad = ((headerLength + 7) & ~7) - headerLength; // pad aligns pixels on 8
-    long dataLength = headerLength + wid_ht*(wid_ht>>3);
-    unsigned char * const buffer = malloc(pad + dataLength);
-    unsigned char * const header = buffer + pad;
-    unsigned char * const pixels = header + headerLength;
+        sprintf((char *)header, "P4\n%ld %ld\n", wid_ht, wid_ht);
 
 
-    // generate the bitmap header
+        // calculate initial values, store in r0, i0
 
-    sprintf((char *)header, "P4\n%ld %ld\n", wid_ht, wid_ht);
+        __m128d r0[wid_ht/2];
+        double i0[wid_ht];
 
-
-    // calculate initial values, store in r0, i0
-
-    __m128d r0[wid_ht/2];
-    double i0[wid_ht];
-
-    for(long xy=0; xy<wid_ht; xy+=2)
-    {
-        r0[xy>>1] = 2.0 / wid_ht * (__m128d){xy,  xy+1} - 1.5;
-        i0[xy]    = 2.0 / wid_ht *  xy    - 1.0;
-        i0[xy+1]  = 2.0 / wid_ht * (xy+1) - 1.0;
-    }
-
-
-    // generate the bitmap
-
-    long use8 = wid_ht%64;
-    if (use8)
-    {
-        // process 8 pixels (one byte) at a time    
-        #pragma omp parallel for schedule(guided)
-        for(long y=0; y<wid_ht; y++)
+        for(long xy=0; xy<wid_ht; xy+=2)
         {
-            __m128d init_i = (__m128d){i0[y], i0[y]};
-            long rowstart = y*wid_ht/8;
-            for(long x=0; x<wid_ht; x+=8)
+            r0[xy>>1] = 2.0 / wid_ht * (__m128d){xy,  xy+1} - 1.5;
+            i0[xy]    = 2.0 / wid_ht *  xy    - 1.0;
+            i0[xy+1]  = 2.0 / wid_ht * (xy+1) - 1.0;
+        }
+
+
+        // generate the bitmap
+
+        long use8 = wid_ht%64;
+        if (use8)
+        {
+            // process 8 pixels (one byte) at a time    
+            #pragma omp parallel for schedule(guided)
+            for(long y=0; y<wid_ht; y++)
             {
-                pixels[rowstart + x/8] = mand8(r0+x/2, init_i);
+                __m128d init_i = (__m128d){i0[y], i0[y]};
+                long rowstart = y*wid_ht/8;
+                for(long x=0; x<wid_ht; x+=8)
+                {
+                    pixels[rowstart + x/8] = mand8(r0+x/2, init_i);
+                }
             }
         }
-    }
-    else
-    {
-        // process 64 pixels (8 bytes) at a time
-        #pragma omp parallel for schedule(guided)
-        for(long y=0; y<wid_ht; y++)
+        else
         {
-            __m128d init_i = (__m128d){i0[y], i0[y]};
-            long rowstart = y*wid_ht/64;
-            for(long x=0; x<wid_ht; x+=64)
+            // process 64 pixels (8 bytes) at a time
+            #pragma omp parallel for schedule(guided)
+            for(long y=0; y<wid_ht; y++)
             {
-                ((unsigned long *)pixels)[rowstart + x/64] = mand64(r0+x/2, init_i);
+                __m128d init_i = (__m128d){i0[y], i0[y]};
+                long rowstart = y*wid_ht/64;
+                for(long x=0; x<wid_ht; x+=64)
+                {
+                    ((unsigned long *)pixels)[rowstart + x/64] = mand64(r0+x/2, init_i);
+                }
             }
         }
+
+        // write the data
+
+        long ret = ret = write(STDOUT_FILENO, header, dataLength);
+
+
+        free(buffer);
+        stop_rapl();
     }
-
-    // write the data
-
-    long ret = ret = write(STDOUT_FILENO, header, dataLength);
-
-
-    free(buffer);
 
     return 0;
 }
+////////////////////////////////////////////////////////////////////////////////////////

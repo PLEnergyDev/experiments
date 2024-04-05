@@ -27,12 +27,10 @@ run_benchmark() {
   local algorithm="$2"
   local args=("${@:3}")
 
-  dotnet build "$language/$algorithm" --configuration Release
-
   local start_time=$(date)
   echo "--- Starting $language $algorithm --- time: $start_time"
 
-  "./$language/$algorithm/bin/Release/net8.0/$algorithm" "${args[@]}"
+  java --enable-native-access=ALL-UNNAMED --enable-preview --source 21 -server "$language/$algorithm/main.java" "${args[@]}"
   sleep 1s
 
   move_result "$language" "$algorithm" "${args[@]}"
@@ -42,23 +40,21 @@ run_benchmark() {
   echo
 }
 
-run_benchmark "C#" "NBody"                      500 50000000
+run_benchmark "Java" "NBody"                      2 50000000
 
-run_benchmark "C#" "FannkuchRedux"              500 12
+# run_benchmark "Java" "FannkuchRedux"              2 12
 
-run_benchmark "C#" "Mandelbrot"                 500 16000
+run_benchmark "Java" "Mandelbrot"                 2 16000
 
-run_benchmark "C#" "Pidigits"                   500 10000
+# run_benchmark "Java" "Pidigits"                   2 10000
 
-run_benchmark "C#" "SpectralNorm"               500 10000
+run_benchmark "Java" "SpectralNorm"               2 10000
 
-run_benchmark "C#" "PolynomialEvaluation"       500 10000
+run_benchmark "Java" "PolynomialEvaluation"       2 10000
 
-run_benchmark "C#" "DivisionLoop"               500 22
+run_benchmark "Java" "DivisionLoop"               2 22
 
-run_benchmark "C#" "MatrixMultiplication"       500 80 80
-
-run_benchmark "C#" "MatrixMultiplicationUnsafe" 500 80 80
+run_benchmark "Java" "MatrixMultiplication"       2 80 80
 
 
 # multiplier to get values in joules 6.103515625e-05
