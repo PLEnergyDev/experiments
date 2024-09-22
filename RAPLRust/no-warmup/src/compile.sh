@@ -12,31 +12,31 @@ compile_benchmark() {
 
 compile_benchmark "C" "binary-trees"
 compile_benchmark "C" "chameneos-redux"
-compile_benchmark "C" "division-loop"
+# compile_benchmark "C" "division-loop" # Not Implemented
 compile_benchmark "C" "fannkuch-redux"
 compile_benchmark "C" "fasta"
 compile_benchmark "C" "k-nucleotide"
 compile_benchmark "C" "mandelbrot"
-compile_benchmark "C" "matrix-multiplication"
+# compile_benchmark "C" "matrix-multiplication" # Not Implemented
 compile_benchmark "C" "n-body"
 compile_benchmark "C" "pidigits"
-compile_benchmark "C" "polynomial-evaluation"
+# compile_benchmark "C" "polynomial-evaluation" # Not Implemented
 compile_benchmark "C" "regex-redux"
 compile_benchmark "C" "reverse-complement"
 compile_benchmark "C" "spectral-norm"
 
 compile_benchmark "C#" "binary-trees"
 compile_benchmark "C#" "chameneos-redux"
-compile_benchmark "C#" "division-loop"
+# compile_benchmark "C#" "division-loop" # Not Implemented
 compile_benchmark "C#" "fannkuch-redux"
 compile_benchmark "C#" "fasta"
 compile_benchmark "C#" "k-nucleotide"
 compile_benchmark "C#" "mandelbrot"
-compile_benchmark "C#" "matrix-multiplication"
-compile_benchmark "C#" "matrix-multiplication-unsafe"
+# compile_benchmark "C#" "matrix-multiplication" # Not Implemented
+# compile_benchmark "C#" "matrix-multiplication-unsafe" # Not Implemented
 compile_benchmark "C#" "n-body"
 compile_benchmark "C#" "pidigits"
-compile_benchmark "C#" "polynomial-evaluation"
+# compile_benchmark "C#" "polynomial-evaluation" # Not Implemented
 compile_benchmark "C#" "regex-redux"
 compile_benchmark "C#" "reverse-complement"
 compile_benchmark "C#" "spectral-norm"
@@ -58,14 +58,14 @@ compile_benchmark "C++" "reverse-complement"
 compile_benchmark "C++" "spectral-norm"
 
 compile_benchmark "Java" "binary-trees"
-compile_benchmark "Java" "division-loop"
+# compile_benchmark "Java" "division-loop" # Not Implemented
 compile_benchmark "Java" "fannkuch-redux"
 compile_benchmark "Java" "fasta"
 compile_benchmark "Java" "k-nucleotide"
 compile_benchmark "Java" "mandelbrot"
-compile_benchmark "Java" "matrix-multiplication"
+# compile_benchmark "Java" "matrix-multiplication" # Not Implemented
 compile_benchmark "Java" "n-body"
-compile_benchmark "Java" "polynomial-evaluation"
+# compile_benchmark "Java" "polynomial-evaluation" # Not Implemented
 compile_benchmark "Java" "regex-redux"
 # compile_benchmark "Java" "reverse-complement" # Not Working
 compile_benchmark "Java" "spectral-norm"

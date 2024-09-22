@@ -27,31 +27,31 @@ run_benchmark() {
 
 run_benchmark "C" "binary-trees"
 run_benchmark "C" "chameneos-redux"
-run_benchmark "C" "division-loop"
+# run_benchmark "C" "division-loop" # Not Implemented
 run_benchmark "C" "fannkuch-redux"
 run_benchmark "C" "fasta"
 run_benchmark "C" "k-nucleotide"
 run_benchmark "C" "mandelbrot"
-run_benchmark "C" "matrix-multiplication"
+# run_benchmark "C" "matrix-multiplication" # Not Implemented
 run_benchmark "C" "n-body"
 run_benchmark "C" "pidigits"
-run_benchmark "C" "polynomial-evaluation"
+# run_benchmark "C" "polynomial-evaluation" # Not Implemented
 run_benchmark "C" "regex-redux"
 run_benchmark "C" "reverse-complement"
 run_benchmark "C" "spectral-norm"
 
 run_benchmark "C#" "binary-trees"
 run_benchmark "C#" "chameneos-redux"
-run_benchmark "C#" "division-loop"
+# run_benchmark "C#" "division-loop" # Not Implemented
 run_benchmark "C#" "fannkuch-redux"
 run_benchmark "C#" "fasta"
 run_benchmark "C#" "k-nucleotide"
 run_benchmark "C#" "mandelbrot"
-run_benchmark "C#" "matrix-multiplication"
-run_benchmark "C#" "matrix-multiplication-unsafe"
+# run_benchmark "C#" "matrix-multiplication" # Not Implemented
+# run_benchmark "C#" "matrix-multiplication-unsafe" # Not Implemented
 run_benchmark "C#" "n-body"
 run_benchmark "C#" "pidigits"
-run_benchmark "C#" "polynomial-evaluation"
+# run_benchmark "C#" "polynomial-evaluation" # Not Implemented
 run_benchmark "C#" "regex-redux"
 run_benchmark "C#" "reverse-complement"
 run_benchmark "C#" "spectral-norm"
@@ -73,14 +73,14 @@ run_benchmark "C++" "reverse-complement"
 run_benchmark "C++" "spectral-norm"
 
 run_benchmark "Java" "binary-trees"
-run_benchmark "Java" "division-loop"
+# run_benchmark "Java" "division-loop" # Not Implemented
 run_benchmark "Java" "fannkuch-redux"
 run_benchmark "Java" "fasta"
 run_benchmark "Java" "k-nucleotide"
 run_benchmark "Java" "mandelbrot"
-run_benchmark "Java" "matrix-multiplication"
+# run_benchmark "Java" "matrix-multiplication" # Not Implemented
 run_benchmark "Java" "n-body"
-run_benchmark "Java" "polynomial-evaluation"
+# run_benchmark "Java" "polynomial-evaluation" # Not Implemented
 run_benchmark "Java" "regex-redux"
 # run_benchmark "Java" "reverse-complement" # Not Working
 run_benchmark "Java" "spectral-norm"
