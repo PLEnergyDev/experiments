@@ -1,0 +1,11 @@
+Algorithm,Package Energy (J),Core Energy (J),Uncore Energy (J),DRAM Energy (J),Elapsed Time (ms),Total Memory (MB),Peak Memory (MB)
+binary-trees,45.71,37.86,0.0,0.99,695,132.5,0
+binary-trees,45.11,37.32,0.0,1.0,691,132.5,0
+binary-trees,45.49,37.7,0.0,1.0,694,132.5,0
+binary-trees,45.06,37.28,0.0,0.99,689,132.5,0
+binary-trees,45.98,38.04,0.0,1.0,705,132.5,0
+binary-trees,45.31,37.5,0.0,0.99,692,132.5,0
+binary-trees,44.37,36.89,0.0,0.98,664,132.5,0
+binary-trees,44.67,36.94,0.0,0.99,685,132.5,0
+binary-trees,44.05,36.63,0.0,0.96,656,132.5,0
+binary-trees,44.29,36.58,0.0,0.98,683,132.5,0

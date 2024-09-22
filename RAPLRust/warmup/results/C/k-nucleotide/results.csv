@@ -1,0 +1,11 @@
+Algorithm,Package Energy (J),Core Energy (J),Uncore Energy (J),DRAM Energy (J),Elapsed Time (ms),Total Memory (MB),Peak Memory (MB)
+k-nucleotide,108.65,90.23,0.0,1.12,1664,127.37,0
+k-nucleotide,108.72,90.2,0.0,1.16,1673,127.37,0
+k-nucleotide,111.58,92.37,0.0,1.42,1736,127.37,0
+k-nucleotide,108.44,90.05,0.0,1.14,1661,127.37,0
+k-nucleotide,107.84,89.44,0.0,1.14,1663,127.37,0
+k-nucleotide,107.82,89.42,0.0,1.14,1661,127.37,0
+k-nucleotide,111.7,92.32,0.0,1.21,1752,127.37,0
+k-nucleotide,115.68,95.98,0.0,1.58,1779,127.37,0
+k-nucleotide,113.98,94.22,0.0,1.22,1787,127.37,0
+k-nucleotide,120.5,99.85,0.0,1.54,1864,127.37,0

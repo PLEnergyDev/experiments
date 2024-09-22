@@ -1,0 +1,11 @@
+Algorithm,Package Energy (J),Core Energy (J),Uncore Energy (J),DRAM Energy (J),Elapsed Time (ms),Total Memory (MB),Peak Memory (MB)
+regex-redux,36.59,26.71,0.0,0.66,888.35,150.45,0
+regex-redux,36.16,26.44,0.0,0.65,876.08,150.45,0
+regex-redux,36.09,26.41,0.0,0.65,870.71,150.45,0
+regex-redux,36.3,26.58,0.0,0.66,876.06,150.45,0
+regex-redux,35.94,26.25,0.0,0.65,873.12,150.45,0
+regex-redux,36.09,26.45,0.0,0.65,869.28,150.45,0
+regex-redux,35.99,26.32,0.0,0.65,870.83,150.45,0
+regex-redux,36.13,26.44,0.0,0.66,870.38,150.45,0
+regex-redux,35.95,26.29,0.0,0.65,871.38,150.45,0
+regex-redux,36.55,26.74,0.0,0.66,882.3,150.45,0

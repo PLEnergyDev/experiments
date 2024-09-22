@@ -7,8 +7,9 @@ import matplotlib.pyplot as plt
 sns.set(style="whitegrid")
 
 rows = ['Elapsed Time (ms)', 'Package Energy (µJ)', 'DRAM Energy (µJ)', 'Temperature (C°)']
+
 # you need to this this dict manually
-experiments = {
+# experiments = {
     # 'Plot Category': {
         # 'Title of plot': '/path/to/csv/file.csv',
         # 'Side by side title of plot': '/path/to/csv/file.csv',
@@ -17,6 +18,16 @@ experiments = {
         # 'Title of plot': '/path/to/csv/file.csv',
         # 'Side by side title of plot': '/path/to/csv/file.csv',
     # }
+# }
+experiments = {
+    'Plot Category': {
+        'Title of plot': '/path/to/csv/file.csv',
+        'Side by side title of plot': '/path/to/csv/file.csv',
+    },
+    'Another Plot Category': {
+        'Title of plot': '/path/to/csv/file.csv',
+        'Side by side title of plot': '/path/to/csv/file.csv',
+    }
 }
 
 fig, axs = plt.subplots(nrows=len(rows), ncols=len(experiments) * 2, figsize=(len(experiments) * 15, len(rows) * 5), sharey='row')

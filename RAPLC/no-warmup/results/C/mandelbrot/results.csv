@@ -1,0 +1,11 @@
+Algorithm,Package Energy (J),Core Energy (J),Uncore Energy (J),DRAM Energy (J),Elapsed Time (ms),Total Memory (MB),Peak Memory (MB)
+mandelbrot,57.52,51.96,0.0,0.29,500.58,32.0,0
+mandelbrot,58.83,53.31,0.0,0.29,500.22,32.0,0
+mandelbrot,59.14,53.57,0.0,0.3,501.85,32.0,0
+mandelbrot,59.21,53.65,0.0,0.3,500.97,32.0,0
+mandelbrot,59.3,53.74,0.0,0.3,501.89,32.0,0
+mandelbrot,59.24,53.68,0.0,0.29,500.98,32.0,0
+mandelbrot,59.34,53.78,0.0,0.3,502.07,32.0,0
+mandelbrot,59.21,53.69,0.0,0.3,500.77,32.0,0
+mandelbrot,59.39,53.85,0.0,0.3,502.44,32.0,0
+mandelbrot,59.35,53.78,0.0,0.3,501.63,32.0,0

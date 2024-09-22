@@ -1,0 +1,15 @@
+compile:
+	g++ -c -pipe -O3 -fomit-frame-pointer -march=native -mfpmath=sse -msse2 -mfpmath=sse -msse2 -fopenmp -mno-fma --std=c++14 mandelbrot.gpp-6.c++ -o mandelbrot.gpp-6.c++.o &&  g++ mandelbrot.gpp-6.c++.o -o mandelbrot.gpp-6.gpp_run -fopenmp 
+
+measure:
+	sudo modprobe msr
+	sudo ../../RAPL/target/release/RAPL "./mandelbrot.gpp-6.gpp_run 16000"
+
+run:
+	./mandelbrot.gpp-6.gpp_run 16000
+
+mem:
+	time -v ./mandelbrot.gpp-6.gpp_run 16000
+
+valgrind:
+	valgrind --tool=massif --stacks=yes ./mandelbrot.gpp-6.gpp_run 16000

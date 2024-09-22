@@ -1,0 +1,13 @@
+compile:
+	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp -mfpmath=sse -msse2 spectralnorm.gcc-4.c -o spectralnorm.gcc-4.gcc_run -lm
+
+measure:
+	sudo modprobe msr
+	sudo ../../RAPL/target/release/RAPL "./spectralnorm.gcc-4.gcc_run 5500"
+
+run:
+	./spectralnorm.gcc-4.gcc_run 5500
+
+mem:
+	time -v ./spectralnorm.gcc-4.gcc_run 5500
+

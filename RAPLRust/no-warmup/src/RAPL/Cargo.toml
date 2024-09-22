@@ -1,0 +1,5 @@
+[package]
+name = "RAPL"
+
+[dependencies]
+rapl-lib = { path = "../rapl-interface/rapl-lib" }

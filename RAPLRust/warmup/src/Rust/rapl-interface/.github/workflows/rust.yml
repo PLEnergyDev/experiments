@@ -1,0 +1,27 @@
+name: Rust
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+        matrix:
+            os: [ubuntu-latest, windows-latest]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Rust Toolchain
+        run: rustup toolchain install stable --profile minimal -c rustfmt,clippy
+
+      - name: Clippy
+        run: cargo clippy
+
+      - name: Build
+        run: cargo build --verbose
+
+      #- name: Tests
+      #  run: cargo test --verbose
