@@ -1,12 +1,31 @@
-compile:
-	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -std=c99 -mfpmath=sse -msse3 -fopenmp fasta.gcc-2.c -o fasta.gcc-2.gcc_run
-	
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./fasta.gcc-2.gcc_run 25000000" C fasta
+CC=gcc
 
-run:
-	./fasta.gcc-2.gcc_run 25000000
+OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=native -std=c99 -mfpmath=sse -msse3 -fopenmp
+CFLAGS=$(OPT_FLAGS)
 
-mem:
-	time -v ./fasta.gcc-2.gcc_run 25000000
+TARGET=main
+SRC=$(TARGET).c
+
+RAPL=../../RAPL/main
+
+INPUT=25000000
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS)
+
+run: $(TARGET)
+	./$(TARGET) $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "./$(TARGET) $(INPUT)" C fasta
+
+mem: $(TARGET)
+	time -v ./$(TARGET) $(INPUT)
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: all clean run measure mem

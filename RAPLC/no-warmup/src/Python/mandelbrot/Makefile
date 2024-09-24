@@ -3,7 +3,7 @@ compile:
 
 measure:
 	sudo modprobe msr
-	sudo ../../RAPL/main "python3 -OO mandelbrot.python3-7.py 16000" Python mandelbrot
+	sudo ../../RAPL/main "python3 -OO mandelbrot.python3-7.py 16000"
 
 run:
 	python3 -OO mandelbrot.python3-7.py 16000

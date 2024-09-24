@@ -1,16 +1,31 @@
-compile:
-	cp nbody.java-4.java nbody.java
-	javac -d . nbody.java
+JAVAC=javac
+JAVA=java
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "java nbody 50000000" Java n-body
+CLASS=nbody
+SRC=$(CLASS).java
 
-run:
-	java nbody 50000000
+RAPL=../../RAPL/main
+INPUT=50000000
 
-mem:
-	time -v java nbody 50000000
+all: $(CLASS)
 
-valgrind:
-	valgrind --tool=massif --stacks=yes java nbody 50000000
+$(CLASS): $(SRC)
+	$(JAVAC) $(SRC)
+
+run: $(CLASS)
+	$(JAVA) $(CLASS) $(INPUT)
+
+measure: $(CLASS)
+	modprobe msr
+	$(RAPL) "$(JAVA) $(CLASS) $(INPUT)" Java n-body
+
+mem: $(CLASS)
+	time -v $(JAVA) $(CLASS) $(INPUT)
+
+valgrind: $(CLASS)
+	valgrind --tool=massif --stacks=yes $(JAVA) $(CLASS) $(INPUT)
+
+clean:
+	rm -f *.class
+
+.PHONY: all clean run measure mem valgrind

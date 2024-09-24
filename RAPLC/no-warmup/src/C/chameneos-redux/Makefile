@@ -1,12 +1,31 @@
-compile:
-	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -pthread chameneosredux.gcc-5.c -o chameneosredux.gcc-5.gcc_run
-	
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./chameneosredux.gcc-5.gcc_run 6000000" C chameneos-redux
+CC=gcc
 
-run:
-	./chameneosredux.gcc-5.gcc_run 6000000
+OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=native -pthread
+CFLAGS=$(OPT_FLAGS)
 
-mem:
-	time -v ./chameneosredux.gcc-5.gcc_run 6000000
+TARGET=main
+SRC=$(TARGET).c
+
+RAPL=../../RAPL/main
+
+INPUT=6000000
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS)
+
+run: $(TARGET)
+	./$(TARGET) $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "./$(TARGET) $(INPUT)" C chameneos-redux
+
+mem: $(TARGET)
+	time -v ./$(TARGET) $(INPUT)
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: all clean run measure mem

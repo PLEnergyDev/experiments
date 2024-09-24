@@ -1,12 +1,31 @@
-compile:
-	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -std=c99 -fopenmp fannkuchredux.gcc-5.c -o fannkuchredux.gcc-5.gcc_run 
-	
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./fannkuchredux.gcc-5.gcc_run 12" C fannkuch-redux
+CC=gcc
 
-run:
-	./fannkuchredux.gcc-5.gcc_run 12
+OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=native -std=c99 -fopenmp
+CFLAGS=$(OPT_FLAGS)
 
-mem:
-	 time -v ./fannkuchredux.gcc-5.gcc_run 12
+TARGET=main
+SRC=$(TARGET).c
+
+RAPL=../../RAPL/main
+
+INPUT=12
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS)
+
+run: $(TARGET)
+	./$(TARGET) $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "./$(TARGET) $(INPUT)" C fannkuch-redux
+
+mem: $(TARGET)
+	time -v ./$(TARGET) $(INPUT)
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: all clean run measure mem

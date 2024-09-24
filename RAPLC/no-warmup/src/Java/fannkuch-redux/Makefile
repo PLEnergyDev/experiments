@@ -1,15 +1,31 @@
-compile:
-	javac -d . fannkuchredux.java
+JAVAC=javac
+JAVA=java
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "java fannkuchredux 12" Java fannkuch-redux
+CLASS=fannkuchredux
+SRC=$(CLASS).java
 
-run:
-	java fannkuchredux 12
+RAPL=../../RAPL/main
+INPUT=12
 
-mem:
-	time -v java fannkuchredux 12
+all: $(CLASS)
 
-valgrind:
-	valgrind --tool=massif --stacks=yes java fannkuchredux 12
+$(CLASS): $(SRC)
+	$(JAVAC) $(SRC)
+
+run: $(CLASS)
+	$(JAVA) $(CLASS) $(INPUT)
+
+measure: $(CLASS)
+	modprobe msr
+	$(RAPL) "$(JAVA) $(CLASS) $(INPUT)" Java fannkuch-redux
+
+mem: $(CLASS)
+	time -v $(JAVA) $(CLASS) $(INPUT)
+
+valgrind: $(CLASS)
+	valgrind --tool=massif --stacks=yes $(JAVA) $(CLASS) $(INPUT)
+
+clean:
+	rm -f *.class
+
+.PHONY: all clean run measure mem valgrind

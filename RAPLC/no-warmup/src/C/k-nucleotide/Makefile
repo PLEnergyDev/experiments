@@ -1,12 +1,33 @@
-compile:
-	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp -std=c99 -IInclude knucleotide.c -o knucleotide.gcc_run
+CC=gcc
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./knucleotide.gcc_run 0 < ../../knucleotide-input25000000.txt" C k-nucleotide
+OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp -std=c99
+INCLUDE_FLAGS=-IInclude
 
-run:
-	./knucleotide.gcc_run 0 < ../../knucleotide-input25000000.txt
+CFLAGS=$(OPT_FLAGS) $(INCLUDE_FLAGS)
 
-mem:
-	time -v ./knucleotide.gcc_run 0 < ../../knucleotide-input25000000.txt
+TARGET=main
+SRC=$(TARGET).c
+
+RAPL=../../RAPL/main
+
+INPUT=../../knucleotide-input25000000.txt
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS)
+
+run: $(TARGET)
+	./$(TARGET) < $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "./$(TARGET) < $(INPUT)" C k-nucleotide
+
+mem: $(TARGET)
+	time -v ./$(TARGET) < $(INPUT)
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: all clean run measure mem

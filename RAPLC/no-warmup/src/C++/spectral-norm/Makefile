@@ -1,14 +1,33 @@
-compile:
-	g++ -c -pipe -O3 -fomit-frame-pointer -march=native -mfpmath=sse -msse2 -fopenmp -mfpmath=sse -msse2 spectralnorm.gpp-6.c++ -o spectralnorm.gpp-6.c++.o &&  g++ spectralnorm.gpp-6.c++.o -o spectralnorm.gpp-6.gpp_run -fopenmp
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./spectralnorm.gpp-6.gpp_run 5500" C++ spectral-norm
+CC=g++
 
-run:
-	./spectralnorm.gpp-6.gpp_run 5500
+OPT_FLAGS=-pipe -O3 -fomit-frame-pointer -march=native -mfpmath=sse -msse2 -fopenmp
+CFLAGS=$(OPT_FLAGS)
 
-mem:
-	time -v ./spectralnorm.gpp-6.gpp_run 5500
+TARGET=main
+SRC=$(TARGET).cpp
 
-valgrind:
-	valgrind --tool=massif --stacks=yes ./spectralnorm.gpp-6.gpp_run 5500
+RAPL=../../RAPL/main
+INPUT=5500
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS)
+
+run: $(TARGET)
+	./$(TARGET) $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "./$(TARGET) $(INPUT)" C++ spectral-norm
+
+mem: $(TARGET)
+	time -v ./$(TARGET) $(INPUT)
+
+valgrind: $(TARGET)
+	valgrind --tool=massif --stacks=yes ./$(TARGET) $(INPUT)
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: all clean run measure mem valgrind

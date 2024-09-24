@@ -1,11 +1,31 @@
-compile:
-	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -mno-fma -fno-finite-math-only -mfpmath=sse -msse2 -fopenmp mandelbrot.gcc-6.c -o mandelbrot.gcc-6.gcc_run
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./mandelbrot.gcc-6.gcc_run 16000" C mandelbrot
+CC=gcc
 
-run:
-	./mandelbrot.gcc-6.gcc_run 16000
+OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=native -mno-fma -fno-finite-math-only -mfpmath=sse -msse2 -fopenmp
+CFLAGS=$(OPT_FLAGS)
 
-mem:
-	time -v ./mandelbrot.gcc-6.gcc_run 16000
+TARGET=main
+SRC=$(TARGET).c
+
+RAPL=../../RAPL/main
+
+INPUT=16000
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS)
+
+run: $(TARGET)
+	./$(TARGET) $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "./$(TARGET) $(INPUT)" C mandelbrot
+
+mem: $(TARGET)
+	time -v ./$(TARGET) $(INPUT)
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: all clean run measure mem

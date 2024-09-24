@@ -1,16 +1,31 @@
-compile:
-	cp regexredux.java-3.java regexredux.java
-	javac -d . regexredux.java
+JAVAC=javac
+JAVA=java
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "java regexredux 0 < ../../regexredux-input5000000.txt" Java regex-redux
+CLASS=regexredux
+SRC=$(CLASS).java
 
-run:
-	java   regexredux 0 < ../../regexredux-input5000000.txt
+RAPL=../../RAPL/main
+INPUT=../../regexredux-input5000000.txt
 
-mem:
-	time -v java regexredux 0 < ../../regexredux-input5000000.txt
+all: $(CLASS)
 
-valgrind:
-	valgrind --tool=massif --stacks=yes java regexredux 0 < ../../regexredux-input5000000.txt
+$(CLASS): $(SRC)
+	$(JAVAC) $(SRC)
+
+run: $(CLASS)
+	$(JAVA) $(LIB_FLAGS) $(CLASS) < $(INPUT)
+
+measure: $(CLASS)
+	modprobe msr
+	$(RAPL) "$(JAVA) $(LIB_FLAGS) $(CLASS) < $(INPUT)" Java regex-redux
+
+mem: $(CLASS)
+	time -v $(JAVA) $(LIB_FLAGS) $(CLASS) < $(INPUT)
+
+valgrind: $(CLASS)
+	valgrind --tool=massif --stacks=yes $(JAVA) $(LIB_FLAGS) $(CLASS) < $(INPUT)
+
+clean:
+	rm -f *.class
+
+.PHONY: all clean run measure mem valgrind

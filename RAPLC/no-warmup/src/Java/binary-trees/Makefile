@@ -1,16 +1,31 @@
-compile:
-	cp binarytrees.java-7.java binarytrees.java
-	javac -d . binarytrees.java
+JAVAC=javac
+JAVA=java
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "java binarytrees 21" Java binary-trees
+CLASS=binarytrees
+SRC=$(CLASS).java
 
-run:
-	java binarytrees 21
+RAPL=../../RAPL/main
+INPUT=21
 
-mem:
-	time -v java binarytrees 21
+all: $(CLASS)
 
-valgrind:
-	valgrind --tool=massif --stacks=yes java binarytrees 21
+$(CLASS): $(SRC)
+	$(JAVAC) $(SRC)
+
+run: $(CLASS)
+	$(JAVA) $(CLASS) $(INPUT)
+
+measure: $(CLASS)
+	modprobe msr
+	$(RAPL) "$(JAVA) $(CLASS) $(INPUT)" Java binary-trees
+
+mem: $(CLASS)
+	time -v $(JAVA) $(CLASS) $(INPUT)
+
+valgrind: $(CLASS)
+	valgrind --tool=massif --stacks=yes $(JAVA) $(CLASS) $(INPUT)
+
+clean:
+	rm -f *.class
+
+.PHONY: all clean run measure mem valgrind

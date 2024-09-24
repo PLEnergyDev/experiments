@@ -1,11 +1,31 @@
-compile:
-	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -funroll-loops -fopenmp revcomp.gcc-6.c -o revcomp.gcc-6.gcc_run 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./revcomp.gcc-6.gcc_run 0 < ../../revcomp-input25000000.txt" C reverse-complement
+CC=gcc
 
-run:
-	./revcomp.gcc-6.gcc_run 0 < ../../revcomp-input25000000.txt
+OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=native -funroll-loops -fopenmp
+CFLAGS=$(OPT_FLAGS)
 
-mem:
-	time -v ./revcomp.gcc-6.gcc_run 0 < ../../revcomp-input25000000.txt
+TARGET=main
+SRC=$(TARGET).c
+
+RAPL=../../RAPL/main
+
+INPUT=../../revcomp-input25000000.txt
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS)
+
+run: $(TARGET)
+	./$(TARGET) < $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "./$(TARGET) < $(INPUT)" C reverse-complement
+
+mem: $(TARGET)
+	time -v ./$(TARGET) < $(INPUT)
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: all clean run measure mem

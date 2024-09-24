@@ -1,16 +1,31 @@
-compile:
-	cp fasta.java-5.java fasta.java
-	javac -d . fasta.java
+JAVAC=javac
+JAVA=java
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "java fasta 25000000" Java fasta
+CLASS=fasta
+SRC=$(CLASS).java
 
-run:
-	java fasta 25000000
+RAPL=../../RAPL/main
+INPUT=25000000
 
-mem:
-	time -v java fasta 25000000
+all: $(CLASS)
 
-valgrind:
-	valgrind --tool=massif --stacks=yes java fasta 25000000
+$(CLASS): $(SRC)
+	$(JAVAC) $(SRC)
+
+run: $(CLASS)
+	$(JAVA) $(CLASS) $(INPUT)
+
+measure: $(CLASS)
+	modprobe msr
+	$(RAPL) "$(JAVA) $(CLASS) $(INPUT)" Java fasta
+
+mem: $(CLASS)
+	time -v $(JAVA) $(CLASS) $(INPUT)
+
+valgrind: $(CLASS)
+	valgrind --tool=massif --stacks=yes $(JAVA) $(CLASS) $(INPUT)
+
+clean:
+	rm -f *.class
+
+.PHONY: all clean run measure mem valgrind

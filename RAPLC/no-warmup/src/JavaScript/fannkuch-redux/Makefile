@@ -3,7 +3,7 @@ compile:
 
 measure:
 	sudo modprobe msr
-	sudo ../../RAPL/main "node --no-deprecation fannkuchredux.node-4.js 12" JavaScript fannkuch-redux
+	sudo ../../RAPL/main "node --no-deprecation fannkuchredux.node-4.js 12"
 
 run:
 	node --no-deprecation fannkuchredux.node-4.js 12

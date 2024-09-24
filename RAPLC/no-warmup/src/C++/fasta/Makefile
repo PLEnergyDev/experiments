@@ -1,16 +1,34 @@
-compile:
-	g++ -c -pipe -O3 -fomit-frame-pointer -march=native -mfpmath=sse -msse3 -std=c++11 fasta.gpp-5.c++ -o fasta.gpp-5.c++.o && g++ fasta.gpp-5.c++.o -o fasta.gpp-5.gpp_run -lpthread 
+CC=g++
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./fasta.gpp-5.gpp_run 25000000" C++ fasta
+OPT_FLAGS=-pipe -O3 -fomit-frame-pointer -march=native -mfpmath=sse -msse3 -std=c++11
+LIB_FLAGS=-lpthread
+CFLAGS=$(OPT_FLAGS) $(LIB_FLAGS)
 
-run:
-	./fasta.gpp-5.gpp_run 25000000
+TARGET=main
+SRC=$(TARGET).cpp
 
-mem:
-	time -v ./fasta.gpp-5.gpp_run 25000000
+RAPL=../../RAPL/main
+INPUT=25000000
 
-valgrind:
-	valgrind --tool=massif --stacks=yes ./fasta.gpp-5.gpp_run 25000000
+all: $(TARGET)
 
+$(TARGET): $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS)
+
+run: $(TARGET)
+	./$(TARGET) $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "./$(TARGET) $(INPUT)" C++ fasta
+
+mem: $(TARGET)
+	time -v ./$(TARGET) $(INPUT)
+
+valgrind: $(TARGET)
+	valgrind --tool=massif --stacks=yes ./$(TARGET) $(INPUT)
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: all clean run measure mem valgrind

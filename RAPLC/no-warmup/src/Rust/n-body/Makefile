@@ -1,15 +1,32 @@
-compile:
-	cargo build --release
+CC=cargo
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./target/release/n-body 50000000" Rust n-body
+OPT_FLAGS=--release
 
-run:
-	./target/release/n-body 50000000
+TARGET=target/release/main
+SRC=src/main.rs
 
-mem:
-	time -v ./target/release/n-body 50000000
+RAPL=../../RAPL/main
+INPUT=50000000
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) build $(OPT_FLAGS)
+
+run: $(TARGET)
+	$(TARGET) $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "$(TARGET) $(INPUT)" Rust n-body
+
+mem: $(TARGET)
+	time -v $(TARGET) $(INPUT)
 
 valgrind:
-	valgrind --tool=massif --stacks=yes ./target/release/n-body 50000000
+	valgrind --tool=massif --stacks=yes $(TARGET) $(INPUT)
+
+clean:
+	$(CC) clean
+
+.PHONY: all clean run measure mem valgrind

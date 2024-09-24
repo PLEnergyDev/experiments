@@ -1,11 +1,32 @@
-compile:
-	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp regexredux.gcc-4.c -o regexredux.gcc-4.gcc_run -lpcre
+CC=gcc
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./regexredux.gcc-4.gcc_run 0 < ../../regexredux-input5000000.txt" C regex-redux
+OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp
+LIB_FLAGS=-lpcre
+CFLAGS=$(OPT_FLAGS)
 
-run:
-	./regexredux.gcc-4.gcc_run 0 < ../../regexredux-input5000000.txt
-mem:
-	time -v ./regexredux.gcc-4.gcc_run 0 < ../../regexredux-input5000000.txt
+TARGET=main
+SRC=$(TARGET).c
+
+RAPL=../../RAPL/main
+
+INPUT=../../regexredux-input5000000.txt
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS) $(LIB_FLAGS)
+
+run: $(TARGET)
+	./$(TARGET) < $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "./$(TARGET) < $(INPUT)" C regex-redux
+
+mem: $(TARGET)
+	time -v ./$(TARGET) < $(INPUT)
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: all clean run measure mem

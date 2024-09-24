@@ -1,11 +1,32 @@
-compile:
-	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -mfpmath=sse -msse3 nbody.gcc-4.c -o nbody.gcc-4.gcc_run -lm
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./nbody.gcc-4.gcc_run 50000000" C n-body
+CC=gcc
 
-run:
-	./nbody.gcc-4.gcc_run 50000000
+OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=native -mfpmath=sse -msse3
+LIB_FLAGS=-lm
+CFLAGS=$(OPT_FLAGS)
 
-mem:
-	time -v ./nbody.gcc-4.gcc_run 50000000
+TARGET=main
+SRC=$(TARGET).c
+
+RAPL=../../RAPL/main
+
+INPUT=50000000
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS) $(LIB_FLAGS)
+
+run: $(TARGET)
+	./$(TARGET) $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "./$(TARGET) $(INPUT)" C n-body
+
+mem: $(TARGET)
+	time -v ./$(TARGET) $(INPUT)
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: all clean run measure mem

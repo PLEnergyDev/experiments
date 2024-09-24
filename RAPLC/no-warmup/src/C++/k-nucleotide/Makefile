@@ -1,15 +1,34 @@
-compile:
-	g++ -c -pipe -O3 -fomit-frame-pointer -march=native  -std=c++14 knucleotide.gpp-3.c++ -o knucleotide.gpp-3.c++.o && g++ knucleotide.gpp-3.c++.o -o knucleotide.gpp-3.gpp_run -Wl,--no-as-needed -lpthread 
+CC=g++
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./knucleotide.gpp-3.gpp_run 0 < ../../knucleotide-input25000000.txt" C++ k-nucleotide
+OPT_FLAGS=-pipe -O3 -fomit-frame-pointer -march=native -std=c++14
+LIB_FLAGS=-Wl,--no-as-needed -lpthread
+CFLAGS=$(OPT_FLAGS) $(LIB_FLAGS)
 
-run:
-	./knucleotide.gpp-3.gpp_run 0 < ../../knucleotide-input25000000.txt
+TARGET=main
+SRC=$(TARGET).cpp
 
-mem:
-	time -v ./knucleotide.gpp-3.gpp_run 0 < ../../knucleotide-input25000000.txt
+RAPL=../../RAPL/main
+INPUT=../../knucleotide-input25000000.txt
 
-valgrind:
-	valgrind --tool=massif --stacks=yes ./knucleotide.gpp-3.gpp_run 0 < ../../knucleotide-input25000000.txt
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS)
+
+run: $(TARGET)
+	./$(TARGET) < $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "./$(TARGET) < $(INPUT)" C++ k-nucleotide
+
+mem: $(TARGET)
+	time -v ./$(TARGET) < $(INPUT)
+
+valgrind: $(TARGET)
+	valgrind --tool=massif --stacks=yes ./$(TARGET) < $(INPUT)
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: all clean run measure mem valgrind

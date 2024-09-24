@@ -1,0 +1,110 @@
+# started on Mon Sep 23 22:26:56 2024
+
+
+ Performance counter stats for 'system wide':
+
+             37.46 Joules power/energy-pkg/                                                     
+              0.31 Joules power/energy-ram/                                                     
+               612 C      msr/cpu_thermal_margin/                                               
+
+       0.550496173 seconds time elapsed
+
+# started on Mon Sep 23 22:26:58 2024
+
+
+ Performance counter stats for 'system wide':
+
+             37.28 Joules power/energy-pkg/                                                     
+              0.30 Joules power/energy-ram/                                                     
+               602 C      msr/cpu_thermal_margin/                                               
+
+       0.537393679 seconds time elapsed
+
+# started on Mon Sep 23 22:27:01 2024
+
+
+ Performance counter stats for 'system wide':
+
+             38.76 Joules power/energy-pkg/                                                     
+              0.31 Joules power/energy-ram/                                                     
+               588 C      msr/cpu_thermal_margin/                                               
+
+       0.548831907 seconds time elapsed
+
+# started on Mon Sep 23 22:27:03 2024
+
+
+ Performance counter stats for 'system wide':
+
+             38.42 Joules power/energy-pkg/                                                     
+              0.31 Joules power/energy-ram/                                                     
+               621 C      msr/cpu_thermal_margin/                                               
+
+       0.561711200 seconds time elapsed
+
+# started on Mon Sep 23 22:27:06 2024
+
+
+ Performance counter stats for 'system wide':
+
+             37.96 Joules power/energy-pkg/                                                     
+              0.30 Joules power/energy-ram/                                                     
+               597 C      msr/cpu_thermal_margin/                                               
+
+       0.539323626 seconds time elapsed
+
+# started on Mon Sep 23 22:27:09 2024
+
+
+ Performance counter stats for 'system wide':
+
+             37.47 Joules power/energy-pkg/                                                     
+              0.30 Joules power/energy-ram/                                                     
+               587 C      msr/cpu_thermal_margin/                                               
+
+       0.529464263 seconds time elapsed
+
+# started on Mon Sep 23 22:27:11 2024
+
+
+ Performance counter stats for 'system wide':
+
+             34.92 Joules power/energy-pkg/                                                     
+              0.28 Joules power/energy-ram/                                                     
+               605 C      msr/cpu_thermal_margin/                                               
+
+       0.496833585 seconds time elapsed
+
+# started on Mon Sep 23 22:27:14 2024
+
+
+ Performance counter stats for 'system wide':
+
+             38.15 Joules power/energy-pkg/                                                     
+              0.30 Joules power/energy-ram/                                                     
+               600 C      msr/cpu_thermal_margin/                                               
+
+       0.542327197 seconds time elapsed
+
+# started on Mon Sep 23 22:27:16 2024
+
+
+ Performance counter stats for 'system wide':
+
+             37.63 Joules power/energy-pkg/                                                     
+              0.30 Joules power/energy-ram/                                                     
+               566 C      msr/cpu_thermal_margin/                                               
+
+       0.532940401 seconds time elapsed
+
+# started on Mon Sep 23 22:27:19 2024
+
+
+ Performance counter stats for 'system wide':
+
+             35.81 Joules power/energy-pkg/                                                     
+              0.29 Joules power/energy-ram/                                                     
+               602 C      msr/cpu_thermal_margin/                                               
+
+       0.511945150 seconds time elapsed
+

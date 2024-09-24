@@ -1,15 +1,32 @@
-compile:
-	cargo build --release
+CC=cargo
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./target/release/mandelbrot 16000" Rust mandelbrot
+OPT_FLAGS=--release
 
-run:
-	./target/release/mandelbrot 16000
+TARGET=target/release/main
+SRC=src/main.rs
 
-mem:
-	time -v  ./target/release/mandelbrot 16000
+RAPL=../../RAPL/main
+INPUT=16000
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) build $(OPT_FLAGS)
+
+run: $(TARGET)
+	$(TARGET) $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "$(TARGET) $(INPUT)" Rust mandelbrot
+
+mem: $(TARGET)
+	time -v $(TARGET) $(INPUT)
 
 valgrind:
-	valgrind --tool=massif --stacks=yes  ./target/release/mandelbrot 16000
+	valgrind --tool=massif --stacks=yes $(TARGET) $(INPUT)
+
+clean:
+	$(CC) clean
+
+.PHONY: all clean run measure mem valgrind

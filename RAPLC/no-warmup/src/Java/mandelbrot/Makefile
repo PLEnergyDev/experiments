@@ -1,16 +1,31 @@
-compile:
-	cp mandelbrot.java-2.java mandelbrot.java
-	javac -d . mandelbrot.java
+JAVAC=javac
+JAVA=java
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "java   mandelbrot 16000" Java mandelbrot
+CLASS=mandelbrot
+SRC=$(CLASS).java
 
-run:
-	java mandelbrot 16000
+RAPL=../../RAPL/main
+INPUT=16000
 
-mem:
-	time -v java mandelbrot 16000
+all: $(CLASS)
 
-valgrind:
-	valgrind --tool=massif --stacks=yes java mandelbrot 16000
+$(CLASS): $(SRC)
+	$(JAVAC) $(SRC)
+
+run: $(CLASS)
+	$(JAVA) $(CLASS) $(INPUT)
+
+measure: $(CLASS)
+	modprobe msr
+	$(RAPL) "$(JAVA) $(CLASS) $(INPUT)" Java mandelbrot
+
+mem: $(CLASS)
+	time -v $(JAVA) $(CLASS) $(INPUT)
+
+valgrind: $(CLASS)
+	valgrind --tool=massif --stacks=yes $(JAVA) $(CLASS) $(INPUT)
+
+clean:
+	rm -f *.class
+
+.PHONY: all clean run measure mem valgrind

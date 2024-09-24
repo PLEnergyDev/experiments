@@ -1,15 +1,32 @@
-compile:
-	cargo build --release
+CC=cargo
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./target/release/spectral-norm 5500" Rust spectral-norm
+OPT_FLAGS=--release
 
-run:
-	./target/release/spectral-norm 5500
+TARGET=target/release/main
+SRC=src/main.rs
 
-mem:
-	time -v ./target/release/spectral-norm 5500
+RAPL=../../RAPL/main
+INPUT=5500
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) build $(OPT_FLAGS)
+
+run: $(TARGET)
+	$(TARGET) $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "$(TARGET) $(INPUT)" Rust spectral-norm
+
+mem: $(TARGET)
+	time -v $(TARGET) $(INPUT)
 
 valgrind:
-	valgrind --tool=massif --stacks=yes ./target/release/spectral-norm 5500
+	valgrind --tool=massif --stacks=yes $(TARGET) $(INPUT)
+
+clean:
+	$(CC) clean
+
+.PHONY: all clean run measure mem valgrind

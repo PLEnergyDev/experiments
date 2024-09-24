@@ -1,12 +1,34 @@
-compile:
-	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp -D_FILE_OFFSET_BITS=64 -I/usr/include/apr-1.0 binarytrees.gcc-3.c -o binarytrees.gcc-3.gcc_run -lapr-1 -lgomp -lm
-	
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./binarytrees.gcc-3.gcc_run 21" C binary-trees
+CC=gcc
 
-run:
-	./binarytrees.gcc-3.gcc_run 21
+OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp
+DEFINES=-D_FILE_OFFSET_BITS=64
+INCLUDE_FLAGS=-I/usr/include/apr-1.0
+LIB_FLAGS=-lapr-1 -lgomp -lm
 
-mem:
-	time -v ./binarytrees.gcc-3.gcc_run 21
+CFLAGS=$(OPT_FLAGS) $(DEFINES) $(INCLUDE_FLAGS)
+
+TARGET=main
+SRC=$(TARGET).c
+
+RAPL=../../RAPL/main
+INPUT=21
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS) $(LIB_FLAGS)
+
+run: $(TARGET)
+	./$(TARGET) $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "./$(TARGET) $(INPUT)" C binary-trees
+
+mem: $(TARGET)
+	time -v ./$(TARGET) $(INPUT)
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: all clean run measure mem

@@ -1,8 +1,9 @@
 compile:
 	cp -L mandelbrot.node mandelbrot.js
+
 measure:
 	sudo modprobe msr
-	sudo ../../RAPL/main "node mandelbrot.js 16000" JavaScript mandelbrot
+	sudo ../../RAPL/main "node mandelbrot.js 16000"
 
 run:
 	node --no-deprecation mandelbrot.js 16000

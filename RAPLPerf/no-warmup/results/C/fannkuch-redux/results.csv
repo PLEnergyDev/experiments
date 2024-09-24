@@ -1,0 +1,11 @@
+Algorithm,Package Energy (J),Core Energy (J),Uncore Energy (J),DRAM Energy (J),Elapsed Time (ms),Total Memory (MB),Peak Memory (MB)
+fannkuch-redux,309.29,0,0,1.46,2623.63,1.87,0
+fannkuch-redux,310.61,0,0,1.47,2636.75,1.87,0
+fannkuch-redux,309.15,0,0,1.46,2621.14,1.87,0
+fannkuch-redux,309.48,0,0,1.47,2639.66,1.87,0
+fannkuch-redux,309.49,0,0,1.46,2620.02,1.87,0
+fannkuch-redux,309.72,0,0,1.46,2628.83,1.87,0
+fannkuch-redux,309.88,0,0,1.47,2635.13,1.87,0
+fannkuch-redux,308.93,0,0,1.46,2615.5,1.87,0
+fannkuch-redux,309.12,0,0,1.46,2619.73,1.87,0
+fannkuch-redux,309.69,0,0,1.46,2628.4,1.87,0

@@ -1,14 +1,34 @@
-compile:
-	g++ -c -pipe -O3 -fomit-frame-pointer -march=native  -std=c++14 -g pidigits.gpp-4.c++ -o pidigits.gpp-4.c++.o &&  g++ pidigits.gpp-4.c++.o -o pidigits.gpp-4.gpp_run -lgmp -lgmpxx 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./pidigits.gpp-4.gpp_run 10000" C++ pidigits
+CC=g++
 
-run:
-	./pidigits.gpp-4.gpp_run 10000
+OPT_FLAGS=-pipe -O3 -fomit-frame-pointer -march=native -std=c++14 -g
+LIB_FLAGS=-lgmp -lgmpxx
+CFLAGS=$(OPT_FLAGS) $(LIB_FLAGS)
 
-mem:
-	time -v ./pidigits.gpp-4.gpp_run 10000
+TARGET=main
+SRC=$(TARGET).cpp
 
-valgrind:
-	valgrind --tool=massif --stacks=yes ./pidigits.gpp-4.gpp_run 10000
+RAPL=../../RAPL/main
+INPUT=10000
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS)
+
+run: $(TARGET)
+	./$(TARGET) $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "./$(TARGET) $(INPUT)" C++ pidigits
+
+mem: $(TARGET)
+	time -v ./$(TARGET) $(INPUT)
+
+valgrind: $(TARGET)
+	valgrind --tool=massif --stacks=yes ./$(TARGET) $(INPUT)
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: all clean run measure mem valgrind

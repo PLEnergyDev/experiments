@@ -1,16 +1,33 @@
-compile:
-	cp revcomp.csharpcore-2.csharpcore Program.cs
-	dotnet build -c Release
+CC=dotnet
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "dotnet ./bin/Release/net8.0/tmp.dll 0 < ../../revcomp-input25000000.txt" CSharp reverse-complement
+OPT_FLAGS=-c Release
 
-run:
-	dotnet ./bin/Release/net8.0/tmp.dll 0 < ../../revcomp-input25000000.txt
+TARGET=bin/Release/net8.0/program
+SRC=Program.cs
 
-mem:
-	time -v  dotnet ./bin/Release/net8.0/tmp.dll 0 < ../../revcomp-input25000000.txt
+RAPL=../../RAPL/main
+
+INPUT=../../revcomp-input25000000.txt
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) build $(OPT_FLAGS)
+
+run: $(TARGET)
+	$(TARGET) < $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "$(TARGET) < $(INPUT)" C# reverse-complement
+
+mem: $(TARGET)
+	time -v $(TARGET) < $(INPUT)
 
 valgrind:
-	valgrind --tool=massif --stacks=yes   dotnet ./bin/Release/net8.0/tmp.dll 0 < ../../revcomp-input25000000.txt
+	valgrind --tool=massif --stacks=yes $(TARGET) < $(INPUT)
+
+clean:
+	rm -rf bin obj
+
+.PHONY: all clean run measure mem valgrind

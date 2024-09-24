@@ -1,8 +1,9 @@
 compile:
 	cp knucleotide.python3-3.python3 knucleotide.python3-3.py
+
 measure:
 	sudo modprobe msr
-	sudo ../../RAPL/main "python3 -OO knucleotide.python3-3.py 0 < ../../knucleotide-input25000000.txt" Python k-nucleotide
+	sudo ../../RAPL/main "python3 -OO knucleotide.python3-3.py 0 < ../../knucleotide-input25000000.txt"
 
 run:
 	python3 -OO knucleotide.python3-3.py 0 < ../../knucleotide-input25000000.txt

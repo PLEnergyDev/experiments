@@ -1,13 +1,32 @@
-compile:
-	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp -mfpmath=sse -msse2 spectralnorm.gcc-4.c -o spectralnorm.gcc-4.gcc_run -lm
+CC=gcc
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./spectralnorm.gcc-4.gcc_run 5500" C spectral-norm
+OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp -mfpmath=sse -msse2
+LIB_FLAGS=-lm
+CFLAGS=$(OPT_FLAGS)
 
-run:
-	./spectralnorm.gcc-4.gcc_run 5500
+TARGET=main
+SRC=$(TARGET).c
 
-mem:
-	time -v ./spectralnorm.gcc-4.gcc_run 5500
+RAPL=../../RAPL/main
 
+INPUT=5500
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS) $(LIB_FLAGS)
+
+run: $(TARGET)
+	./$(TARGET) $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "./$(TARGET) $(INPUT)" C spectral-norm
+
+mem: $(TARGET)
+	time -v ./$(TARGET) $(INPUT)
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: all clean run measure mem

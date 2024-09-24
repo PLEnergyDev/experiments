@@ -3,7 +3,7 @@ compile:
 
 measure:
 	sudo modprobe msr
-	sudo ../../RAPL/main "node --no-deprecation binarytrees.js 21" JavaScript binary-trees
+	sudo ../../RAPL/main "node --no-deprecation binarytrees.js 21"
 
 run:
 	node --no-deprecation binarytrees.js 21

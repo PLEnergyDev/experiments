@@ -1,14 +1,33 @@
-compile:
-	g++ -c -pipe -O3 -fomit-frame-pointer -march=native -mfpmath=sse -msse2 -mfpmath=sse -msse2 -fopenmp -mno-fma --std=c++14 mandelbrot.gpp-6.c++ -o mandelbrot.gpp-6.c++.o &&  g++ mandelbrot.gpp-6.c++.o -o mandelbrot.gpp-6.gpp_run -fopenmp 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./mandelbrot.gpp-6.gpp_run 16000" C++ mandelbrot
+CC=g++
 
-run:
-	./mandelbrot.gpp-6.gpp_run 16000
+OPT_FLAGS=-pipe -O3 -fomit-frame-pointer -march=native -mfpmath=sse -msse2 -fopenmp -mno-fma --std=c++14
+CFLAGS=$(OPT_FLAGS)
 
-mem:
-	time -v ./mandelbrot.gpp-6.gpp_run 16000
+TARGET=main
+SRC=$(TARGET).cpp
 
-valgrind:
-	valgrind --tool=massif --stacks=yes ./mandelbrot.gpp-6.gpp_run 16000
+RAPL=../../RAPL/main
+INPUT=16000
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS)
+
+run: $(TARGET)
+	./$(TARGET) $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "./$(TARGET) $(INPUT)" C++ mandelbrot
+
+mem: $(TARGET)
+	time -v ./$(TARGET) $(INPUT)
+
+valgrind: $(TARGET)
+	valgrind --tool=massif --stacks=yes ./$(TARGET) $(INPUT)
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: all clean run measure mem valgrind

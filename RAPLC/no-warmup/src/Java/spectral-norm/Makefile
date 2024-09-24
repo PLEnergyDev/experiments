@@ -1,16 +1,31 @@
-compile:
-	cp spectralnorm.java-2.java spectralnorm.java
-	javac -d . spectralnorm.java
+JAVAC=javac
+JAVA=java
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "java spectralnorm 5500" Java spectral-norm
+CLASS=spectralnorm
+SRC=$(CLASS).java
 
-run:
-	java spectralnorm 5500
+RAPL=../../RAPL/main
+INPUT=5500
 
-mem:
-	time -v java spectralnorm 5500
+all: $(CLASS)
 
-valgrind:
-	valgrind --tool=massif --stacks=yes java spectralnorm 5500
+$(CLASS): $(SRC)
+	$(JAVAC) $(SRC)
+
+run: $(CLASS)
+	$(JAVA) $(CLASS) $(INPUT)
+
+measure: $(CLASS)
+	modprobe msr
+	$(RAPL) "$(JAVA) $(CLASS) $(INPUT)" Java spectral-norm
+
+mem: $(CLASS)
+	time -v $(JAVA) $(CLASS) $(INPUT)
+
+valgrind: $(CLASS)
+	valgrind --tool=massif --stacks=yes $(JAVA) $(CLASS) $(INPUT)
+
+clean:
+	rm -f *.class
+
+.PHONY: all clean run measure mem valgrind

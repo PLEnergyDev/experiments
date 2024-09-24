@@ -1,15 +1,32 @@
-compile:
-	cargo build --release
+CC=cargo
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./target/release/reverse-complement 0 < ../../revcomp-input25000000.txt" Rust reverse-complement
+OPT_FLAGS=--release
 
-run:
-	./target/release/reverse-complement 0 < ../../revcomp-input25000000.txt
+TARGET=target/release/main
+SRC=src/main.rs
 
-mem:
-	time -v ./target/release/reverse-complement 0 < ../../revcomp-input25000000.txt
+RAPL=../../RAPL/main
+INPUT=../../revcomp-input25000000.txt
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) build $(OPT_FLAGS)
+
+run: $(TARGET)
+	$(TARGET) < $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "$(TARGET) < $(INPUT)" Rust reverse-complement
+
+mem: $(TARGET)
+	time -v $(TARGET) < $(INPUT)
 
 valgrind:
-	valgrind --tool=massif --stacks=yes ./target/release/reverse-complement 0 < ../../revcomp-input25000000.txt
+	valgrind --tool=massif --stacks=yes $(TARGET) < $(INPUT)
+
+clean:
+	$(CC) clean
+
+.PHONY: all clean run measure mem valgrind

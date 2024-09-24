@@ -1,16 +1,33 @@
-compile:
-	cp threadring.csharpcore Program.cs
-	dotnet build -c Release
+CC=dotnet
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/target/release/RAPL "dotnet ./bin/Release/net8.0/tmp.dll 50000000"
+OPT_FLAGS=-c Release
 
-run:
-	dotnet ./bin/Release/net8.0/tmp.dll 50000000
+TARGET=bin/Release/net8.0/program
+SRC=Program.cs
 
-mem:
-	time -v  dotnet ./bin/Release/net8.0/tmp.dll 50000000
+RAPL=../../RAPL/target/release/RAPL
+
+INPUT=50000000
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) build $(OPT_FLAGS)
+
+run: $(TARGET)
+	$(TARGET) $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "$(TARGET) $(INPUT)"
+
+mem: $(TARGET)
+	time -v $(TARGET) $(INPUT)
 
 valgrind:
-	valgrind --tool=massif --stacks=yes  dotnet ./bin/Release/net8.0/tmp.dll 50000000
+	valgrind --tool=massif --stacks=yes $(TARGET) $(INPUT)
+
+clean:
+	rm -rf bin obj
+
+.PHONY: all clean run measure mem valgrind

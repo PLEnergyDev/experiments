@@ -1,15 +1,32 @@
-compile:
-	cargo build --release
+CC=cargo
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./target/release/k-nucleotide 0 < ../../knucleotide-input25000000.txt" Rust k-nucleotide
+OPT_FLAGS=--release
 
-run:
-	./target/release/k-nucleotide 0 < ../../knucleotide-input25000000.txt
+TARGET=target/release/main
+SRC=src/main.rs
 
-mem:
-	time -v ./target/release/k-nucleotide 0 < ../../knucleotide-input25000000.txt
+RAPL=../../RAPL/main
+INPUT=../../knucleotide-input25000000.txt
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) build $(OPT_FLAGS)
+
+run: $(TARGET)
+	$(TARGET) < $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "$(TARGET) < $(INPUT)" Rust k-nucleotide
+
+mem: $(TARGET)
+	time -v $(TARGET) < $(INPUT)
 
 valgrind:
-	valgrind --tool=massif --stacks=yes ./target/release/k-nucleotide 0 < ../../knucleotide-input25000000.txt
+	valgrind --tool=massif --stacks=yes $(TARGET) < $(INPUT)
+
+clean:
+	$(CC) clean
+
+.PHONY: all clean run measure mem valgrind

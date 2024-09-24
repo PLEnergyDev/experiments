@@ -1,15 +1,32 @@
-compile:
-	cargo build --release
+CC=cargo
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "./target/release/binary-trees 21" Rust binary-trees
+OPT_FLAGS=--release
 
-run:
-	./target/release/binary-trees 21
+TARGET=target/release/main
+SRC=src/main.rs
 
-mem:
-	time -v ./target/release/binary-trees 21
+RAPL=../../RAPL/main
+INPUT=21
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) build $(OPT_FLAGS)
+
+run: $(TARGET)
+	$(TARGET) $(INPUT)
+
+measure: $(TARGET)
+	modprobe msr
+	$(RAPL) "$(TARGET) $(INPUT)" Rust binary-trees
+
+mem: $(TARGET)
+	time -v $(TARGET) $(INPUT)
 
 valgrind:
-	valgrind --tool=massif --stacks=yes ./target/release/binary-trees 21 
+	valgrind --tool=massif --stacks=yes $(TARGET) $(INPUT)
+
+clean:
+	$(CC) clean
+
+.PHONY: all clean run measure mem valgrind

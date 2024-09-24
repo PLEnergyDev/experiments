@@ -1,16 +1,31 @@
-compile:
-	cp revcomp.java-3.java revcomp.java
-	javac -d . revcomp.java
+JAVAC=javac
+JAVA=java
 
-measure:
-	sudo modprobe msr
-	sudo ../../RAPL/main "java revcomp 0 < ../../revcomp-input25000000.txt" Java reverse-complement
+CLASS=revcomp
+SRC=$(CLASS).java
 
-run:
-	java revcomp 0 < ../../revcomp-input25000000.txt
+RAPL=../../RAPL/main
+INPUT=../../revcomp-input25000000.txt
 
-mem:
-	time -v java revcomp 0 < ../../revcomp-input25000000.txt
+all: $(CLASS)
 
-valgrind:
-	valgrind --tool=massif --stacks=yes java revcomp 0 < ../../revcomp-input25000000.txt
+$(CLASS): $(SRC)
+	$(JAVAC) $(SRC)
+
+run: $(CLASS)
+	$(JAVA) $(LIB_FLAGS) $(CLASS) < $(INPUT)
+
+measure: $(CLASS)
+	modprobe msr
+	$(RAPL) "$(JAVA) $(LIB_FLAGS) $(CLASS) < $(INPUT)" Java reverse-complement
+
+mem: $(CLASS)
+	time -v $(JAVA) $(LIB_FLAGS) $(CLASS) < $(INPUT)
+
+valgrind: $(CLASS)
+	valgrind --tool=massif --stacks=yes $(JAVA) $(LIB_FLAGS) $(CLASS) < $(INPUT)
+
+clean:
+	rm -f *.class
+
+.PHONY: all clean run measure mem valgrind
