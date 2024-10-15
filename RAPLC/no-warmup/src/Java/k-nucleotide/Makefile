@@ -1,31 +1,37 @@
 JAVAC=javac
 JAVA=java
 
-LIB_FLAGS=-cp .:/usr/local/src/java-libs/fastutil-7.0.12.jar
+CFLAGS=--enable-preview --release 21 -cp .:/usr/local/src/java-libs/fastutil-7.0.12.jar
+RFLAGS=--enable-preview --enable-native-access=ALL-UNNAMED -cp .:/usr/local/src/java-libs/fastutil-7.0.12.jar
 
 CLASS=knucleotide
 SRC=$(CLASS).java
 
-RAPL=../../RAPL/main
+RAPL_DIR=../../RAPL
+RAPL=$(RAPL_DIR)/main
 INPUT=../../knucleotide-input25000000.txt
 
-all: $(CLASS)
+$(RAPL):
+	@echo "Building RAPL interface..."
+	@cd $(RAPL_DIR) && make
 
-$(CLASS): $(SRC)
-	$(JAVAC) $(LIB_FLAGS) $(SRC)
+all: $(RAPL) $(CLASS)
 
-run: $(CLASS)
-	$(JAVA) $(LIB_FLAGS) $(CLASS) < $(INPUT)
+$(CLASS): $(SRC) $(RAPL)
+	$(JAVAC) $(CFLAGS) $(SRC)
 
-measure: $(CLASS)
+run: $(CLASS) $(RAPL)
+	$(JAVA) $(RFLAGS) $(CLASS) < $(INPUT)
+
+measure: $(CLASS) $(RAPL)
 	modprobe msr
-	$(RAPL) "$(JAVA) $(LIB_FLAGS) $(CLASS) < $(INPUT)" Java k-nucleotide
+	$(RAPL) "$(JAVA) $(RFLAGS) $(CLASS) < $(INPUT)" Java k-nucleotide
 
-mem: $(CLASS)
-	time -v $(JAVA) $(LIB_FLAGS) $(CLASS) < $(INPUT)
+mem: $(CLASS) $(RAPL)
+	time -v $(JAVA) $(RFLAGS) $(CLASS) < $(INPUT)
 
-valgrind: $(CLASS)
-	valgrind --tool=massif --stacks=yes $(JAVA) $(LIB_FLAGS) $(CLASS) < $(INPUT)
+valgrind: $(CLASS) $(RAPL)
+	valgrind --tool=massif --stacks=yes $(JAVA) $(RFLAGS) $(CLASS) < $(INPUT)
 
 clean:
 	rm -f *.class

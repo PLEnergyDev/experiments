@@ -1,0 +1,110 @@
+# started on Sun Oct 13 20:41:40 2024
+
+
+ Performance counter stats for 'system wide':
+
+            351.39 Joules power/energy-pkg/                                                     
+              6.60 Joules power/energy-ram/                                                     
+            249.67 Joules power/energy-cores/                                                   
+
+       9.170061993 seconds time elapsed
+
+# started on Sun Oct 13 20:41:51 2024
+
+
+ Performance counter stats for 'system wide':
+
+             85.61 Joules power/energy-pkg/                                                     
+              1.35 Joules power/energy-ram/                                                     
+             58.78 Joules power/energy-cores/                                                   
+
+       2.423727300 seconds time elapsed
+
+# started on Sun Oct 13 20:41:54 2024
+
+
+ Performance counter stats for 'system wide':
+
+             86.93 Joules power/energy-pkg/                                                     
+              1.36 Joules power/energy-ram/                                                     
+             59.94 Joules power/energy-cores/                                                   
+
+       2.435048047 seconds time elapsed
+
+# started on Sun Oct 13 20:41:58 2024
+
+
+ Performance counter stats for 'system wide':
+
+             87.35 Joules power/energy-pkg/                                                     
+              1.36 Joules power/energy-ram/                                                     
+             60.30 Joules power/energy-cores/                                                   
+
+       2.441038894 seconds time elapsed
+
+# started on Sun Oct 13 20:42:01 2024
+
+
+ Performance counter stats for 'system wide':
+
+             86.95 Joules power/energy-pkg/                                                     
+              1.36 Joules power/energy-ram/                                                     
+             60.02 Joules power/energy-cores/                                                   
+
+       2.432759624 seconds time elapsed
+
+# started on Sun Oct 13 20:42:04 2024
+
+
+ Performance counter stats for 'system wide':
+
+             86.41 Joules power/energy-pkg/                                                     
+              1.36 Joules power/energy-ram/                                                     
+             59.42 Joules power/energy-cores/                                                   
+
+       2.440500251 seconds time elapsed
+
+# started on Sun Oct 13 20:42:08 2024
+
+
+ Performance counter stats for 'system wide':
+
+             84.26 Joules power/energy-pkg/                                                     
+              1.34 Joules power/energy-ram/                                                     
+             57.70 Joules power/energy-cores/                                                   
+
+       2.398488912 seconds time elapsed
+
+# started on Sun Oct 13 20:42:11 2024
+
+
+ Performance counter stats for 'system wide':
+
+             85.04 Joules power/energy-pkg/                                                     
+              1.34 Joules power/energy-ram/                                                     
+             58.39 Joules power/energy-cores/                                                   
+
+       2.405031061 seconds time elapsed
+
+# started on Sun Oct 13 20:42:15 2024
+
+
+ Performance counter stats for 'system wide':
+
+             86.92 Joules power/energy-pkg/                                                     
+              1.36 Joules power/energy-ram/                                                     
+             59.89 Joules power/energy-cores/                                                   
+
+       2.439098119 seconds time elapsed
+
+# started on Sun Oct 13 20:42:18 2024
+
+
+ Performance counter stats for 'system wide':
+
+             85.15 Joules power/energy-pkg/                                                     
+              1.35 Joules power/energy-ram/                                                     
+             58.27 Joules power/energy-cores/                                                   
+
+       2.428853222 seconds time elapsed
+

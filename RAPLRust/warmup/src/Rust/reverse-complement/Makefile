@@ -1,27 +1,38 @@
 CC=cargo
-CFLAGS=--release
 
-TARGET=target/release/reverse-complement
+CFLAGS=--release
+RAPL_DIR=../../rapl-interface
+RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
+
+TARGET=target/release/main
+SRC=src/main.rs
 
 COUNT=20
+INPUT=../../revcomp-input25000000.txt
 
-$(TARGET): $(SRC)
+$(RAPL):
+	@echo "Building rapl-interface with cargo in release mode..."
+	@cd $(RAPL_DIR) && cargo build --release
+
+all: $(RAPL) $(TARGET)
+
+$(TARGET): $(SRC) $(RAPL)
 	$(CC) build $(CFLAGS)
 
-run: $(TARGET)
-	./$(TARGET) 1 < ../../revcomp-input25000000.txt
+run: $(TARGET) $(RAPL)
+	./$(TARGET) 1 < $(INPUT)
 
-measure: $(TARGET)
-	sudo modprobe msr
-	./$(TARGET) $(COUNT) < ../../revcomp-input25000000.txt
+measure: $(TARGET) $(RAPL)
+	modprobe msr
+	./$(TARGET) $(COUNT) < $(INPUT)
 
-mem: $(TARGET)
-	time -v ./$(TARGET) 1 < ../../revcomp-input25000000.txt
+mem: $(TARGET) $(RAPL)
+	time -v ./$(TARGET) 1 < $(INPUT)
 
-valgrind: $(TARGET)
-	valgrind --tool=massif --stacks=yes ./$(TARGET) 1 < ../../revcomp-input25000000.txt
+valgrind: $(TARGET) $(RAPL)
+	valgrind --tool=massif --stacks=yes ./$(TARGET) 1 < $(INPUT)
 
 clean:
 	$(CC) clean
 
-.PHONY: all clean
+.PHONY: all clean run measure mem valgrind

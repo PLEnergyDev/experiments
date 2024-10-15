@@ -16,11 +16,13 @@ static extern void stop_rapl();
 string[] arguments = Environment.GetCommandLineArgs();
 
 uint count = uint.Parse(arguments[1]);
+int n = int.Parse(arguments[2]);
 for (int i = 0; i < count; i++) {
     start_rapl();
-    int n = int.Parse(arguments[2]);
-    double sum = PolynomialEvaluation.Run(n);
-    Console.WriteLine(sum);
+    for (int j = 0; j < 1000; j++) {
+        double sum = PolynomialEvaluation.Run(n);
+        Console.WriteLine(sum);
+    }
     stop_rapl();
 }
 

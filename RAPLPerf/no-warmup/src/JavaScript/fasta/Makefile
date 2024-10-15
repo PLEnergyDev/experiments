@@ -2,7 +2,7 @@ compile:
 	cp -L fasta.node-4.node fasta.node-4.js
 
 measure:
-	sudo modprobe msr
+	modprobe msr
 	sudo ../../RAPL/target/release/RAPL "node --no-deprecation fasta.node-4.js 25000000"
 
 run:

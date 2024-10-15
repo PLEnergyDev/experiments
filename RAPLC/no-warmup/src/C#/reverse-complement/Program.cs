@@ -1,28 +1,13 @@
-﻿/* The Computer Language Benchmarks Game
-   http://benchmarksgame.alioth.debian.org/
-
-   Contributed by Peperud
-
-   Attempt at introducing concurrency.
-   Ideas and code borrowed from various other contributions and places. 
-
-   TODO 
-        Better way to reverse complement the block's body without having 
-        to flatten it first.
-*/
-
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 static class revcomp
 {
-    static BlockingCollection<byte[]> readQue = new BlockingCollection<byte[]>();
-    static BlockingCollection<RCBlock> inQue = new BlockingCollection<RCBlock>();
-    static BlockingCollection<RCBlock> outQue = new BlockingCollection<RCBlock>();
-
     static readonly int READER_BUFFER_SIZE = 1024 * 1024 * 16;
 
     static readonly byte[] comp = new byte[256];
@@ -32,100 +17,31 @@ static class revcomp
 
     static void Main(string[] args)
     {
-        Task.Run(() => Reader());
-
-        Task.Run(() => Parser());
+        // Read the entire input into a buffer
+        byte[] inputData;
+        using (var inS = Console.OpenStandardInput())
+        {
+            using (var ms = new MemoryStream())
+            {
+                inS.CopyTo(ms);
+                inputData = ms.ToArray();
+            }
+        }
 
         InitComplements();
 
-        var reverser = Task.Run(() => Reverser());
-        
-        var writer = Task.Run(() => Writer());
+        // Reset static variables for each iteration
+        RCBlock.ResetSequenceNumbers();
 
-        reverser.Wait();
-        outQue.CompleteAdding();
-
-        writer.Wait();
-    }
-
-    static void Reader()
-    {
-        using (var inS = Console.OpenStandardInput())
-        {
-            byte[] buf;
-            int bytesRead;
-
-            do
-            {
-                buf = new byte[READER_BUFFER_SIZE];
-                bytesRead = inS.Read(buf, 0, READER_BUFFER_SIZE);
-                if (bytesRead > 0)
-                {
-                    if (bytesRead == READER_BUFFER_SIZE)
-                    {
-                        readQue.Add(buf);
-                    }
-                    else
-                    {
-                        var tmp = new byte[bytesRead];
-                        Buffer.BlockCopy(buf, 0, tmp, 0, bytesRead);
-                        readQue.Add(tmp);
-                    }
-                }
-            } while (bytesRead == READER_BUFFER_SIZE);
-
-            readQue.CompleteAdding();
-
-        }
-    }
-
-    static void Parser()
-    {
-        var rdr = new RCBlockReader(readQue);
-        var rcBlock = rdr.Read();
-        while (rcBlock != null)
-        {
-            inQue.Add(rcBlock);
-            rcBlock = rdr.Read();
-        }
-        inQue.CompleteAdding();
-    }
-
-    static void Reverser()
-    {
-        try
-        {
-            while (!inQue.IsCompleted)
-            {
-                var block = inQue.Take();
-                block.ReverseAndComplement();
-                outQue.Add(block);
-            }
-        }
-        catch (InvalidOperationException) { }
-    }
-
-    static void Writer()
-    {
-        using (var outS = Console.OpenStandardOutput())
-        {
-            try
-            {
-                while (!outQue.IsCompleted)
-                {
-                    var block = outQue.Take();
-                    block.Write(outS);
-                }
-            }
-            catch (InvalidOperationException) { }
-        }
+        var processor = new ReverseComplementProcessor(inputData);
+        processor.Process();
     }
 
     static void InitComplements()
     {
-        for (byte i = 0; i < 255; i++)
+        for (int i = 0; i < 256; i++)
         {
-            comp[i] = i;
+            comp[i] = (byte)i;
         }
         for (int i = 0; i < Seq.Length; i++)
         {
@@ -135,47 +51,111 @@ static class revcomp
         comp[(byte)' '] = 0;
     }
 
-    static byte[] FlattenList(List<byte[]> lineBuffer)
+    class ReverseComplementProcessor
     {
-        int cnt = lineBuffer.Count;
+        byte[] inputData;
 
-        // Should we calculate the total size as we go, 
-        // or should we do it here (in the dedicated CPU bound task)?
+        BlockingCollection<byte[]> readQue = new BlockingCollection<byte[]>();
+        BlockingCollection<RCBlock> inQue = new BlockingCollection<RCBlock>();
+        BlockingCollection<RCBlock> outQue = new BlockingCollection<RCBlock>();
 
-        int totalSize = 0;
-        for (var i = 0; i < cnt; i++)
+        public ReverseComplementProcessor(byte[] inputData)
         {
-            totalSize += lineBuffer[i].Length;
+            this.inputData = inputData;
         }
 
-        byte[] result = new byte[totalSize];
-
-        int pos = 0;
-
-        for (var i = 0; i < cnt; i++)
+        public void Process()
         {
-            Buffer.BlockCopy(lineBuffer[i], 0, result, pos, lineBuffer[i].Length);
-            pos += lineBuffer[i].Length;
+            var readerTask = Task.Run(() => Reader());
+            var parserTask = Task.Run(() => Parser());
+            var reverserTask = Task.Run(() => Reverser());
+            var writerTask = Task.Run(() => Writer());
+
+            Task.WaitAll(readerTask, parserTask, reverserTask);
+            outQue.CompleteAdding();
+            writerTask.Wait();
         }
 
-        return result;
+        void Reader()
+        {
+            int offset = 0;
+            int totalLength = inputData.Length;
+
+            while (offset < totalLength)
+            {
+                int bytesToRead = Math.Min(READER_BUFFER_SIZE, totalLength - offset);
+                byte[] buffer = new byte[bytesToRead];
+                Buffer.BlockCopy(inputData, offset, buffer, 0, bytesToRead);
+                offset += bytesToRead;
+                readQue.Add(buffer);
+            }
+            readQue.CompleteAdding();
+        }
+
+        void Parser()
+        {
+            var rdr = new RCBlockReader(readQue);
+            RCBlock rcBlock;
+            while ((rcBlock = rdr.Read()) != null)
+            {
+                inQue.Add(rcBlock);
+            }
+            inQue.CompleteAdding();
+        }
+
+        void Reverser()
+        {
+            try
+            {
+                foreach (var block in inQue.GetConsumingEnumerable())
+                {
+                    block.ReverseAndComplement();
+                    outQue.Add(block);
+                }
+            }
+            catch (InvalidOperationException) { }
+        }
+
+        void Writer()
+        {
+            using (var outS = Console.OpenStandardOutput())
+            {
+                try
+                {
+                    foreach (var block in outQue.GetConsumingEnumerable())
+                    {
+                        block.Write(outS);
+                    }
+                }
+                catch (InvalidOperationException) { }
+            }
+        }
     }
 
     class RCBlock
     {
+        static int nextSequenceNumberToOutput = 0;
+        static int sequenceNumberGenerator = 0;
+        static readonly object lockObj = new object();
+
+        public int SequenceNumber;
+
         public List<byte[]> Title;
         public List<byte[]> Data;
         public byte[] FlatData;
         public byte[] FlatTitle;
 
+        public static void ResetSequenceNumbers()
+        {
+            nextSequenceNumberToOutput = 0;
+            sequenceNumberGenerator = 0;
+        }
+
         internal void ReverseAndComplement()
         {
-            var tt = new []
-            {
-                Task.Run(() => FlattenData()),
-                Task.Run(() => FlattenTitle())
-            };
-            Task.WaitAll(tt);
+            var flattenTitleTask = Task.Run(() => FlattenTitle());
+            var flattenDataTask = Task.Run(() => FlattenData());
+            Task.WaitAll(flattenTitleTask, flattenDataTask);
 
             int i = 0, j = FlatData.Length - 1;
             byte ci, cj;
@@ -183,21 +163,25 @@ static class revcomp
             while (i < j)
             {
                 ci = FlatData[i];
-                if (ci == 10)
+                if (ci == LF)
                 {
                     i++;
-                    ci = FlatData[i];
+                    continue;
                 }
                 cj = FlatData[j];
-                if (cj == 10)
+                if (cj == LF)
                 {
                     j--;
-                    cj = FlatData[j];
+                    continue;
                 }
                 FlatData[i] = comp[cj];
                 FlatData[j] = comp[ci];
                 i++;
                 j--;
+            }
+            if (i == j && FlatData[i] != LF)
+            {
+                FlatData[i] = comp[FlatData[i]];
             }
         }
 
@@ -213,16 +197,52 @@ static class revcomp
 
         internal void Write(Stream s)
         {
-            s.Write(FlatTitle, 0, FlatTitle.Length);
-            s.WriteByte(10);
-            s.Write(FlatData, 0, FlatData.Length);
+            lock (lockObj)
+            {
+                while (SequenceNumber != nextSequenceNumberToOutput)
+                {
+                    Monitor.Wait(lockObj);
+                }
+
+                s.Write(FlatTitle, 0, FlatTitle.Length);
+                s.WriteByte(LF);
+                s.Write(FlatData, 0, FlatData.Length);
+
+                nextSequenceNumberToOutput++;
+                Monitor.PulseAll(lockObj);
+            }
+        }
+
+        static byte[] FlattenList(List<byte[]> lineBuffer)
+        {
+            int totalSize = 0;
+            foreach (var arr in lineBuffer)
+            {
+                totalSize += arr.Length;
+            }
+
+            byte[] result = new byte[totalSize];
+            int pos = 0;
+
+            foreach (var arr in lineBuffer)
+            {
+                Buffer.BlockCopy(arr, 0, result, pos, arr.Length);
+                pos += arr.Length;
+            }
+
+            return result;
+        }
+
+        public static int GetNextSequenceNumber()
+        {
+            return Interlocked.Increment(ref sequenceNumberGenerator) - 1;
         }
     }
 
     class RCBlockReader
     {
         BlockingCollection<byte[]> readQue;
-        static readonly byte GT = (byte)'>';     
+        static readonly byte GT = (byte)'>';
         byte[] byteBuffer;
         int bytePos, bytesRead;
 
@@ -239,10 +259,17 @@ static class revcomp
                 return null;
             }
 
-            return new RCBlock { Title = title, Data = ReadLine(GT, true) };
+            var data = ReadUntilNextTitle();
+            var block = new RCBlock
+            {
+                Title = title,
+                Data = data,
+                SequenceNumber = RCBlock.GetNextSequenceNumber()
+            };
+            return block;
         }
 
-        private List<byte[]> ReadLine(byte lineSeparator, bool dontAdvanceBytePos = false)
+        private List<byte[]> ReadLine(byte lineSeparator)
         {
             if (bytePos == bytesRead && ReadToBuffer() == 0)
             {
@@ -259,12 +286,15 @@ static class revcomp
                 num = bytePos;
                 do
                 {
+                    if (num >= bytesRead)
+                        break;
                     c = byteBuffer[num];
                     if (c == lineSeparator)
                     {
-                        byte[] result = new byte[num - bytePos];
-                        Buffer.BlockCopy(byteBuffer, bytePos, result, 0, result.Length);
-                        bytePos = num + (dontAdvanceBytePos ? 0 : 1);
+                        int length = num - bytePos;
+                        byte[] result = new byte[length];
+                        Buffer.BlockCopy(byteBuffer, bytePos, result, 0, length);
+                        bytePos = num + 1;
 
                         if (lineBuffer != null)
                         {
@@ -279,13 +309,13 @@ static class revcomp
                     num++;
                 } while (num < bytesRead);
 
-                num = bytesRead - bytePos;
+                int remaining = bytesRead - bytePos;
                 if (lineBuffer == null)
                 {
                     lineBuffer = new List<byte[]>();
                 }
-                var tmp = new byte[num];
-                Buffer.BlockCopy(byteBuffer, bytePos, tmp, 0, num);
+                byte[] tmp = new byte[remaining];
+                Buffer.BlockCopy(byteBuffer, bytePos, tmp, 0, remaining);
 
                 lineBuffer.Add(tmp);
                 if (ReadToBuffer() <= 0)
@@ -295,6 +325,38 @@ static class revcomp
             }
         }
 
+        private List<byte[]> ReadUntilNextTitle()
+        {
+            List<byte[]> dataBuffer = new List<byte[]>();
+
+            while (true)
+            {
+                if (bytePos == bytesRead && ReadToBuffer() == 0)
+                {
+                    break;
+                }
+
+                int num = bytePos;
+                while (num < bytesRead)
+                {
+                    if (byteBuffer[num] == GT && num == bytePos)
+                    {
+                        // Found next title
+                        return dataBuffer;
+                    }
+                    num++;
+                }
+
+                int length = num - bytePos;
+                byte[] dataChunk = new byte[length];
+                Buffer.BlockCopy(byteBuffer, bytePos, dataChunk, 0, length);
+                dataBuffer.Add(dataChunk);
+                bytePos = num;
+            }
+
+            return dataBuffer;
+        }
+
         private int ReadToBuffer()
         {
             try
@@ -302,7 +364,7 @@ static class revcomp
                 byteBuffer = readQue.Take();
                 bytePos = 0;
                 bytesRead = byteBuffer.Length;
-                return byteBuffer.Length;
+                return bytesRead;
             }
             catch (InvalidOperationException)
             {

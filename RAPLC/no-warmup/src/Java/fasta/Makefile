@@ -1,29 +1,37 @@
 JAVAC=javac
 JAVA=java
 
+CFLAGS=--enable-preview --release 21
+RFLAGS=--enable-preview --enable-native-access=ALL-UNNAMED
+
 CLASS=fasta
 SRC=$(CLASS).java
 
-RAPL=../../RAPL/main
+RAPL_DIR=../../RAPL
+RAPL=$(RAPL_DIR)/main
 INPUT=25000000
 
-all: $(CLASS)
+$(RAPL):
+	@echo "Building RAPL interface..."
+	@cd $(RAPL_DIR) && make
 
-$(CLASS): $(SRC)
-	$(JAVAC) $(SRC)
+all: $(RAPL) $(CLASS)
 
-run: $(CLASS)
-	$(JAVA) $(CLASS) $(INPUT)
+$(CLASS): $(SRC) $(RAPL)
+	$(JAVAC) $(CFLAGS) $(SRC)
 
-measure: $(CLASS)
+run: $(CLASS) $(RAPL)
+	$(JAVA) $(RFLAGS) $(CLASS) $(INPUT)
+
+measure: $(CLASS) $(RAPL)
 	modprobe msr
-	$(RAPL) "$(JAVA) $(CLASS) $(INPUT)" Java fasta
+	$(RAPL) "$(JAVA) $(RFLAGS) $(CLASS) $(INPUT)" Java fasta
 
-mem: $(CLASS)
-	time -v $(JAVA) $(CLASS) $(INPUT)
+mem: $(CLASS) $(RAPL)
+	time -v $(JAVA) $(RFLAGS) $(CLASS) $(INPUT)
 
-valgrind: $(CLASS)
-	valgrind --tool=massif --stacks=yes $(JAVA) $(CLASS) $(INPUT)
+valgrind: $(CLASS) $(RAPL)
+	valgrind --tool=massif --stacks=yes $(JAVA) $(RFLAGS) $(CLASS) $(INPUT)
 
 clean:
 	rm -f *.class

@@ -1,17 +1,7 @@
-// The Computer Language Benchmarks Game
-// http://benchmarksgame.alioth.debian.org/
-//
-// Contributed by Jeremy Zerfas
-
-// This string/character array is used to convert characters into the
-// complementing character.
 #define COMPLEMENT_LOOKUP \
   "                                                                "\
-  /*ABCDEFGHIJKLMNOPQRSTUVWXYZ      abcdefghijklmnopqrstuvwxyz    */\
   " TVGH  CD  M KN   YSAABW R       TVGH  CD  M KN   YSAABW R"
 
-// This controls the size of reads from the input and is also used as the
-// initial sequence_Capacity.
 #define READ_SIZE 16384
 
 #include <stdio.h>
@@ -19,133 +9,200 @@
 #include <string.h>
 #include <stdint.h>
 
-// intptr_t should be the native integer type on most sane systems.
+void start_rapl();
+void stop_rapl();
+
 typedef intptr_t intnative_t;
 
+static volatile intnative_t next_Sequence_Number_To_Output = 1;
 
-static intnative_t next_Sequence_Number_To_Output=1;
+static void process_Sequence(char *sequence, const intnative_t sequence_Size,
+                             const intnative_t sequence_Number) {
+   sequence = realloc(sequence, sequence_Size);
 
-static void process_Sequence(char * sequence, const intnative_t sequence_Size
-  , const intnative_t sequence_Number){
-   // Free up any memory we didn't need.
-   sequence=realloc(sequence, sequence_Size);
+   char *front_Pos = sequence, *back_Pos = sequence + sequence_Size - 1;
 
-   // Set up pointers to the front_Pos and bac_Pos, advance front_Pos to the
-   // first character on the next line, and then make sure front_Pos and
-   // back_Pos start out pointing to non-line feed characters (unless all the
-   // characters happen to be line feeds in which case front_Pos will go past
-   // back_Pos causing the reversing and complementing loop to do nothing.
-   char * front_Pos=sequence, * back_Pos=sequence+sequence_Size-1;
-   while(*front_Pos++!='\n');
-   while(*front_Pos=='\n' && front_Pos<=back_Pos) front_Pos++;
-   while(*back_Pos=='\n' && front_Pos<=back_Pos) back_Pos--;
-
-   // Reverse and complement the sequence.
-   while(front_Pos<=back_Pos){
-      const char temp=COMPLEMENT_LOOKUP[(unsigned char)*front_Pos];
-      *front_Pos=COMPLEMENT_LOOKUP[(unsigned char)*back_Pos];
-      *back_Pos=temp;
-
-      // Skip over line feeds.
-      while(*++front_Pos=='\n');
-      while(*--back_Pos=='\n');
+   // Move front_Pos to the first character after the initial header line.
+   while (front_Pos < sequence + sequence_Size && *front_Pos++ != '\n');
+   if (front_Pos >= sequence + sequence_Size) {
+      // No sequence data found
+      return;
    }
 
-   // Wait for our turn to output the altered sequence and then output it.
+   // Adjust front_Pos and back_Pos to skip over any newline characters.
+   while (front_Pos < sequence + sequence_Size && *front_Pos == '\n') front_Pos++;
+   while (back_Pos > sequence && *back_Pos == '\n') back_Pos--;
+
+   while (front_Pos < back_Pos) {
+      const char temp = COMPLEMENT_LOOKUP[(unsigned char)*front_Pos];
+      *front_Pos = COMPLEMENT_LOOKUP[(unsigned char)*back_Pos];
+      *back_Pos = temp;
+
+      do { front_Pos++; } while (front_Pos < back_Pos && *front_Pos == '\n');
+      do { back_Pos--; } while (front_Pos < back_Pos && *back_Pos == '\n');
+   }
+
+   if (front_Pos == back_Pos) {
+      *front_Pos = COMPLEMENT_LOOKUP[(unsigned char)*front_Pos];
+   }
+
    #pragma omp flush(next_Sequence_Number_To_Output)
-   while(sequence_Number!=next_Sequence_Number_To_Output){
+   while (sequence_Number != next_Sequence_Number_To_Output) {
       #pragma omp flush(next_Sequence_Number_To_Output)
    }
    fwrite(sequence, 1, sequence_Size, stdout);
    next_Sequence_Number_To_Output++;
    #pragma omp flush(next_Sequence_Number_To_Output)
 
-   // Free the memory for the altered sequence.
    free(sequence);
 }
 
+int main(int argc, char **argv) {
+   char *input_data = NULL;
+   size_t input_size = 0;
+   size_t bytes_read;
+   char read_buffer[READ_SIZE];
 
-int main(){
-   #pragma omp parallel
-   {
-      #pragma omp single
-      {
-         // Allocate memory for the initial sequence (assuming there is one).
-         intnative_t sequence_Capacity=READ_SIZE, sequence_Size=0
-           , sequence_Number=1;
-         char * sequence=malloc(sequence_Capacity);
-
-         // Read in sequence data until we reach the end of the file or
-         // encounter an error.
-         for(intnative_t bytes_Read; (bytes_Read
-           =fread(&sequence[sequence_Size], 1, READ_SIZE, stdin)); ){
-
-
-            // Search the read in chunk of data for a '>' to see if any
-            // sequences are being started.
-            for(char * sequence_Start; (sequence_Start
-              =memchr(&sequence[sequence_Size], '>', bytes_Read)); ){
-
-               // Update the sequence_Size to reflect any data before the
-               // '>' that was read in.
-               const intnative_t number_Of_Preceding_Bytes
-                 =sequence_Start-&sequence[sequence_Size];
-               sequence_Size+=number_Of_Preceding_Bytes;
-
-
-               // If there is any data for the current sequence, then
-               // start processing it.
-               if(sequence_Size){
-
-                  // Allocate memory for a new sequence and copy the '>'
-                  // & any data following it to the new sequence.
-                  char * const new_Sequence=malloc(READ_SIZE);
-                  memcpy(new_Sequence, sequence_Start
-                    , bytes_Read-number_Of_Preceding_Bytes);
-
-                  // Process the current sequence and have another thread
-                  // do the work if OpenMP is enabled and there is more
-                  // than one CPU core.
-                  #pragma omp task\
-                    firstprivate(sequence, sequence_Size, sequence_Number)
-                  {
-                     process_Sequence(sequence, sequence_Size
-                       , sequence_Number);
-                  }
-
-                  // Update variables to reflect the new sequence.
-                  sequence=new_Sequence;
-                  sequence_Capacity=READ_SIZE;
-                  sequence_Size=0;
-                  sequence_Number++;
-               }
-
-
-               // Update sequence_Size and bytes_Read to reflect the read
-               // in '>' and any data that preceded it.
-               sequence_Size++;
-               bytes_Read-=number_Of_Preceding_Bytes+1;
-            }
-
-
-            // Update sequence_Size to reflect the bytes that were read in.
-            sequence_Size+=bytes_Read;
-
-            // If there potentially isn't enough free space for all the data
-            // from the next read, then double the capacity of the sequence.
-            if(sequence_Size>sequence_Capacity-READ_SIZE)
-               sequence=realloc(sequence, sequence_Capacity*=2);
-         }
-
-
-         // If there is any data for a last sequence, process it, otherwise
-         // just free the sequence memory.
-         if(sequence_Size)
-            process_Sequence(sequence, sequence_Size, sequence_Number);
-         else
-            free(sequence);
+   while ((bytes_read = fread(read_buffer, 1, READ_SIZE, stdin)) > 0) {
+      char *new_input_data = realloc(input_data, input_size + bytes_read);
+      if (!new_input_data) {
+         fprintf(stderr, "Memory allocation error\n");
+         free(input_data);
+         return 1;
       }
+      input_data = new_input_data;
+      memcpy(input_data + input_size, read_buffer, bytes_read);
+      input_size += bytes_read;
    }
 
+   if (input_size == 0) {
+      fprintf(stderr, "No input data\n");
+      return 1;
+   }
+
+      next_Sequence_Number_To_Output = 1;
+
+      int error_occurred = 0;
+
+      #pragma omp parallel shared(error_occurred)
+      {
+         #pragma omp single
+         {
+            intnative_t sequence_Capacity = READ_SIZE, sequence_Size = 0, sequence_Number = 1;
+            char *sequence = malloc(sequence_Capacity);
+
+            if (!sequence) {
+               fprintf(stderr, "Memory allocation error\n");
+               error_occurred = 1;
+            } else {
+               size_t offset = 0;
+
+               while (offset < input_size && !error_occurred) {
+                  size_t bytes_to_copy = input_size - offset;
+                  if (bytes_to_copy > READ_SIZE) bytes_to_copy = READ_SIZE;
+
+                  if (sequence_Size + bytes_to_copy > sequence_Capacity) {
+                     sequence_Capacity = (sequence_Size + bytes_to_copy) * 2;
+                     char *new_sequence = realloc(sequence, sequence_Capacity);
+                     if (!new_sequence) {
+                        fprintf(stderr, "Memory allocation error\n");
+                        free(sequence);
+                        error_occurred = 1;
+                        break;
+                     }
+                     sequence = new_sequence;
+                  }
+
+                  memcpy(&sequence[sequence_Size], input_data + offset, bytes_to_copy);
+                  offset += bytes_to_copy;
+
+                  intnative_t bytes_Read = bytes_to_copy;
+                  sequence_Size += bytes_Read;
+
+                  char *sequence_Start = sequence;
+                  while (1) {
+                     // Search for the next '>' indicating a new sequence.
+                     char *next_seq = memchr(sequence_Start + 1, '>', (sequence + sequence_Size) - (sequence_Start + 1));
+                     if (next_seq == NULL) {
+                        // No more sequences in the current buffer.
+                        break;
+                     }
+
+                     // Calculate the size of the current sequence.
+                     intnative_t current_sequence_size = next_seq - sequence_Start;
+
+                     if (current_sequence_size > 0) {
+                        // Copy the sequence data to a new buffer.
+                        char *sequence_copy = malloc(current_sequence_size);
+                        if (!sequence_copy) {
+                           fprintf(stderr, "Memory allocation error\n");
+                           free(sequence);
+                           error_occurred = 1;
+                           break;
+                        }
+                        memcpy(sequence_copy, sequence_Start, current_sequence_size);
+
+                        #pragma omp task firstprivate(sequence_copy, current_sequence_size, sequence_Number)
+                        {
+                           process_Sequence(sequence_copy, current_sequence_size, sequence_Number);
+                        }
+
+                        sequence_Number++;
+                     }
+
+                     sequence_Start = next_seq;
+                  }
+
+                  // Move any remaining data to the beginning of the buffer.
+                  intnative_t remaining_data_size = (sequence + sequence_Size) - sequence_Start;
+                  memmove(sequence, sequence_Start, remaining_data_size);
+                  sequence_Size = remaining_data_size;
+                  sequence_Start = sequence;
+
+                  if (sequence_Size > sequence_Capacity - READ_SIZE) {
+                     sequence_Capacity = sequence_Size + READ_SIZE;
+                     char *new_sequence = realloc(sequence, sequence_Capacity);
+                     if (!new_sequence) {
+                        fprintf(stderr, "Memory allocation error\n");
+                        free(sequence);
+                        error_occurred = 1;
+                        break;
+                     }
+                     sequence = new_sequence;
+                  }
+               }
+
+               if (!error_occurred) {
+                  if (sequence_Size > 0) {
+                     // Process the last sequence.
+                     char *sequence_copy = malloc(sequence_Size);
+                     if (!sequence_copy) {
+                        fprintf(stderr, "Memory allocation error\n");
+                        free(sequence);
+                        error_occurred = 1;
+                     } else {
+                        memcpy(sequence_copy, sequence, sequence_Size);
+
+                        #pragma omp task firstprivate(sequence_copy, sequence_Size, sequence_Number)
+                        {
+                           process_Sequence(sequence_copy, sequence_Size, sequence_Number);
+                        }
+                     }
+                  }
+
+                  #pragma omp taskwait
+               }
+
+               free(sequence);
+            }
+         }
+      }
+
+      if (error_occurred) {
+         free(input_data);
+         return 1;
+      }
+
+   free(input_data);
    return 0;
 }

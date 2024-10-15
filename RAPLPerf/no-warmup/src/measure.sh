@@ -18,8 +18,7 @@ run_benchmark() {
   local algorithm="$2"
   local runs="$3"
 
-  cd "./$language/$algorithm"
-  
+  cd "./$language/$algorithm"  
   for ((i = 0; i < runs; i++)); do
     echo "[INFO] Running $algorithm in $language (Run $((i + 1)))"
 
@@ -28,12 +27,12 @@ run_benchmark() {
       -e power/energy-pkg/,power/energy-ram/,power/energy-cores/ \
       -- make run || { echo "[ERROR] Failed to run $algorithm"; exit 1; }
 
-    sleep 2s
+    sleep 1s
   done
 
   sleep 1s
   move_result "$language" "$algorithm"
-  cd "../.."
+  cd "../.." || { echo "[ERROR] Failed to navigate back"; exit 1; }
 }
 
 # Declare separate arrays for each language's algorithms
@@ -42,12 +41,15 @@ run_benchmark() {
 C_benchmarks=(
   "binary-trees"
   # "chameneos-redux" # Not Relevant
+  "division-loop"
   "fannkuch-redux"
   "fasta"
   "k-nucleotide"
   "mandelbrot"
+  "matrix-multiplication"
   "n-body"
-  # "pidigits"  # Not Relevant
+  # "pidigits" # Not Relevant
+  "polynomial-evaluation"
   "regex-redux"
   "reverse-complement"
   "spectral-norm"
@@ -57,28 +59,35 @@ C_benchmarks=(
 Csharp_benchmarks=(
   "binary-trees"
   # "chameneos-redux" # Not Relevant
+  "division-loop"
   "fannkuch-redux"
   "fasta"
   "k-nucleotide"
   "mandelbrot"
+  "matrix-multiplication"
+  # "matrix-multiplication" # Not Relevant
   "n-body"
-  # "pidigits"  # Not Relevant
+  # "pidigits" # Not Relevant
+  "polynomial-evaluation"
   "regex-redux"
   "reverse-complement"
   "spectral-norm"
-  # "thread-ring"  # Not Relevant
+  # "thread-ring" # Not Relevant
 )
 
 # C++ benchmarks
 Cpp_benchmarks=(
   "binary-trees"
   # "chameneos-redux" # Not Relevant
+  "division-loop"
   "fannkuch-redux"
-  # "fasta" # Run this individually because it freezes sometimes
+  "fasta"
   "k-nucleotide"
   "mandelbrot"
+  "matrix-multiplication"
   "n-body"
-  # "pidigits"  # Not Relevant
+  # "pidigits" # Not Relevant
+  "polynomial-evaluation"
   "regex-redux"
   "reverse-complement"
   "spectral-norm"
@@ -88,27 +97,33 @@ Cpp_benchmarks=(
 Java_benchmarks=(
   "binary-trees"
   # "chameneos-redux" # Not Relevant
+  "division-loop"
   "fannkuch-redux"
   "fasta"
   "k-nucleotide"
   "mandelbrot"
+  "matrix-multiplication"
   "n-body"
-  # "pidigits"  # Not Relevant
+  # "pidigits" # Not Relevant
+  "polynomial-evaluation"
   "regex-redux"
   "reverse-complement"
   "spectral-norm"
 )
 
-# Rust benchmarks3
+# Rust benchmarks
 Rust_benchmarks=(
   "binary-trees"
   # "chameneos-redux" # Not Relevant
+  "division-loop"
   "fannkuch-redux"
   "fasta"
   "k-nucleotide"
   "mandelbrot"
+  "matrix-multiplication"
   "n-body"
-  # "pidigits"  # Not Relevant
+  # "pidigits" # Not Relevant
+  "polynomial-evaluation"
   "regex-redux"
   "reverse-complement"
   "spectral-norm"

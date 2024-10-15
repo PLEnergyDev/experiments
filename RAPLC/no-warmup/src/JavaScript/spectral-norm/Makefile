@@ -2,7 +2,7 @@ compile:
 	cp -L spectralnorm.node-2.node spectralnorm.node-2.js
 
 measure:
-	sudo modprobe msr
+	modprobe msr
 	sudo ../../RAPL/main "node --no-deprecation spectralnorm.node-2.js 5500"
 
 run:

@@ -21,8 +21,10 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < count; i++) {
         start_rapl();
         int M = atoi(argv[2]);
-        double result = DivisionLoop(M);
-        printf("%f\n", result);
+        for (int i = 0; i < 10; i++) {
+            double result = DivisionLoop(M);
+            printf("%f\n", result);
+        }
         stop_rapl();
     }
     return 0;

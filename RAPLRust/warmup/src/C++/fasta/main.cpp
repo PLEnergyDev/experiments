@@ -1,30 +1,18 @@
-/* The Computer Language Benchmarks Game
- http://benchmarksgame.alioth.debian.org/
-
- converted to C++ from D by Rafal Rusin
- modified by Vaclav Haisman
- modified by The Anh to compile with g++ 4.3.2
- modified by Branimir Maksimovic
- modified by Kim Walisch
- modified by Tavis Bohne
- made multithreaded by Jeff Wofford on the model of fasta C gcc #7 and fasta
- Rust #2
-
- compiles with gcc fasta.cpp -std=c++11 -O2
- */
-
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <functional>
 #include <iostream>
 #include <mutex>
 #include <numeric>
 #include <thread>
 #include <vector>
+
 extern "C" {
 void start_rapl();
 void stop_rapl();
 }
+
 struct IUB {
   float p;
   char c;
@@ -38,40 +26,40 @@ const std::string alu = {"GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGG"
                          "AGGCGGAGGTTGCAGTGAGCCGAGATCGCGCCACTGCACTCC"
                          "AGCCTGGGCGACAGAGCGAGACTCCGTCTCAAAAA"};
 
-std::array<IUB, 15> iub = {{{0.27f, 'a'},
-                            {0.12f, 'c'},
-                            {0.12f, 'g'},
-                            {0.27f, 't'},
-                            {0.02f, 'B'},
-                            {0.02f, 'D'},
-                            {0.02f, 'H'},
-                            {0.02f, 'K'},
-                            {0.02f, 'M'},
-                            {0.02f, 'N'},
-                            {0.02f, 'R'},
-                            {0.02f, 'S'},
-                            {0.02f, 'V'},
-                            {0.02f, 'W'},
-                            {0.02f, 'Y'}}};
+std::array<IUB, 15> iub = {{
+    {0.27f, 'a'}, {0.12f, 'c'}, {0.12f, 'g'}, {0.27f, 't'}, {0.02f, 'B'},
+    {0.02f, 'D'}, {0.02f, 'H'}, {0.02f, 'K'}, {0.02f, 'M'}, {0.02f, 'N'},
+    {0.02f, 'R'}, {0.02f, 'S'}, {0.02f, 'V'}, {0.02f, 'W'}, {0.02f, 'Y'}
+}};
 
-std::array<IUB, 4> homosapiens = {{{0.3029549426680f, 'a'},
-                                   {0.1979883004921f, 'c'},
-                                   {0.1975473066391f, 'g'},
-                                   {0.3015094502008f, 't'}}};
+std::array<IUB, 4> homosapiens = {{
+    {0.3029549426680f, 'a'},
+    {0.1979883004921f, 'c'},
+    {0.1975473066391f, 'g'},
+    {0.3015094502008f, 't'}
+}};
 
 const int IM = 139968;
 const float IM_RECIPROCAL = 1.0f / IM;
 
-uint32_t gen_random() {
+class RandomGenerator {
+public:
+  using result_t = uint32_t;
+  RandomGenerator(int seed = 42) : last(seed) {}
+  result_t operator()() {
+    last = (last * IA + IC) % IM;
+    return last;
+  }
+
+private:
   static const int IA = 3877, IC = 29573;
-  static int last = 42;
-  last = (last * IA + IC) % IM;
-  return last;
-}
+  int last;
+};
 
 char convert_trivial(char c) { return c; }
 
-template <class iterator_type> class repeat_generator_type {
+template <class iterator_type>
+class repeat_generator_type {
 public:
   using result_t = char;
 
@@ -90,6 +78,7 @@ private:
   iterator_type current;
   iterator_type last;
 };
+
 template <class iterator_type>
 repeat_generator_type<iterator_type> make_repeat_generator(iterator_type first,
                                                            iterator_type last) {
@@ -111,24 +100,6 @@ char convert_homosapiens(uint32_t random) {
   return convert_random(random, homosapiens.begin(), homosapiens.end());
 }
 
-template <class iterator_type> class random_generator_type {
-public:
-  using result_t = uint32_t;
-
-  random_generator_type(iterator_type first, iterator_type last)
-      : first(first), last(last) {}
-  result_t operator()() { return gen_random(); }
-
-private:
-  iterator_type first;
-  iterator_type last;
-};
-template <class iterator_type>
-random_generator_type<iterator_type> make_random_generator(iterator_type first,
-                                                           iterator_type last) {
-  return random_generator_type<iterator_type>(first, last);
-}
-
 template <class iterator_type>
 void make_cumulative(iterator_type first, iterator_type last) {
   std::partial_sum(first, last, first, [](IUB l, IUB r) -> IUB {
@@ -138,131 +109,81 @@ void make_cumulative(iterator_type first, iterator_type last) {
 }
 
 const size_t CHARS_PER_LINE = 60;
-const size_t CHARS_PER_LINE_INCL_NEWLINES = CHARS_PER_LINE + 1;
-const size_t LINES_PER_BLOCK = 1024;
-const size_t VALUES_PER_BLOCK = CHARS_PER_LINE * LINES_PER_BLOCK;
-const size_t CHARS_PER_BLOCK_INCL_NEWLINES =
-    CHARS_PER_LINE_INCL_NEWLINES * LINES_PER_BLOCK;
+const size_t VALUES_PER_BLOCK = CHARS_PER_LINE * 1024; // Adjusted block size
 
 const unsigned THREADS_TO_USE =
-    std::max(1U, std::min(4U, std::thread::hardware_concurrency()));
-
-#define LOCK(mutex) std::lock_guard<decltype(mutex)> guard_{mutex};
-
-std::mutex g_fillMutex;
-size_t g_fillThreadIndex = 0;
-size_t g_totalValuesToGenerate = 0;
-
-template <class iterator_type, class generator_type>
-size_t fillBlock(size_t currentThread, iterator_type begin,
-                 generator_type &generator) {
-  while (true) {
-    LOCK(g_fillMutex);
-    if (currentThread == g_fillThreadIndex) {
-      // Select the next thread for this work.
-      ++g_fillThreadIndex;
-      if (g_fillThreadIndex >= THREADS_TO_USE) {
-        g_fillThreadIndex = 0;
-      }
-
-      // Do the work.
-      const size_t valuesToGenerate =
-          std::min(g_totalValuesToGenerate, VALUES_PER_BLOCK);
-      g_totalValuesToGenerate -= valuesToGenerate;
-
-      for (size_t valuesRemaining = 0; valuesRemaining < valuesToGenerate;
-           ++valuesRemaining) {
-        *begin++ = generator();
-      }
-
-      return valuesToGenerate;
-    }
-  }
-}
-
-template <class BlockIter, class CharIter, class converter_type>
-size_t convertBlock(BlockIter begin, BlockIter end, CharIter outCharacter,
-                    converter_type &converter) {
-  const auto beginCharacter = outCharacter;
-  size_t col = 0;
-  for (; begin != end; ++begin) {
-    const uint32_t random = *begin;
-
-    *outCharacter++ = converter(random);
-    if (++col >= CHARS_PER_LINE) {
-      col = 0;
-      *outCharacter++ = '\n';
-    }
-  }
-  // Check if we need to end the line
-  if (0 != col) {
-    // Last iteration didn't end the line, so finish the job.
-    *outCharacter++ = '\n';
-  }
-
-  return std::distance(beginCharacter, outCharacter);
-}
-
-std::mutex g_outMutex;
-size_t g_outThreadIndex = -1;
-
-template <class iterator_type>
-void writeCharacters(size_t currentThread, iterator_type begin, size_t count) {
-  while (true) {
-    LOCK(g_outMutex);
-    if (g_outThreadIndex == -1 || currentThread == g_outThreadIndex) {
-      // Select the next thread for this work.
-      g_outThreadIndex = currentThread + 1;
-      if (g_outThreadIndex >= THREADS_TO_USE) {
-        g_outThreadIndex = 0;
-      }
-
-      // Do the work.
-      std::fwrite(begin, count, 1, stdout);
-      return;
-    }
-  }
-}
+    std::max(1U, std::thread::hardware_concurrency());
 
 template <class generator_type, class converter_type>
-void work(size_t currentThread, generator_type &generator,
-          converter_type &converter) {
+void work(std::atomic<size_t> &totalValuesToGenerate, generator_type &generator,
+          converter_type &converter, std::mutex &outputMutex) {
   std::array<typename generator_type::result_t, VALUES_PER_BLOCK> block;
-  std::array<char, CHARS_PER_BLOCK_INCL_NEWLINES> characters;
+  std::array<char, VALUES_PER_BLOCK + VALUES_PER_BLOCK / CHARS_PER_LINE + 1> characters;
 
   while (true) {
-    const auto bytesGenerated =
-        fillBlock(currentThread, block.begin(), generator);
-
-    if (bytesGenerated == 0) {
+    size_t chunk_size = std::min(VALUES_PER_BLOCK, totalValuesToGenerate.load());
+    if (chunk_size == 0) {
+      break;
+    }
+    size_t oldTotal = totalValuesToGenerate.load();
+    while (!totalValuesToGenerate.compare_exchange_weak(oldTotal, oldTotal - chunk_size)) {
+      if (oldTotal == 0) {
+        chunk_size = 0;
+        break;
+      }
+      chunk_size = std::min(VALUES_PER_BLOCK, oldTotal);
+    }
+    if (chunk_size == 0) {
       break;
     }
 
-    const auto charactersGenerated =
-        convertBlock(block.begin(), block.begin() + bytesGenerated,
-                     characters.begin(), converter);
+    // Generate values
+    for (size_t i = 0; i < chunk_size; ++i) {
+      block[i] = generator();
+    }
 
-    writeCharacters(currentThread, characters.begin(), charactersGenerated);
+    // Convert and format output
+    size_t charsGenerated = 0;
+    size_t col = 0;
+    for (size_t i = 0; i < chunk_size; ++i) {
+      characters[charsGenerated++] = converter(block[i]);
+      if (++col >= CHARS_PER_LINE) {
+        characters[charsGenerated++] = '\n';
+        col = 0;
+      }
+    }
+    if (col != 0) {
+      characters[charsGenerated++] = '\n';
+    }
+
+    // Output the result
+    {
+      std::lock_guard<std::mutex> guard(outputMutex);
+      std::fwrite(characters.data(), charsGenerated, 1, stdout);
+    }
   }
 }
 
 template <class generator_type, class converter_type>
-void make(const char *desc, int n, generator_type generator,
+void make(const char *desc, int n, generator_type prototype_generator,
           converter_type converter) {
   std::cout << '>' << desc << '\n';
 
-  g_totalValuesToGenerate = n;
-  g_outThreadIndex = -1;
-  g_fillThreadIndex = 0;
+  std::atomic<size_t> totalValuesToGenerate(n);
+  std::mutex outputMutex;
 
-  std::vector<std::thread> threads(THREADS_TO_USE - 1);
-  for (size_t i = 0; i < threads.size(); ++i) {
-    threads[i] =
-        std::thread{std::bind(&work<generator_type, converter_type>, i,
-                              std::ref(generator), std::ref(converter))};
+  // Create generator instances per thread
+  std::vector<generator_type> generators;
+  for (unsigned i = 0; i < THREADS_TO_USE; ++i) {
+    generators.push_back(prototype_generator);
   }
 
-  work(threads.size(), generator, converter);
+  // Start threads
+  std::vector<std::thread> threads;
+  for (unsigned i = 0; i < THREADS_TO_USE; ++i) {
+    threads.emplace_back(work<generator_type, converter_type>, std::ref(totalValuesToGenerate),
+                         std::ref(generators[i]), std::ref(converter), std::ref(outputMutex));
+  }
 
   for (auto &thread : threads) {
     thread.join();
@@ -270,25 +191,38 @@ void make(const char *desc, int n, generator_type generator,
 }
 
 int main(int argc, char *argv[]) {
-  int count = atoi(argv[1]);
+  if (argc < 3) {
+    std::cerr << "usage: " << argv[0] << " count length\n";
+    return 1;
+  }
+
+  int count = std::atoi(argv[1]);
+  int n = std::atoi(argv[2]);
+
+  if (n <= 0 || count <= 0) {
+    std::cerr << "Invalid input parameters.\n";
+    return 1;
+  }
+
+  // Precompute cumulative probabilities outside the loop
+  make_cumulative(iub.begin(), iub.end());
+  make_cumulative(homosapiens.begin(), homosapiens.end());
+
   for (int counter = 0; counter < count; counter++) {
     start_rapl();
-    int n = 1000;
-    if (argc < 3 || (n = std::atoi(argv[2])) <= 0) {
-      std::cerr << "usage: " << argv[0] << " length\n";
-      return 1;
-    }
 
-    make_cumulative(iub.begin(), iub.end());
-    make_cumulative(homosapiens.begin(), homosapiens.end());
+    // Sequence ONE: Using the repeat generator
+    auto repeatGen = make_repeat_generator(alu.begin(), alu.end());
+    make("ONE Homo sapiens alu", n * 2, repeatGen, &convert_trivial);
 
-    make("ONE Homo sapiens alu", n * 2,
-         make_repeat_generator(alu.begin(), alu.end()), &convert_trivial);
-    make("TWO IUB ambiguity codes", n * 3,
-         make_random_generator(iub.begin(), iub.end()), &convert_IUB);
-    make("THREE Homo sapiens frequency", n * 5,
-         make_random_generator(homosapiens.begin(), homosapiens.end()),
-         &convert_homosapiens);
+    // Sequence TWO: Using RandomGenerator and convert_IUB
+    RandomGenerator randGen1(42 + counter); // Seed with counter to vary sequences
+    make("TWO IUB ambiguity codes", n * 3, randGen1, &convert_IUB);
+
+    // Sequence THREE: Using RandomGenerator and convert_homosapiens
+    RandomGenerator randGen2(42 + counter * 2);
+    make("THREE Homo sapiens frequency", n * 5, randGen2, &convert_homosapiens);
+
     stop_rapl();
   }
   return 0;

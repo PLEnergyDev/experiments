@@ -150,7 +150,8 @@ int main(int argc, char **argv) {
          memcmp(">THREE", buffer, sizeof(">THREE") - 1))
     ;
 
-  // Start with 1 MB of storage for reading in the polynucleotide and grow geometrically.
+  // Start with 1 MB of storage for reading in the polynucleotide and grow
+  // geometrically.
   intnative_t polynucleotide_Capacity = 1048576;
   intnative_t polynucleotide_Length = 0;
   char *polynucleotide = malloc(polynucleotide_Capacity);
@@ -203,7 +204,8 @@ int main(int argc, char **argv) {
     }
 
     // Output the results.
-    for (intnative_t i = 0; i < 7; printf("%s\n", output_Buffer[i++]));
+    for (intnative_t i = 0; i < 7; printf("%s\n", output_Buffer[i++]))
+      ;
 
     stop_rapl();
   }

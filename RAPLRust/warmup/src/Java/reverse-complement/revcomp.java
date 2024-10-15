@@ -1,25 +1,21 @@
 /* The Computer Language Benchmarks Game
    http://benchmarksgame.alioth.debian.org/
- 
+
    contributed by Leonhard Holz
-   thanks to Anthony Donnefort for the basic mapping idea
+   modified to allow multiple iterations within main
 */
+
+import java.io.*;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.*;
+import java.util.concurrent.*;
 
-public class revcomp {
+public class revcomp
+{
     private static final byte[] map = new byte[256];
-    private static final int CHUNK_SIZE = 1024 * 1024 * 16;
+    private static final int CHUNK_SIZE = 1024 * 1024 * 16; // 16 MB
     private static final int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
-    private static final ExecutorService service = Executors.newFixedThreadPool(NUMBER_OF_CORES);
-    private static final List < byte[] > list = Collections.synchronizedList(new ArrayList < byte[] > ());
 
     static {
         for (int i = 0; i < map.length; i++) {
@@ -40,7 +36,8 @@ public class revcomp {
         map['u'] = map['U'] = 'A';
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException
+    {
         var dll_path = System.getProperty("user.dir") + "/../../rapl-interface/target/release/librapl_lib.so";
         System.load(dll_path);
 
@@ -52,33 +49,31 @@ public class revcomp {
         MemorySegment stop_rapl_symbol = SymbolLookup.loaderLookup().find("stop_rapl").get();
         MethodHandle stop_rapl = Linker.nativeLinker().downcallHandle(stop_rapl_symbol,
             FunctionDescriptor.of(ValueLayout.JAVA_INT));
-        int count = Integer.parseInt(args[0]);
-        for (int counter = 0; counter < count; counter++) {
+
+        // Read all input data into a byte array using CHUNK_SIZE buffer
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[CHUNK_SIZE];
+        int read;
+        while ((read = System.in.read(buffer)) != -1) {
+            baos.write(buffer, 0, read);
+        }
+        byte[] inputData = baos.toByteArray();
+
+        int loop_count = Integer.parseInt(args[0]);
+
+        for (int counter = 0; counter < loop_count; counter++) {
             try {
                 start_rapl.invoke();
             } catch (Throwable e) {
                 e.printStackTrace();
             }
-            int read;
-            byte[] buffer;
-            Finder lastFinder = null;
+            // Create a new InputStream from the input data
+            ByteArrayInputStream bais = new ByteArrayInputStream(inputData);
 
-            do {
-                buffer = new byte[CHUNK_SIZE];
-                read = System.in.read(buffer);
-                list.add(buffer);
+            // Run the benchmark
+            revcomp benchmark = new revcomp();
+            benchmark.runBenchmark(bais);
 
-                Finder finder = new Finder(buffer, read, lastFinder);
-                service.execute(finder);
-                lastFinder = finder;
-
-            } while (read == CHUNK_SIZE);
-
-            Status status = lastFinder.finish();
-            Mapper mapper = new Mapper(status.lastFinding, status.count - 1, status.lastMapper);
-            service.execute(mapper);
-
-            service.shutdown();
             try {
                 stop_rapl.invoke();
             } catch (Throwable e) {
@@ -87,36 +82,95 @@ public class revcomp {
         }
     }
 
-    private static final class Status {
+    // Instance variables for each benchmark run
+    private ExecutorService service;
+    private List<byte[]> list;
+
+    public void runBenchmark(InputStream in) throws IOException
+    {
+        service = Executors.newFixedThreadPool(NUMBER_OF_CORES);
+        list = Collections.synchronizedList(new ArrayList<byte[]>());
+
+        int read;
+        byte[] buffer;
+        Finder lastFinder = null;
+
+        do {
+            buffer = new byte[CHUNK_SIZE];
+            read = in.read(buffer);
+            if (read > 0) {
+                // Only add the read bytes to the list
+                list.add(Arrays.copyOf(buffer, read));
+            }
+
+            if (read == -1) {
+                break;
+            }
+
+            Finder finder = new Finder(buffer, read, lastFinder);
+            service.execute(finder);
+            lastFinder = finder;
+
+        } while (read == CHUNK_SIZE);
+
+        if (lastFinder != null) {
+            Status status = lastFinder.finish();
+            Mapper mapper = new Mapper(status.lastFinding, status.count - 1, status.lastMapper);
+            service.execute(mapper);
+        }
+
+        // Wait for all tasks to complete
+        service.shutdown();
+        try {
+            service.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        // Reset resources for the next iteration
+        service = null;
+        list = null;
+    }
+
+    // Inner class to hold the status between Finder and Mapper
+    private final class Status
+    {
         private int count = 0;
         private int lastFinding = 0;
         private Mapper lastMapper = null;
     }
 
-    private static final class Finder implements Runnable {
+    // Finder class to locate sequence headers
+    private final class Finder implements Runnable
+    {
         private int size;
         private byte[] a;
         private Status status;
         private Finder previous;
         private boolean done = false;
 
-        public Finder(byte[] a, int size, Finder previous) {
+        public Finder(byte[] a, int size, Finder previous)
+        {
             this.a = a;
             this.size = size;
             this.previous = previous;
         }
 
-        public Status finish() {
-            while (!done) try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                // ignored
+        public Status finish()
+        {
+            while (!done) {
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    // ignored
+                }
             }
             return status;
         }
 
-        public void run() {
-            LinkedList <Integer> findings = new LinkedList < Integer > ();
+        public void run()
+        {
+            LinkedList<Integer> findings = new LinkedList<Integer>();
 
             for (int i = 0; i < size; i++) {
                 if (a[i] == '>') {
@@ -128,45 +182,53 @@ public class revcomp {
                 status = new Status();
             } else {
                 status = previous.finish();
-                findings.add(0, status.lastFinding);
+                findings.addFirst(status.lastFinding);
                 for (int i = 1; i < findings.size(); i++) {
                     findings.set(i, findings.get(i) + status.count);
                 }
             }
 
-            if (findings.size() > 1)
+            if (findings.size() > 1) {
                 for (int i = 0; i < findings.size() - 1; i++) {
                     status.lastMapper = new Mapper(findings.get(i), findings.get(i + 1) - 1, status.lastMapper);
                     service.execute(status.lastMapper);
                 }
+            }
 
-            status.lastFinding = findings.get(findings.size() - 1);
+            status.lastFinding = findings.getLast();
             status.count += size;
             done = true;
         }
     }
 
-    private static final class Mapper implements Runnable {
+    // Mapper class to perform the reverse-complement
+    private final class Mapper implements Runnable
+    {
         private int end;
         private int start;
         private Mapper previous;
         private boolean done = false;
 
-        public Mapper(int start, int end, Mapper previous) {
-            this.end = end;
+        public Mapper(int start, int end, Mapper previous)
+        {
             this.start = start;
+            this.end = end;
             this.previous = previous;
         }
 
-        public void finish() {
-            while (!done) try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                // ignored
+        public void finish()
+        {
+            while (!done) {
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    // ignored
+                }
             }
         }
 
-        public void run() {
+        public void run()
+        {
             int[] positions = find(list, start, end);
 
             int lp1 = positions[0];
@@ -194,13 +256,21 @@ public class revcomp {
                 }
                 if (p1 == tob.length) {
                     lp1++;
-                    tob = list.get(lp1);
-                    p1 = 0;
+                    if (lp1 < list.size()) {
+                        tob = list.get(lp1);
+                        p1 = 0;
+                    } else {
+                        break;
+                    }
                 }
                 if (p2 == -1) {
                     lp2--;
-                    bot = list.get(lp2);
-                    p2 = bot.length - 1;
+                    if (lp2 >= 0) {
+                        bot = list.get(lp2);
+                        p2 = bot.length - 1;
+                    } else {
+                        break;
+                    }
                 }
             }
 
@@ -213,7 +283,9 @@ public class revcomp {
         }
     }
 
-    private static void write(List < byte[] > list, int lpStart, int start, int lpEnd, int end) {
+    // Method to write the output
+    private void write(List<byte[]> list, int lpStart, int start, int lpEnd, int end)
+    {
         byte[] a = list.get(lpStart);
         while (lpStart < lpEnd) {
             System.out.write(a, start, a.length - start);
@@ -224,12 +296,14 @@ public class revcomp {
         System.out.write(a, start, end - start + 1);
     }
 
-    private static int[] find(List < byte[] > list, int start, int end) {
+    // Method to find positions in the byte arrays
+    private int[] find(List<byte[]> list, int start, int end)
+    {
         int n = 0, lp = 0;
         int[] result = new int[4];
         boolean foundStart = false;
 
-        for (byte[] bytes: list) {
+        for (byte[] bytes : list) {
             if (!foundStart && n + bytes.length > start) {
                 result[0] = lp;
                 result[1] = start - n;

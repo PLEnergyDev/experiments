@@ -7,25 +7,30 @@ CFLAGS=$(OPT_FLAGS) $(LIB_FLAGS)
 TARGET=main
 SRC=$(TARGET).cpp
 
-RAPL=../../RAPL/main
+RAPL_DIR=../../RAPL
+RAPL=$(RAPL_DIR)/main
 INPUT=../../revcomp-input25000000.txt
 
-all: $(TARGET)
+$(RAPL):
+	@echo "Building RAPL interface..."
+	@cd $(RAPL_DIR) && make
 
-$(TARGET): $(SRC)
+all: $(RAPL) $(TARGET)
+
+$(TARGET): $(SRC) $(RAPL)
 	$(CC) $(SRC) -o $(TARGET) $(CFLAGS)
 
-run: $(TARGET)
+run: $(TARGET) $(RAPL)
 	./$(TARGET) < $(INPUT)
 
-measure: $(TARGET)
+measure: $(TARGET) $(RAPL)
 	modprobe msr
 	$(RAPL) "./$(TARGET) < $(INPUT)" C++ reverse-complement
 
-mem: $(TARGET)
+mem: $(TARGET) $(RAPL)
 	time -v ./$(TARGET) < $(INPUT)
 
-valgrind: $(TARGET)
+valgrind: $(TARGET) $(RAPL)
 	valgrind --tool=massif --stacks=yes ./$(TARGET) < $(INPUT)
 
 clean:

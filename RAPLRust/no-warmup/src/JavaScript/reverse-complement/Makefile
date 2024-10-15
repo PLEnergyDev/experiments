@@ -2,7 +2,7 @@ compile:
 	cp -L revcomp.node-7.node revcomp.node-7.js
 
 measure:
-	sudo modprobe msr
+	modprobe msr
 	sudo ../../RAPL/target/release/RAPL "node --no-deprecation revcomp.node-7.js 0 < ../../revcomp-input25000000.txt"
 
 run:

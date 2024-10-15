@@ -36,7 +36,7 @@ List the CPU's MSR's on Linux.
 
 Enable MSR.
 
-`sudo modprobe msr`
+`modprobe msr`
 
 ## Install driver on Windows
 

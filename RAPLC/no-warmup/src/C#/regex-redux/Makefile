@@ -1,30 +1,33 @@
 CC=dotnet
 
-OPT_FLAGS=-c Release
+CFLAGS=-c Release
 
-TARGET=bin/Release/net8.0/program
+TARGET=bin/Release/net8.0/regex-redux
 SRC=Program.cs
 
 RAPL=../../RAPL/main
-
 INPUT=../../regexredux-input5000000.txt
 
-all: $(TARGET)
+$(RAPL):
+	@echo "Building RAPL interface..."
+	@cd $(RAPL_DIR) && make
 
-$(TARGET): $(SRC)
-	$(CC) build $(OPT_FLAGS)
+all: $(RAPL) $(TARGET)
 
-run: $(TARGET)
+$(TARGET): $(SRC) $(RAPL)
+	$(CC) build $(CFLAGS)
+
+run: $(TARGET) $(RAPL)
 	$(TARGET) < $(INPUT)
 
-measure: $(TARGET)
+measure: $(TARGET) $(RAPL)
 	modprobe msr
 	$(RAPL) "$(TARGET) < $(INPUT)" C# regex-redux
 
-mem: $(TARGET)
+mem: $(TARGET) $(RAPL)
 	time -v $(TARGET) < $(INPUT)
 
-valgrind:
+valgrind: $(TARGET) $(RAPL)
 	valgrind --tool=massif --stacks=yes $(TARGET) < $(INPUT)
 
 clean:

@@ -1,29 +1,37 @@
 JAVAC=javac
 JAVA=java
 
+CFLAGS=--enable-preview --release 21
+RFLAGS=--enable-preview --enable-native-access=ALL-UNNAMED
+
 CLASS=nbody
 SRC=$(CLASS).java
 
-RAPL=../../RAPL/target/release/RAPL
+RAPL_DIR=../../RAPL
+RAPL=$(RAPL_DIR)/target/release/RAPL
 INPUT=50000000
 
-all: $(CLASS)
+$(RAPL):
+	@echo "Building RAPL interface..."
+	@cd $(RAPL_DIR) && cargo build --release
 
-$(CLASS): $(SRC)
-	$(JAVAC) $(SRC)
+all: $(RAPL) $(CLASS)
 
-run: $(CLASS)
-	$(JAVA) $(CLASS) $(INPUT)
+$(CLASS): $(SRC) $(RAPL)
+	$(JAVAC) $(CFLAGS) $(SRC)
 
-measure: $(CLASS)
+run: $(CLASS) $(RAPL)
+	$(JAVA) $(RFLAGS) $(CLASS) $(INPUT)
+
+measure: $(CLASS) $(RAPL)
 	modprobe msr
-	$(RAPL) "$(JAVA) $(CLASS) $(INPUT)"
+	$(RAPL) "$(JAVA) $(RFLAGS) $(CLASS) $(INPUT)" Java n-body
 
-mem: $(CLASS)
-	time -v $(JAVA) $(CLASS) $(INPUT)
+mem: $(CLASS) $(RAPL)
+	time -v $(JAVA) $(RFLAGS) $(CLASS) $(INPUT)
 
-valgrind: $(CLASS)
-	valgrind --tool=massif --stacks=yes $(JAVA) $(CLASS) $(INPUT)
+valgrind: $(CLASS) $(RAPL)
+	valgrind --tool=massif --stacks=yes $(JAVA) $(RFLAGS) $(CLASS) $(INPUT)
 
 clean:
 	rm -f *.class

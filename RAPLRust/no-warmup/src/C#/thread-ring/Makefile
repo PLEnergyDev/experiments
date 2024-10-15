@@ -1,30 +1,35 @@
 CC=dotnet
 
-OPT_FLAGS=-c Release
+CFLAGS=-c Release
 
-TARGET=bin/Release/net8.0/program
+RAPL_DIR=../../RAPL
+RAPL=$(RAPL_DIR)/target/release/RAPL
+
+TARGET=bin/Release/net8.0/thread-ring
 SRC=Program.cs
-
-RAPL=../../RAPL/target/release/RAPL
 
 INPUT=50000000
 
-all: $(TARGET)
+$(RAPL):
+	@echo "Building RAPL interface..."
+	@cd $(RAPL_DIR) && cargo build --release
 
-$(TARGET): $(SRC)
-	$(CC) build $(OPT_FLAGS)
+all: $(RAPL) $(TARGET)
 
-run: $(TARGET)
+$(TARGET): $(SRC) $(RAPL)
+	$(CC) build $(CFLAGS)
+
+run: $(TARGET) $(RAPL)
 	$(TARGET) $(INPUT)
 
-measure: $(TARGET)
+measure: $(TARGET) $(RAPL)
 	modprobe msr
 	$(RAPL) "$(TARGET) $(INPUT)"
 
-mem: $(TARGET)
+mem: $(TARGET) $(RAPL)
 	time -v $(TARGET) $(INPUT)
 
-valgrind:
+valgrind: $(RAPL)
 	valgrind --tool=massif --stacks=yes $(TARGET) $(INPUT)
 
 clean:

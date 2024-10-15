@@ -2,7 +2,7 @@ compile:
 	cp -L mandelbrot.node mandelbrot.js
 
 measure:
-	sudo modprobe msr
+	modprobe msr
 	sudo ../../RAPL/target/release/RAPL "node mandelbrot.js 16000"
 
 run:

@@ -18,12 +18,13 @@ fn main() {
     let counter = std::env::args().nth(1)
         .and_then(|n| n.parse().ok())
         .unwrap_or(1);  // Default to 1 if not provided
+    let n = std::env::args_os().nth(2)
+        .and_then(|s| s.into_string().ok())
+        .and_then(|n| n.parse().ok())
+        .unwrap_or(27);
     for _ in 0..counter {
         start_rapl();
-        let n = std::env::args_os().nth(2)
-            .and_then(|s| s.into_string().ok())
-            .and_then(|n| n.parse().ok())
-            .unwrap_or(27);
+
         for (i, d) in Context::new().enumerate().take(n) {
             print!("{}", d);
             if (i + 1) % 10 == 0 { println!("\t:{}", i + 1); }

@@ -17,12 +17,15 @@ run_benchmark() {
 C_benchmarks=(
   "binary-trees"
   # "chameneos-redux" # Not Relevant
+  "division-loop"
   "fannkuch-redux"
   "fasta"
   "k-nucleotide"
   "mandelbrot"
+  "matrix-multiplication"
   "n-body"
   # "pidigits" # Not Relevant
+  "polynomial-evaluation"
   "regex-redux"
   "reverse-complement"
   "spectral-norm"
@@ -32,12 +35,16 @@ C_benchmarks=(
 Csharp_benchmarks=(
   "binary-trees"
   # "chameneos-redux" # Not Relevant
+  "division-loop"
   "fannkuch-redux"
-  # "fasta" # Run this indiv`idually because it freezes sometimes
+  "fasta"
   "k-nucleotide"
   "mandelbrot"
+  "matrix-multiplication"
+  # "matrix-multiplication-unsafe" # Not Relevant
   "n-body"
   # "pidigits" # Not Relevant
+  "polynomial-evaluation"
   "regex-redux"
   "reverse-complement"
   "spectral-norm"
@@ -48,12 +55,15 @@ Csharp_benchmarks=(
 Cpp_benchmarks=(
   "binary-trees"
   # "chameneos-redux" # Not Relevant
+  "division-loop"
   "fannkuch-redux"
-  # "fasta" # Run this indiv`idually because it freezes sometimes
+  "fasta"
   "k-nucleotide"
   "mandelbrot"
+  "matrix-multiplication"
   "n-body"
   # "pidigits" # Not Relevant
+  "polynomial-evaluation"
   "regex-redux"
   "reverse-complement"
   "spectral-norm"
@@ -63,12 +73,15 @@ Cpp_benchmarks=(
 Java_benchmarks=(
   "binary-trees"
   # "chameneos-redux" # Not Relevant
+  "division-loop"
   "fannkuch-redux"
   "fasta"
   "k-nucleotide"
   "mandelbrot"
+  "matrix-multiplication"
   "n-body"
   # "pidigits" # Not Relevant
+  "polynomial-evaluation"
   "regex-redux"
   "reverse-complement"
   "spectral-norm"
@@ -78,12 +91,15 @@ Java_benchmarks=(
 Rust_benchmarks=(
   "binary-trees"
   # "chameneos-redux" # Not Relevant
+  "division-loop"
   "fannkuch-redux"
   "fasta"
   "k-nucleotide"
   "mandelbrot"
+  "matrix-multiplication"
   "n-body"
   # "pidigits" # Not Relevant
+  "polynomial-evaluation"
   "regex-redux"
   "reverse-complement"
   "spectral-norm"

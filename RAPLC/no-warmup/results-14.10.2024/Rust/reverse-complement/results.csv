@@ -1,0 +1,11 @@
+Algorithm,Package Energy (J),Core Energy (J),Uncore Energy (J),DRAM Energy (J),Elapsed Time (ms),Total Memory (MB),Peak Memory (MB)
+reverse-complement,469.16,396.66,0.0,3.85,6541.0,245.87,0
+reverse-complement,488.89,414.62,0.0,3.94,6705.13,245.87,0
+reverse-complement,507.1,431.06,0.0,4.06,6861.25,245.87,0
+reverse-complement,469.88,400.65,0.0,3.68,6249.0,245.87,0
+reverse-complement,481.15,412.01,0.0,3.68,6239.76,245.87,0
+reverse-complement,540.25,450.22,0.0,4.74,8127.99,245.87,0
+reverse-complement,472.11,391.43,0.0,4.32,7283.01,245.87,0
+reverse-complement,435.38,361.11,0.0,3.94,6700.99,245.87,0
+reverse-complement,471.08,390.66,0.0,4.25,7261.2,245.87,0
+reverse-complement,496.92,412.09,0.0,4.47,7652.81,245.87,0

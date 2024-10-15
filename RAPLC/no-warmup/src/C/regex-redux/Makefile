@@ -7,9 +7,13 @@ CFLAGS=$(OPT_FLAGS)
 TARGET=main
 SRC=$(TARGET).c
 
-RAPL=../../RAPL/main
-
+RAPL_DIR=../../RAPL
+RAPL=$(RAPL_DIR)/main
 INPUT=../../regexredux-input5000000.txt
+
+$(RAPL):
+	@echo "Building RAPL interface..."
+	@cd $(RAPL_DIR) && make
 
 all: $(TARGET)
 
@@ -19,14 +23,17 @@ $(TARGET): $(SRC)
 run: $(TARGET)
 	./$(TARGET) < $(INPUT)
 
-measure: $(TARGET)
+measure: $(RAPL) $(TARGET)
 	modprobe msr
 	$(RAPL) "./$(TARGET) < $(INPUT)" C regex-redux
 
 mem: $(TARGET)
 	time -v ./$(TARGET) < $(INPUT)
 
+valgrind: $(TARGET)
+	valgrind --tool=massif --stacks=yes ./$(TARGET) < $(INPUT)
+
 clean:
 	rm -f $(TARGET)
 
-.PHONY: all clean run measure mem
+.PHONY: all clean run measure mem valgrind

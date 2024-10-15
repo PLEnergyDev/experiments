@@ -19,8 +19,10 @@ for (int i = 0; i < count; i++) {
     start_rapl();
     int rows = int.Parse(arguments[2]);
     int cols = int.Parse(arguments[3]);
-    double sum = MatrixMultiplication.Run(rows, cols);
-    Console.WriteLine(sum);
+    for (int j = 0; j < 100; j++) {
+        double sum = MatrixMultiplication.Run(rows, cols);
+        Console.WriteLine(sum);
+    }
     stop_rapl();
 }
 

@@ -1,26 +1,41 @@
-CC=javac
-CFLAGS=--enable-preview --release 21 -d .
+JAVAC=javac
+JAVA=java
 
-TARGET=Bench
-SRC=Bench.java
+CFLAGS=--enable-preview --release 21
+RFLAGS=--enable-preview --enable-native-access=ALL-UNNAMED
+
+RAPL_DIR=../../rapl-interface
+RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
+
+CLASS=polynomialevaluation
+SRC=$(CLASS).java
 
 COUNT=20
-INPUT=10000
+INPUT=1000
 
-$(TARGET): $(SRC)
-	$(CC) $(CFLAGS) $(SRC)
+$(RAPL):
+	@echo "Building rapl-interface with cargo in release mode..."
+	@cd $(RAPL_DIR) && cargo build --release
 
-run: $(TARGET)
-	java --enable-preview $(TARGET) 1 $(INPUT)
+all: $(RAPL) $(CLASS)
 
-measure: $(TARGET)
+$(CLASS): $(SRC) $(RAPL)
+	$(JAVAC) $(CFLAGS) $(SRC)
+
+run: $(CLASS) $(RAPL)
+	$(JAVA) $(RFLAGS) $(CLASS) 1 $(INPUT)
+
+measure: $(CLASS) $(RAPL)
 	modprobe msr
-	java --enable-preview $(TARGET) $(COUNT) $(INPUT)
+	$(JAVA) $(RFLAGS) $(CLASS) $(COUNT) $(INPUT)
 
-mem: $(TARGET)
-	time -v java --enable-preview $(TARGET) 1 $(INPUT)
+mem: $(CLASS) $(RAPL)
+	time -v $(JAVA) $(RFLAGS) $(CLASS) 1 $(INPUT)
+
+valgrind: $(RAPL)
+	valgrind --tool=massif --stacks=yes $(JAVA) $(RFLAGS) $(CLASS) 1 $(INPUT)
 
 clean:
 	rm -f *.class
 
-.PHONY: all clean
+.PHONY: all clean run measure mem valgrind

@@ -7,11 +7,15 @@ CFLAGS=$(OPT_FLAGS)
 TARGET=main
 SRC=$(TARGET).c
 
-RAPL=../../RAPL/main
-
+RAPL_DIR=../../RAPL
+RAPL=$(RAPL_DIR)/main
 INPUT=10000
 
-all: $(TARGET)
+$(RAPL):
+	@echo "Building RAPL interface..."
+	@cd $(RAPL_DIR) && make
+
+all: $(RAPL) $(TARGET)
 
 $(TARGET): $(SRC)
 	$(CC) $(SRC) -o $(TARGET) $(CFLAGS) $(LIB_FLAGS)
@@ -26,7 +30,10 @@ measure: $(TARGET)
 mem: $(TARGET)
 	time -v ./$(TARGET) $(INPUT)
 
+valgrind: $(TARGET)
+	valgrind --tool=massif --stacks=yes ./$(TARGET) $(INPUT)
+
 clean:
 	rm -f $(TARGET)
 
-.PHONY: all clean run measure mem
+.PHONY: all clean run measure mem valgrind

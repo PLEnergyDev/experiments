@@ -44,6 +44,11 @@ public class fasta {
         MethodHandle stop_rapl = Linker.nativeLinker().downcallHandle(stop_rapl_symbol,
             FunctionDescriptor.of(ValueLayout.JAVA_INT));
         int count = Integer.parseInt(args[0]);
+        int n = 1000;
+
+        if (args.length > 0) {
+            n = Integer.parseInt(args[1]);
+        }
         for (int counter = 0; counter < count; counter++) {
             try {
                 start_rapl.invoke();
@@ -51,11 +56,6 @@ public class fasta {
                 e.printStackTrace();
             }
 
-            int n = 1000;
-
-            if (args.length > 0) {
-                n = Integer.parseInt(args[1]);
-            }
             for (int i = 0; i < WORKERS.length; i++) {
                 WORKERS[i] = new NucleotideSelector();
                 WORKERS[i].setDaemon(true);

@@ -1,27 +1,38 @@
 CC=dotnet
-CFLAGS=-c Release --no-restore --no-self-contained
+
+CFLAGS=-c Release
+RAPL_DIR=../../rapl-interface
+RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
 
 TARGET=bin/Release/net8.0/division-loop
 SRC=Program.cs
 
 COUNT=20
-INPUT=22
+INPUT=20
 
-$(TARGET): $(SRC)
-	$(CC) restore
+$(RAPL):
+	@echo "Building rapl-interface with cargo in release mode..."
+	@cd $(RAPL_DIR) && cargo build --release
+
+all: $(RAPL) $(TARGET)
+
+$(TARGET): $(SRC) $(RAPL)
 	$(CC) build $(CFLAGS)
 
-run: $(TARGET)
+run: $(TARGET) $(RAPL)
 	./$(TARGET) 1 $(INPUT)
 
-measure: $(TARGET)
+measure: $(TARGET) $(RAPL)
 	modprobe msr
 	./$(TARGET) $(COUNT) $(INPUT)
 
-mem: $(TARGET)
+mem: $(TARGET) $(RAPL)
 	time -v ./$(TARGET) 1 $(INPUT)
+
+valgrind: $(RAPL)
+	valgrind --tool=massif --stacks=yes ./$(TARGET) $(INPUT)
 
 clean:
 	rm -rf bin obj
 
-.PHONY: all clean
+.PHONY: all clean run measure mem valgrind

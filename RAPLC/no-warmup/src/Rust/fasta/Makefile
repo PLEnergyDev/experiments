@@ -1,29 +1,34 @@
 CC=cargo
 
-OPT_FLAGS=--release
+CFLAGS=--release
 
 TARGET=target/release/main
 SRC=src/main.rs
 
-RAPL=../../RAPL/main
+RAPL_DIR=../../RAPL
+RAPL=$(RAPL_DIR)/main
 INPUT=25000000
 
-all: $(TARGET)
+$(RAPL):
+	@echo "Building RAPL interface..."
+	@cd $(RAPL_DIR) && make
 
-$(TARGET): $(SRC)
-	$(CC) build $(OPT_FLAGS)
+all: $(RAPL) $(TARGET)
 
-run: $(TARGET)
+$(TARGET): $(SRC) $(RAPL)
+	$(CC) build $(CFLAGS)
+
+run: $(TARGET) $(RAPL)
 	$(TARGET) $(INPUT)
 
-measure: $(TARGET)
+measure: $(TARGET) $(RAPL)
 	modprobe msr
 	$(RAPL) "$(TARGET) $(INPUT)" Rust fasta
 
-mem: $(TARGET)
+mem: $(TARGET) $(RAPL)
 	time -v $(TARGET) $(INPUT)
 
-valgrind:
+valgrind: $(TARGET) $(RAPL)
 	valgrind --tool=massif --stacks=yes $(TARGET) $(INPUT)
 
 clean:

@@ -2,7 +2,7 @@ compile:
 	cp -L nbody.node nbody.js
 
 measure:
-	sudo modprobe msr
+	modprobe msr
 	sudo ../../RAPL/main "node --no-deprecation nbody.js 50000000"
 
 run:

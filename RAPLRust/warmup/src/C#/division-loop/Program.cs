@@ -19,8 +19,10 @@ uint count = uint.Parse(arguments[1]);
 for (int i = 0; i < count; i++) {
     start_rapl();
     int M = int.Parse(arguments[2]);
-    double sum = DivisionLoop.Run(M);
-    Console.WriteLine(sum);
+    for (int j = 0; j < 10; j++) {
+        double result = DivisionLoop.Run(M);
+        Console.WriteLine(result);
+    }
     stop_rapl();
 }
 

@@ -2,7 +2,7 @@ compile:
 	cp -L binarytrees.node binarytrees.js
 
 measure:
-	sudo modprobe msr
+	modprobe msr
 	sudo ../../RAPL/main "node --no-deprecation binarytrees.js 21"
 
 run:

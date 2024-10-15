@@ -7,23 +7,28 @@ CFLAGS=$(OPT_FLAGS)
 TARGET=main
 SRC=$(TARGET).c
 
-RAPL=../../RAPL/target/release/RAPL
+RAPL_DIR=../../RAPL
+RAPL=$(RAPL_DIR)/target/release/RAPL
 
 INPUT=5500
 
-all: $(TARGET)
+$(RAPL):
+	@echo "Building RAPL interface..."
+	@cd $(RAPL_DIR) && cargo build --release
 
-$(TARGET): $(SRC)
+all: $(RAPL) $(TARGET)
+
+$(TARGET): $(SRC) $(RAPL)
 	$(CC) $(SRC) -o $(TARGET) $(CFLAGS) $(LIB_FLAGS)
 
-run: $(TARGET)
+run: $(TARGET) $(RAPL)
 	./$(TARGET) $(INPUT)
 
-measure: $(TARGET)
+measure: $(TARGET) $(RAPL)
 	modprobe msr
 	$(RAPL) "./$(TARGET) $(INPUT)"
 
-mem: $(TARGET)
+mem: $(TARGET) $(RAPL)
 	time -v ./$(TARGET) $(INPUT)
 
 clean:

@@ -2,7 +2,7 @@ compile:
 	cp -L knucleotide.node-2.node knucleotide.node-2.js
 
 measure:
-	sudo modprobe msr
+	modprobe msr
 	sudo ../../RAPL/target/release/RAPL "node --no-deprecation knucleotide.node-2.js 0 < ../../knucleotide-input25000000.txt"
 
 run:
