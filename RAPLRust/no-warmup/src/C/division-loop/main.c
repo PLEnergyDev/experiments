@@ -1,23 +1,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-////////////////////////////////////////////////////////////////////////////////////////
-double DivisionLoop(int M) {
-    double sum = 0.0;
-    int n = 0;
-    while (sum < M) {
-        n++;
-        sum += 1.0 / n;
+void start_rapl();
+void stop_rapl();
+
+void initialize(int *m, char *argv[]) { *m = atoi(argv[2]); }
+
+void run_benchmark(int m) {
+    for (int i = 0; i < 10; i++) {
+        double sum = 0.0;
+        double n = 0;
+        while (sum < m) {
+            n++;
+            sum += 1.0 / n;
+        }
+        printf("%f\n", n);
     }
-    return n;
 }
-////////////////////////////////////////////////////////////////////////////////////////
+
+void cleanup() {}
 
 int main(int argc, char *argv[]) {
-    int M = atoi(argv[1]);
-    for (int i = 0; i < 10; i++) {
-        double result = DivisionLoop(M);
-        printf("%f\n", result);
+    int iterations = atoi(argv[1]);
+    for (int i = 0; i < iterations; i++) {
+        int m;
+        initialize(&m, argv);
+        start_rapl();
+        run_benchmark(m);
+        stop_rapl();
+        cleanup();
     }
     return 0;
 }

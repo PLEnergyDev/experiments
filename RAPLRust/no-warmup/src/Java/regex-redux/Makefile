@@ -7,12 +7,14 @@ RFLAGS=--enable-preview --enable-native-access=ALL-UNNAMED
 CLASS=regexredux
 SRC=$(CLASS).java
 
-RAPL_DIR=../../RAPL
-RAPL=$(RAPL_DIR)/target/release/RAPL
+RAPL_DIR=../../rapl-interface
+RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
+
+COUNT=30
 INPUT=../../regexredux-input5000000.txt
 
 $(RAPL):
-	@echo "Building RAPL interface..."
+	@echo "Building rapl-interface with cargo in release mode..."
 	@cd $(RAPL_DIR) && cargo build --release
 
 all: $(RAPL) $(CLASS)
@@ -21,17 +23,19 @@ $(CLASS): $(SRC) $(RAPL)
 	$(JAVAC) $(CFLAGS) $(SRC)
 
 run: $(CLASS) $(RAPL)
-	$(JAVA) $(RFLAGS) $(CLASS) < $(INPUT)
+	$(JAVA) $(RFLAGS) $(CLASS) 1 < $(INPUT)
 
 measure: $(CLASS) $(RAPL)
 	modprobe msr
-	$(RAPL) "$(JAVA) $(RFLAGS) $(CLASS) < $(INPUT)" Java regex-redux
+	@for i in $$(seq 0 $(COUNT)); do \
+		$(JAVA) $(RFLAGS) $(CLASS) 1 < $(INPUT); \
+	done
 
 mem: $(CLASS) $(RAPL)
-	time -v $(JAVA) $(RFLAGS) $(CLASS) < $(INPUT)
+	time -v $(JAVA) $(RFLAGS) $(CLASS) 1 < $(INPUT)
 
-valgrind: $(CLASS) $(RAPL)
-	valgrind --tool=massif --stacks=yes $(JAVA) $(RFLAGS) $(CLASS) < $(INPUT)
+valgrind: $(RAPL)
+	valgrind --tool=massif --stacks=yes $(JAVA) $(RFLAGS) $(CLASS) 1 < $(INPUT)
 
 clean:
 	rm -f *.class

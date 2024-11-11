@@ -1,5 +1,5 @@
 /* The Computer Language Benchmarks Game
- * http://benchmarksgame.alioth.debian.org/
+ * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
  * 
  * contributed by Stefan Krause
  * slightly modified by Chad Whipkey
@@ -19,6 +19,7 @@ public final class mandelbrot {
     static AtomicInteger yCt;
     static double[] Crb;
     static double[] Cib;
+    static int N;
 
     static int getByte(int x, int y) {
         int res = 0;
@@ -44,11 +45,13 @@ public final class mandelbrot {
 
                 if (Zr1 * Zr1 + Zi1 * Zi1 > 4) {
                     b |= 2;
-                    if (b == 3) break;
+                    if (b == 3)
+                        break;
                 }
                 if (Zr2 * Zr2 + Zi2 * Zi2 > 4) {
                     b |= 1;
-                    if (b == 3) break;
+                    if (b == 3)
+                        break;
                 }
             } while (--j > 0);
             res = (res << 2) + b;
@@ -61,6 +64,46 @@ public final class mandelbrot {
             line[xb] = (byte) getByte(xb * 8, y);
     }
 
+    public static void initialize(String[] args) {
+        N = 6000;
+        if (args.length >= 1)
+            N = Integer.parseInt(args[1]);
+
+        Crb = new double[N + 7];
+        Cib = new double[N + 7];
+        double invN = 2.0 / N;
+        for (int i = 0; i < N; i++) {
+            Cib[i] = i * invN - 1.0;
+            Crb[i] = i * invN - 1.5;
+        }
+        yCt = new AtomicInteger();
+        out = new byte[N][(N + 7) / 8];
+    }
+
+    public static void run_benchmark() throws Exception {
+        Thread[] pool = new Thread[2 * Runtime.getRuntime().availableProcessors()];
+        for (int i = 0; i < pool.length; i++)
+            pool[i] = new Thread() {
+                public void run() {
+                    int y;
+                    while ((y = yCt.getAndIncrement()) < out.length)
+                        putLine(y, out[y]);
+                }
+            };
+        for (Thread t : pool)
+            t.start();
+        for (Thread t : pool)
+            t.join();
+    }
+
+    public static void cleanup() throws Exception {
+        OutputStream stream = new BufferedOutputStream(System.out);
+        stream.write(("P4\n" + N + " " + N + "\n").getBytes());
+        for (int i = 0; i < N; i++)
+            stream.write(out[i]);
+        stream.close();
+    }
+
     public static void main(String[] args) throws Exception {
         var dll_path = System.getProperty("user.dir") + "/../../rapl-interface/target/release/librapl_lib.so";
         System.load(dll_path);
@@ -68,51 +111,27 @@ public final class mandelbrot {
         // Loading functions
         MemorySegment start_rapl_symbol = SymbolLookup.loaderLookup().find("start_rapl").get();
         MethodHandle start_rapl = Linker.nativeLinker().downcallHandle(start_rapl_symbol,
-            FunctionDescriptor.of(ValueLayout.JAVA_INT));
+                FunctionDescriptor.of(ValueLayout.JAVA_INT));
 
         MemorySegment stop_rapl_symbol = SymbolLookup.loaderLookup().find("stop_rapl").get();
         MethodHandle stop_rapl = Linker.nativeLinker().downcallHandle(stop_rapl_symbol,
-            FunctionDescriptor.of(ValueLayout.JAVA_INT));
-        int count = Integer.parseInt(args[0]);
-        for (int counter = 0; counter < count; counter++) {
+                FunctionDescriptor.of(ValueLayout.JAVA_INT));
+
+        int iterations = Integer.parseInt(args[0]);
+        for (int i = 0; i < iterations; i++) {
+            initialize(args);
             try {
                 start_rapl.invoke();
             } catch (Throwable e) {
                 e.printStackTrace();
             }
-            int N = 6000;
-            if (args.length >= 1) N = Integer.parseInt(args[1]);
-
-            Crb = new double[N + 7];
-            Cib = new double[N + 7];
-            double invN = 2.0 / N;
-            for (int i = 0; i < N; i++) {
-                Cib[i] = i * invN - 1.0;
-                Crb[i] = i * invN - 1.5;
-            }
-            yCt = new AtomicInteger();
-            out = new byte[N][(N + 7) / 8];
-
-            Thread[] pool = new Thread[2 * Runtime.getRuntime().availableProcessors()];
-            for (int i = 0; i < pool.length; i++)
-                pool[i] = new Thread() {
-                    public void run() {
-                        int y;
-                        while ((y = yCt.getAndIncrement()) < out.length) putLine(y, out[y]);
-                    }
-                };
-            for (Thread t: pool) t.start();
-            for (Thread t: pool) t.join();
-
-            OutputStream stream = new BufferedOutputStream(System.out);
-            stream.write(("P4\n" + N + " " + N + "\n").getBytes());
-            for (int i = 0; i < N; i++) stream.write(out[i]);
-            stream.close();
+            run_benchmark();
             try {
                 stop_rapl.invoke();
             } catch (Throwable e) {
                 e.printStackTrace();
             }
+            cleanup();
         }
     }
 }

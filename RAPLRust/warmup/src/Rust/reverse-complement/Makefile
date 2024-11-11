@@ -1,13 +1,14 @@
 CC=cargo
 
 CFLAGS=--release
-RAPL_DIR=../../rapl-interface
-RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
 
 TARGET=target/release/main
 SRC=src/main.rs
 
-COUNT=20
+RAPL_DIR=../../rapl-interface
+RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
+
+COUNT=45
 INPUT=../../revcomp-input25000000.txt
 
 $(RAPL):
@@ -23,7 +24,6 @@ run: $(TARGET) $(RAPL)
 	./$(TARGET) 1 < $(INPUT)
 
 measure: $(TARGET) $(RAPL)
-	modprobe msr
 	./$(TARGET) $(COUNT) < $(INPUT)
 
 mem: $(TARGET) $(RAPL)

@@ -5,10 +5,13 @@ edition = "2021"
 
 [dependencies]
 rayon = "1.10.0"
-rapl-lib = { path = "../rapl-interface/rapl-lib" }
+rapl-lib = { path = "../../rapl-interface/rapl-lib" }
+num-traits = "0.2.19"
+numeric-array = "0.6.1"
+generic-array = "1.1.0"
 
 [profile.release]
 opt-level = 3
 lto = true
 codegen-units = 1
-target-cpu = "core2"
+target-cpu = "ivybridge"

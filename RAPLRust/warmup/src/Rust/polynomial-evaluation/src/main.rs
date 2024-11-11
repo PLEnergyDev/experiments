@@ -1,8 +1,17 @@
-extern crate rapl_lib;
-
 use std::env;
 use rapl_lib::ffi::start_rapl;
 use rapl_lib::ffi::stop_rapl;
+
+fn initialize() {}
+
+fn run_benchmark(n: usize) {
+    for _ in 0..1000 {
+        let result = polynomial_evaluation(n);
+        println!("{}", result);
+    }
+}
+
+fn cleanup() {}
 
 fn init_cs(n: usize) -> Vec<f64> {
     let mut cs: Vec<f64> = vec![0.0; n];
@@ -17,31 +26,24 @@ fn init_cs(n: usize) -> Vec<f64> {
 
 fn polynomial_evaluation(n: usize) -> f64 {
     let cs: Vec<f64> = init_cs(n);
-    let mut res:f64 = 0.0;
-
+    let mut res: f64 = 0.0;
     for i in 0..n {
         res = cs[i] + 5.0 * res;
     }
-
     res
 }
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-
-    if args.len() < 3 {
-        eprintln!("Usage: {} <n>", args[0]);
-        return;
-    }
-
-    let counter = args[1].parse().expect("Please provide a valid integer.");
+    let iterations = std::env::args().nth(1)
+        .and_then(|n| n.parse().ok())
+        .unwrap_or(1);
     let n: usize = args[2].parse().expect("Please provide a valid integer for n.");
-    for _ in 0..counter {
+    for _ in 0..iterations {
+        initialize();
         start_rapl();
-        for _i in 0..1000 {
-            let result:f64 = polynomial_evaluation(n);
-            println!("{}", result);
-        }
+        run_benchmark(n);
         stop_rapl();
+        cleanup();
     }
 }

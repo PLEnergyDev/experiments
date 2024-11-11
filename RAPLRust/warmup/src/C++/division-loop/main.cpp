@@ -1,36 +1,36 @@
 #include <iostream>
-#include <stdlib.h>
+#include <cstdlib>
 
 extern "C" {
-void start_rapl();
-void stop_rapl();
+    void start_rapl();
+    void stop_rapl();
 }
 
-double DivisionLoop(int M) {
-    double sum = 0.0;
-    int n = 0;
-    while (sum < M) {
-        n++;
-        sum += 1.0 / n;
+void initialize(int *m, char *argv[]) { *m = atoi(argv[2]); }
+
+void run_benchmark(int m) {
+    for (int i = 0; i < 10; i++) {
+        double sum = 0.0;
+        double n = 0;
+        while (sum < m) {
+            n++;
+            sum += 1.0 / n;
+        }
+        std::cout << n << std::endl;
     }
-    return n;
 }
+
+void cleanup() {}
 
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        std::cerr << "Usage: " << argv[0] << " <M>" << std::endl;
-        return 1;
-    }
-
-    int count = atoi(argv[1]);
-    for (int counter = 0; counter < count; counter++) {
+    int iterations = std::atoi(argv[1]);
+    for (int i = 0; i < iterations; i++) {
+        int m;
+        initialize(&m, argv);
         start_rapl();
-        int M = std::atoi(argv[2]);
-        for (int i = 0; i < 10; i++) {
-            double result = DivisionLoop(M);
-            std::cout << result << std::endl;
-        }
+        run_benchmark(m);
         stop_rapl();
+        cleanup();
     }
     return 0;
 }

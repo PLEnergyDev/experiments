@@ -1,0 +1,7 @@
+Algorithm,Package Energy (J),Core Energy (J),Uncore Energy (J),DRAM Energy (J),Elapsed Time (ms),Total Memory (MB),Peak Memory (MB)
+division-loop,125.85,52.88,0.0,3.67,6592,0.0,0
+division-loop,126.17,53.17,0.0,3.67,6596,0.0,0
+division-loop,125.62,52.7,0.0,3.67,6589,0.0,0
+division-loop,125.81,52.87,0.0,3.67,6591,0.0,0
+division-loop,125.42,52.7,0.0,3.66,6570,0.0,0
+division-loop,125.9,52.96,0.0,3.67,6586,0.0,0

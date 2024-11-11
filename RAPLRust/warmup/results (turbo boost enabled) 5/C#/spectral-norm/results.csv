@@ -1,0 +1,6 @@
+Algorithm,Package Energy (J),Core Energy (J),Uncore Energy (J),DRAM Energy (J),Elapsed Time (ms),Total Memory (MB),Peak Memory (MB)
+spectral-norm,31.04,27.8,0.0,0.17,293,2.37,0
+spectral-norm,28.26,25.66,0.0,0.13,237,2.37,0
+spectral-norm,28.51,25.86,0.0,0.13,239,2.37,0
+spectral-norm,28.54,25.92,0.0,0.13,237,2.37,0
+spectral-norm,24.23,21.37,0.0,0.14,256,2.37,0

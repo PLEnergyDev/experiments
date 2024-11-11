@@ -1,201 +1,152 @@
-extern crate rapl_lib;
-extern crate futures;
-extern crate futures_cpupool;
-extern crate ordermap;
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+//
+// contributed by Mrjillhace
 
+extern crate fnv;
+
+use std::thread;
 use std::sync::Arc;
-use std::hash::{Hasher, BuildHasherDefault};
-use futures::future::Future; // Import the correct trait for using `wait`
-use futures_cpupool::CpuPool;
-use Item::*;
-use ordermap::OrderMap;
+use std::collections::HashMap;
+use std::hash::BuildHasherDefault;
+use fnv::FnvHasher;
 use rapl_lib::ffi::start_rapl;
 use rapl_lib::ffi::stop_rapl;
 
-struct NaiveHasher(u64);
-impl Default for NaiveHasher {
-    fn default() -> Self {
-        NaiveHasher(0)
-    }
-}
-impl Hasher for NaiveHasher {
-    fn finish(&self) -> u64 {
-        self.0
-    }
-    fn write(&mut self, _: &[u8]) {
-        unimplemented!()
-    }
-    fn write_u64(&mut self, i: u64) {
-        self.0 = i ^ i >> 7;
-    }
-}
-type NaiveBuildHasher = BuildHasherDefault<NaiveHasher>;
-type NaiveHashMap<K, V> = OrderMap<K, V, NaiveBuildHasher>;
-type Map = NaiveHashMap<Code, u32>;
+const SEQ_LENS: [usize; 7] = [1, 2, 3, 4, 6, 12, 18];
+const LOOKUPS: [&'static str; 5] = ["GGT", "GGTA", "GGTATT", "GGTATTTTAATT", "GGTATTTTAATTTATAGT"];
 
-#[derive(Hash, PartialEq, PartialOrd, Ord, Eq, Clone, Copy)]
-struct Code(u64);
-impl Code {
-    fn push(&mut self, c: u8, mask: u64) {
-        self.0 <<= 2;
-        self.0 |= c as u64;
-        self.0 &= mask;
-    }
-    fn from_str(s: &str) -> Code {
-        let mask = Code::make_mask(s.len());
-        let mut res = Code(0);
-        for c in s.as_bytes() {
-            res.push(Code::encode(*c), mask);
-        }
-        res
-    }
-    fn to_string(&self, frame: usize) -> String {
-        let mut res = vec![];
-        let mut code = self.0;
-        for _ in 0..frame {
-            let c = match code as u8 & 0b11 {
-                c if c == Code::encode(b'A') => b'A',
-                c if c == Code::encode(b'T') => b'T',
-                c if c == Code::encode(b'G') => b'G',
-                c if c == Code::encode(b'C') => b'C',
-                _ => unreachable!(),
-            };
-            res.push(c);
-            code >>= 2;
-        }
-        res.reverse();
-        String::from_utf8(res).unwrap()
-    }
-    fn make_mask(frame: usize) -> u64 {
-        (1u64 << (2 * frame)) - 1
-    }
-    fn encode(c: u8) -> u8 {
-        (c & 0b110) >> 1
+type Table = HashMap<u64, usize, BuildHasherDefault<FnvHasher>>;
+
+fn encode(c: char) -> u8 {
+    match c {
+        'a' | 'A' => 0,
+        'c' | 'C' => 1,
+        'g' | 'G' => 2,
+        't' | 'T' => 3,
+        _ => panic!("wrong character"),
     }
 }
 
-struct Iter<'a> {
-    iter: std::slice::Iter<'a, u8>,
-    code: Code,
-    mask: u64,
+fn encode_str(s: &str) -> u64 {
+    s.chars().fold(0, |acc, c| 4 * acc + encode(c) as u64)
 }
-impl<'a> Iter<'a> {
-    fn new(input: &[u8], frame: usize) -> Iter {
-        let mut iter = input.iter();
-        let mut code = Code(0);
-        let mask = Code::make_mask(frame);
-        for c in iter.by_ref().take(frame - 1) {
-            code.push(*c, mask);
-        }
-        Iter {
-            iter: iter,
-            code: code,
-            mask: mask,
-        }
+
+fn decode(mut v: u64, len: usize) -> String {
+    let mut s = String::new();
+    for _ in 0..len {
+        let digit = v % 4;
+        match digit {
+            0 => s.push('A'),
+            1 => s.push('C'),
+            2 => s.push('G'),
+            3 => s.push('T'),
+            _ => {}
+        };
+        v /= 4;
+    }
+    s.chars().rev().collect()
+}
+
+struct Buffer {
+    value: u64,
+    size: usize,
+}
+
+impl Buffer {
+    fn push(&mut self, c: u8) {
+        self.value = (self.value * (1 << 2)) % (1 << (2 * self.size)) + (c as u64);
     }
 }
-impl<'a> Iterator for Iter<'a> {
-    type Item = Code;
-    fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next().map(|&c| {
-            self.code.push(c, self.mask);
-            self.code
+
+fn parse(mut input: &[u8], len: usize) -> Table {
+    let fnv = BuildHasherDefault::<FnvHasher>::default();
+    let mut table = Table::with_hasher(fnv);
+    let mut buffer = Buffer { value: 0, size: len };
+    if input.len() < len {
+        return table;
+    }
+    for _ in 0..len - 1 {
+        buffer.push(input[0]);
+        input = &input[1..];
+    }
+    while input.len() != 0 {
+        buffer.push(input[0]);
+        input = &input[1..];
+        let counter = table.entry(buffer.value).or_insert(0);
+        *counter += 1;
+    }
+    table
+}
+
+fn read_input<R: std::io::BufRead>(source: R, key: &str) -> Vec<u8> {
+    let mut vec = Vec::new();
+    for l in source
+        .lines()
+        .map(|l| l.ok().unwrap())
+        .skip_while(|l| key != &l[..key.len()])
+        .skip(1)
+    {
+        vec.extend(l.trim().chars().map(|b| encode(b)));
+    }
+    vec
+}
+
+fn report(table: &(usize, Table)) {
+    let mut vec = Vec::new();
+    let len = table.0;
+    for entry in table.1.iter() {
+        vec.push((decode(*entry.0, len), *entry.1));
+    }
+    vec.sort_by(|a, b| b.1.cmp(&a.1));
+    let sum = vec.iter().fold(0, |acc, i| acc + i.1);
+    for seq in vec {
+        println!("{} {:.3}", seq.0, (seq.1 * 100) as f32 / sum as f32);
+    }
+    println!("");
+}
+
+fn initialize() {}
+
+fn run_benchmark(input: Arc<Vec<u8>>) {
+    let tables_handle: Vec<_> = SEQ_LENS
+        .iter()
+        .map(|&i| {
+            let input = input.clone();
+            (i, thread::spawn(move || parse(&input, i)))
         })
+        .collect();
+    let mut tables = Vec::new();
+    for (i, handle) in tables_handle {
+        tables.push((i, handle.join().unwrap()));
+    }
+    report(&tables[0]);
+    report(&tables[1]);
+    for &seq in &LOOKUPS {
+        let index = SEQ_LENS.iter().position(|&x| x == seq.len()).unwrap();
+        let num = encode_str(seq);
+        println!(
+            "{}\t{}",
+            tables[index].1.get(&num).unwrap_or(&0),
+            seq
+        );
     }
 }
 
-fn gen_freq(input: &[u8], frame: usize) -> Map {
-    let mut freq = Map::default();
-    for code in Iter::new(input, frame) {
-        *freq.entry(code).or_insert(0) += 1;
-    }
-    freq
-}
-
-#[derive(Clone, Copy)]
-enum Item {
-    Freq(usize),
-    Occ(&'static str),
-}
-impl Item {
-    fn print(&self, freq: &Map) {
-        match *self {
-            Freq(frame) => {
-                let mut v: Vec<_> = freq.iter().map(|(&code, &count)| (count, code)).collect();
-                v.sort();
-                let total = v.iter().map(|&(count, _)| count).sum::<u32>() as f32;
-                for &(count, key) in v.iter().rev() {
-                    println!("{} {:.3}", key.to_string(frame), (count as f32 * 100.) / total);
-                }
-                println!("");
-            }
-            Occ(occ) => println!("{}\t{}", freq[&Code::from_str(occ)], occ),
-        }
-    }
-    fn gen_freq(&self, input: &[u8]) -> Map {
-        match *self {
-            Freq(frame) => gen_freq(input, frame),
-            Occ(occ) => gen_freq(input, occ.len()),
-        }
-    }
-}
-static ITEMS: [Item; 7] = [
-    Freq(1),
-    Freq(2),
-    Occ("GGT"),
-    Occ("GGTA"),
-    Occ("GGTATT"),
-    Occ("GGTATTTTAATT"),
-    Occ("GGTATTTTAATTTATAGT"),
-];
-
-fn get_seq<R: std::io::BufRead>(mut r: R, key: &[u8]) -> Vec<u8> {
-    let mut res = Vec::with_capacity(65536);
-    let mut line = Vec::with_capacity(64);
-
-    loop {
-        match r.read_until(b'\n', &mut line) {
-            Ok(b) if b > 0 => if line.starts_with(key) { break },
-            _ => break,
-        }
-        line.clear();
-    }
-
-    loop {
-        line.clear();
-        match r.read_until(b'\n', &mut line) {
-            Ok(b) if b > 0 => res.extend(line[..line.len()-1].iter().cloned().map(Code::encode)),
-            _ => break,
-        }
-    }
-
-    res
-}
+fn cleanup() {}
 
 fn main() {
-    let counter = std::env::args().nth(1)
+    let iterations = std::env::args().nth(1)
         .and_then(|n| n.parse().ok())
-        .unwrap_or(1);  // Default to 1 if not provided
-
-    // Read the input once before the loop
+        .unwrap_or(1);
     let stdin = std::io::stdin();
-    let input = get_seq(stdin.lock(), b">THREE");
+    let input: Vec<u8> = read_input(stdin.lock(), ">THREE");
     let input = Arc::new(input);
-
-    for _ in 0..counter {
+    for _ in 0..iterations {
+        initialize();
         start_rapl();
-        let pool = CpuPool::new_num_cpus();
-
-        // In reverse to spawn big tasks first
-        let items: Vec<_> = ITEMS.iter().rev().map(|&item| {
-            let input = input.clone();
-            let future_freq = pool.spawn_fn(move || Ok::<_, ()>(item.gen_freq(&input)));
-            (item, future_freq)
-        }).collect();
-
-        for (item, future_freq) in items.into_iter().rev() {
-            item.print(&future_freq.wait().unwrap());
-        }
+        run_benchmark(input.clone());
         stop_rapl();
+        cleanup();
     }
 }

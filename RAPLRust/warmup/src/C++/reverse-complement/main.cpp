@@ -1,365 +1,315 @@
-/* The Computer Language Benchmarks Game
-   http://benchmarksgame.alioth.debian.org/
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+//
+// contributed by Adam Kewley
 
-   Contributed by Andrew Moon
-   Modified to allow multiple iterations without altering the core algorithm
-*/
-
-#include <cstdlib>
-#include <cstdio>
 #include <iostream>
+#include <string>
 #include <vector>
-#include <cstring>
-#include <pthread.h>
-#include <algorithm>
-#include <sched.h>
-#include <ctype.h>
-#include <unistd.h>
+#include <sstream>
+
+#ifdef SIMD
+#include <immintrin.h>
+#endif
 
 extern "C" {
-void start_rapl();
-void stop_rapl();
+    void start_rapl();
+    void stop_rapl();
 }
 
-struct CPUs {
-   CPUs() {
-      cpu_set_t cs;
-      CPU_ZERO(&cs);
-      sched_getaffinity(0, sizeof(cs), &cs);
-      count = 0;
-      for (size_t i = 0; i < CPU_SETSIZE; i++)
-         count += CPU_ISSET(i, &cs) ? 1 : 0;
-      count = std::max(count, size_t(1));
-   }
+namespace {
+    using std::istream;
+    using std::ostream;
+    using std::runtime_error;
+    using std::string;
+    using std::bad_alloc;
+    using std::vector;
 
-   size_t count;
-} cpus;
+    constexpr size_t basepairs_in_line = 60;
+    constexpr size_t line_len = basepairs_in_line + sizeof('\n');
 
-struct ReverseLookup {
-   ReverseLookup(const char *from, const char *to) {
-      for (int i = 0; i < 256; i++)
-         byteLookup[i] = i;
-      for (; *from && *to; from++, to++) {
-         byteLookup[toupper(*from)] = *to;
-         byteLookup[tolower(*from)] = *to;
-      }
-
-      for (int i = 0; i < 256; i++)
-         for (int j = 0; j < 256; j++)
-            wordLookup[(i << 8) | j] = (byteLookup[j] << 8) | byteLookup[i];
-   }
-
-   char operator[](const char &c) { return (char)byteLookup[(unsigned char)c]; }
-   short operator[](const short &s) { return (short)wordLookup[(unsigned short)s]; }
-
-protected:
-   unsigned char byteLookup[256];
-   unsigned short wordLookup[256 * 256];
-} lookup("acbdghkmnsrutwvy", "TGVHCDMKNSYAAWBR");
-
-template <class type>
-struct vector2 : public std::vector<type> {
-   type &last() { return this->operator[](std::vector<type>::size() - 1); }
-};
-
-struct Chunker {
-   enum { lineLength = 60, chunkSize = 65536 };
-
-   Chunker(int seq, const char *data, size_t size, size_t &offset)
-       : id(seq), inputData(data), dataSize(size), dataOffset(offset) {}
-
-   struct Chunk {
-      Chunk() {}
-      Chunk(char *in, size_t amt) : data(in), size(amt) {}
-      char *data;
-      size_t size;
-   };
-
-   void NewChunk() {
-      size_t cur = mark - chunkBase;
-      chunks.push_back(Chunk(chunkBase, cur));
-      chunkBase += (cur + (cur & 1)); // keep it word aligned
-      mark = chunkBase;
-   }
-
-   template <int N>
-   struct LinePrinter {
-      LinePrinter() : lineFill(0) {}
-      void endofblock() {
-         if (lineFill)
-            newline();
-      }
-      void emit(const char *str, size_t amt) {
-         fwrite(str, 1, amt, stdout);
-      }
-      void emit(char c) { fputc(c, stdout); }
-      void emitnewline() { emit('\n'); }
-      void emitlines(char *data, size_t size) {
-         if (lineFill) {
-            size_t toprint = std::min(size, lineLength - lineFill);
-            emit(data, toprint);
-            size -= toprint;
-            data += toprint;
-            lineFill += toprint;
-            if (lineFill == lineLength)
-               newline();
-         }
-
-         while (size >= lineLength) {
-            emit(data, lineLength);
-            emitnewline();
-            size -= lineLength;
-            data += lineLength;
-         }
-
-         if (size) {
-            lineFill = size;
-            emit(data, size);
-         }
-      }
-      void newline() {
-         lineFill = 0;
-         emitnewline();
-      }
-      void reset() { lineFill = 0; }
-
-   protected:
-      size_t lineFill;
-   };
-
-   void Print() {
-      int prevId = -(id - 1);
-      while (__sync_val_compare_and_swap(&printQueue, prevId, id) != prevId)
-         sched_yield();
-
-      fwrite(name, 1, strlen(name), stdout);
-      static LinePrinter<65536 * 2> line;
-      line.reset();
-      for (int i = int(chunks.size()) - 1; i >= 0; i--)
-         line.emitlines(chunks[i].data, chunks[i].size);
-      line.endofblock();
-
-      __sync_val_compare_and_swap(&printQueue, id, -id);
-   }
-
-   size_t Read(char *data, size_t dataCapacity) {
-      if (dataOffset >= dataSize)
-         return 0;
-
-      name = data;
-
-      // Read the name line
-      size_t nameLen = 0;
-      while (dataOffset < dataSize && inputData[dataOffset] != '\n') {
-         name[nameLen++] = inputData[dataOffset++];
-         if (nameLen >= dataCapacity) {
-            fprintf(stderr, "Buffer overflow in Chunker::Read() (name)\n");
-            exit(1);
-         }
-      }
-      if (dataOffset < dataSize && inputData[dataOffset] == '\n') {
-         name[nameLen++] = '\n';
-         dataOffset++; // Skip the newline
-      }
-      name[nameLen] = '\0';
-      mark = chunkBase = name + nameLen;
-
-      // Ensure we do not exceed dataCapacity
-      if (size_t(mark - data) + lineLength >= dataCapacity) {
-         fprintf(stderr, "Buffer overflow in Chunker::Read() (initial)\n");
-         exit(1);
-      }
-
-      mark[lineLength] = -1;
-
-      // Read the sequence lines
-      while (dataOffset < dataSize) {
-         if (inputData[dataOffset] == '>') {
-            // Found next sequence
-            break;
-         }
-
-         size_t lineLen = 0;
-         while (dataOffset < dataSize && inputData[dataOffset] != '\n') {
-            mark[lineLen++] = inputData[dataOffset++];
-            // Check for buffer overflow
-            if (size_t(mark + lineLen - data) >= dataCapacity) {
-               fprintf(stderr, "Buffer overflow in Chunker::Read() (sequence)\n");
-               exit(1);
+    class unsafe_vector {
+    public:
+        unsafe_vector() {
+            _buf = (char*)malloc(_capacity);
+            if (_buf == nullptr) {
+                throw bad_alloc{};
             }
-         }
-         if (dataOffset < dataSize && inputData[dataOffset] == '\n') {
-            dataOffset++; // Skip the newline
-         }
-         mark[lineLen++] = '\n'; // Add newline
-         mark += lineLen;
+        }
 
-         if (mark - chunkBase > chunkSize)
-            NewChunk();
+        unsafe_vector(const unsafe_vector& other) = delete;
+        unsafe_vector(unsafe_vector&& other) = delete;
+        unsafe_vector& operator=(unsafe_vector& other) = delete;
+        unsafe_vector& operator=(unsafe_vector&& other) = delete;
 
-         // Ensure we do not exceed dataCapacity
-         if (size_t(mark - data) + lineLength >= dataCapacity) {
-            fprintf(stderr, "Buffer overflow in Chunker::Read() (loop)\n");
-            exit(1);
-         }
-         mark[lineLength] = -1;
-      }
+        ~unsafe_vector() noexcept {
+            free(_buf);
+        }
 
-      if (mark - chunkBase)
-         NewChunk();
-      return (mark - data); // Return total bytes read into data
-   }
+        char* data() {
+            return _buf;
+        }
 
-   struct WorkerState {
-      Chunker *chunker;
-      size_t offset, count;
-      pthread_t handle;
-   };
+        void resize_UNSAFE(size_t count) {
+            size_t rem = _capacity - _size;
+            if (count > rem) {
+                grow(count);
+            }
+            _size = count;
+        }
 
-   static void *ReverseWorker(void *arg) {
-      WorkerState *state = (WorkerState *)arg;
-      Chunker &chunker = *state->chunker;
-      for (size_t i = 0; i < state->count; i++) {
-         Chunk &chunk = chunker[state->offset + i];
-         short *w = (short *)chunk.data, *bot = w, *top = w + (chunk.size / 2) - 1;
-         for (; bot < top; bot++, top--) {
-            short tmp = lookup[*bot];
-            *bot = lookup[*top];
-            *top = tmp;
-         }
-         // if size is odd, final byte would reverse to the start (skip it)
-         if (chunk.size & 1)
-            chunk.data++;
-      }
-      return 0;
-   }
+        size_t size() const {
+            return _size;
+        }
 
-   void Reverse() {
-      if (!chunks.size())
-         return;
+    private:
+        void grow(size_t min_cap) {
+            size_t new_cap = _capacity;
+            while (new_cap < min_cap) {
+                new_cap *= 2;
+            }
 
-      vector2<WorkerState> workers;
-      size_t numWorkers = std::min(cpus.count, chunks.size());
-      workers.reserve(numWorkers);
-      size_t divs = chunks.size() / numWorkers;
-      size_t offset = 0;
-      for (size_t i = 0; i < numWorkers; i++, offset += divs) {
-         workers.push_back(WorkerState());
-         WorkerState &ws = workers.last();
-         ws.chunker = this;
-         ws.count = (i < numWorkers - 1) ? divs : chunks.size() - offset;
-         ws.offset = offset;
-         pthread_create(&ws.handle, nullptr, ReverseWorker, &ws);
-      }
+            char* new_buf = (char*)realloc(_buf, new_cap);
+            if (new_buf != nullptr) {
+                _capacity = new_cap;
+                _buf = new_buf;
+            } else {
+                throw bad_alloc{};
+            }
+        }
 
-      for (size_t i = 0; i < workers.size(); i++)
-         pthread_join(workers[i].handle, nullptr);
-   }
+        char* _buf = nullptr;
+        size_t _size = 0;
+        size_t _capacity = 1024;
+    };
 
-   Chunk &operator[](size_t i) { return chunks[i]; }
+    char complement(char character) {
+        static const char complement_lut[] = {
+            '\0', '\0', '\0', '\0',  '\0', '\0', '\0', '\0',
+            '\0', '\0', '\n', '\0',  '\0', '\0', '\0', '\0',
+            '\0', '\0', '\0', '\0',  '\0', '\0', '\0', '\0',
+            '\0', '\0', '\0', '\0',  '\0', '\0', '\0', '\0',
 
-public:
-   static volatile int printQueue;
+            '\0', '\0', '\0', '\0',  '\0', '\0', '\0', '\0',
+            '\0', '\0', '\0', '\0',  '\0', '\0', '\0', '\0',
+            '\0', '\0', '\0', '\0',  '\0', '\0', '\0', '\0',
+            '\0', '\0', '\0', '\0',  '\0', '\0', '\0', '\0',
 
-protected:
-   vector2<Chunk> chunks;
-   char *name, *chunkBase, *mark;
-   int id;
-   const char *inputData;
-   size_t dataSize;
-   size_t &dataOffset;
-};
+            '\0', 'T', 'V', 'G',     'H', '\0', '\0', 'C',
+            'D', '\0', '\0', 'M',    '\0', 'K', 'N', '\0',
+            '\0', '\0', 'Y', 'S',    'A', 'A', 'B', 'W',
+            '\0', 'R', '\0', '\0',   '\0', '\0', '\0', '\0',
 
-volatile int Chunker::printQueue = 0;
+            '\0', 'T', 'V', 'G',     'H', '\0', '\0', 'C',
+            'D', '\0', '\0', 'M',   '\0', 'K', 'N', '\0',
+            '\0', '\0', 'Y', 'S',    'A', 'A', 'B', 'W',
+            '\0', 'R', '\0', '\0',   '\0', '\0', '\0', '\0'
+        };
 
-struct ReverseComplement {
-   ReverseComplement(const char *inputData, size_t inputSize)
-       : data(inputData), size(inputSize) {}
+        return complement_lut[character];
+    }
 
-   void Run() {
-      vector2<Chunker *> chunkers;
-      vector2<pthread_t> threads;
+    void complement_swap(char* a, char* b) {
+        char tmp = complement(*a);
+        *a = complement(*b);
+        *b = tmp;
+    }
 
-      // Allocate buffer to hold data read by chunkers
-      std::vector<char> buffer;
-      buffer.reserve(size * 2); // Reserve enough space
+#ifdef SIMD
+    __m128i packed(char c) {
+        return _mm_set1_epi8(c);
+    }
 
-      size_t cur = 0;
-      size_t dataOffset = 0;
-      int id = 1;
-      while (dataOffset < size) {
-         chunkers.push_back(new Chunker(id++, data, size, dataOffset));
+    __m128i reverse_complement_simd(__m128i v) {
+        v = _mm_shuffle_epi8(v, _mm_setr_epi8(
+            15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0));
 
-         // Expand buffer if necessary
-         size_t bufferCapacity = buffer.capacity();
-         if (cur + size - dataOffset + 10000 > bufferCapacity) {
-            buffer.reserve(bufferCapacity + (size - dataOffset) * 2);
-            bufferCapacity = buffer.capacity();
-         }
-         buffer.resize(bufferCapacity);
+        v = _mm_and_si128(v, packed(0x1f));
 
-         size_t read = chunkers.last()->Read(&buffer[cur], bufferCapacity - cur);
-         if (!read) {
-            // No data read, break the loop
-            delete chunkers.last();
-            chunkers.pop_back();
-            break;
-         }
-         cur += read;
+        __m128i lt16_mask = _mm_cmplt_epi8(v, packed(16));
+        __m128i lt16_els = _mm_and_si128(v, lt16_mask);
+        __m128i lt16_lut = _mm_setr_epi8(
+            '\0', 'T', 'V', 'G', 'H', '\0', '\0', 'C',
+            'D', '\0', '\0', 'M', '\0', 'K', 'N', '\0');
+        __m128i lt16_vals = _mm_shuffle_epi8(lt16_lut, lt16_els);
 
-         // Spawn off a thread to finish this chunk while we read another
-         threads.push_back(0);
-         pthread_create(&threads.last(), nullptr, ChunkerThread, chunkers.last());
-      }
+        __m128i g16_els = _mm_sub_epi8(v, packed(16));
+        __m128i g16_lut = _mm_setr_epi8(
+            '\0', '\0', '\0', '\0', '\0', '\0', 'R', '\0',
+            'W', 'B', 'A', 'A', 'S', 'Y', '\0', '\0');
+        __m128i g16_vals = _mm_shuffle_epi8(g16_lut, g16_els);
 
-      for (size_t i = 0; i < threads.size(); i++)
-         pthread_join(threads[i], nullptr);
+        return _mm_or_si128(lt16_vals, g16_vals);
+    }
+#endif
 
-      for (size_t i = 0; i < chunkers.size(); i++)
-         delete chunkers[i];
-   }
+    void reverse_complement_bps(char* start, char* end, size_t num_bps) {
+#ifdef SIMD
+        while (num_bps >= 16) {
+            end -= 16;
 
-   static void *ChunkerThread(void *arg) {
-      Chunker *chunker = (Chunker *)arg;
-      chunker->Reverse();
-      chunker->Print();
-      return nullptr;
-   }
+            __m128i tmp = _mm_loadu_si128((__m128i*)start);
+            _mm_storeu_si128((__m128i*)start, reverse_complement_simd(_mm_loadu_si128((__m128i*)end)));
+            _mm_storeu_si128((__m128i*)end, reverse_complement_simd(tmp));
 
-protected:
-   const char *data;
-   size_t size;
-};
+            num_bps -= 16;
+            start += 16;
+        }
+#endif
+        while (num_bps >= 1) {
+            complement_swap(start++, --end);
+            num_bps -= 1;
+        }
+    }
+
+    struct Sequence {
+        string header;
+        unsafe_vector seq;
+    };
+
+    void reverse_complement(Sequence& s) {
+        char* begin = s.seq.data();
+        char* end = s.seq.data() + s.seq.size();
+
+        if (begin == end) {
+            return;
+        }
+
+        size_t len = end - begin;
+        size_t trailer_len = len % line_len;
+
+        end--;
+
+        if (trailer_len == 0) {
+            size_t num_pairs = len / 2;
+            reverse_complement_bps(begin, end, num_pairs);
+
+            bool has_middle_bp = (len % 2) > 0;
+            if (has_middle_bp) {
+                begin[num_pairs] = complement(begin[num_pairs]);
+            }
+
+            return;
+        }
+
+        size_t trailer_bps = trailer_len > 0 ? trailer_len - 1 : 0;
+
+        size_t rem_bps = basepairs_in_line - trailer_bps;
+        size_t rem_bytes = rem_bps + 1;
+
+        size_t num_whole_lines = len / line_len;
+        size_t num_steps = num_whole_lines / 2;
+
+        for (size_t i = 0; i < num_steps; ++i) {
+            reverse_complement_bps(begin, end, trailer_bps);
+            begin += trailer_bps;
+            end -= trailer_len;
+
+            reverse_complement_bps(begin, end, rem_bps);
+            begin += rem_bytes;
+            end -= rem_bps;
+        }
+
+        bool has_unpaired_line = (num_whole_lines % 2) > 0;
+        if (has_unpaired_line) {
+            reverse_complement_bps(begin, end, trailer_bps);
+            begin += trailer_bps;
+            end -= trailer_len;
+        }
+
+        size_t bps_in_last_line = end - begin;
+        size_t swaps_in_last_line = bps_in_last_line / 2;
+        reverse_complement_bps(begin, end, swaps_in_last_line);
+
+        bool has_unpaired_byte = (bps_in_last_line % 2) > 0;
+        if (has_unpaired_byte) {
+            begin[swaps_in_last_line] = complement(begin[swaps_in_last_line]);
+        }
+    }
+
+    void read_up_to(istream& in, unsafe_vector& out, char delim) {
+        constexpr size_t read_size = 1 << 16;
+
+        size_t bytes_read = 0;
+        out.resize_UNSAFE(read_size);
+        while (in) {
+            in.getline(out.data() + bytes_read, read_size, delim);
+            bytes_read += in.gcount();
+
+            if (in.fail()) {
+                out.resize_UNSAFE(bytes_read + read_size);
+                in.clear(in.rdstate() & ~std::ios::failbit);
+            } else if (in.eof()) {
+                break;
+            } else {
+                --bytes_read;
+                break;
+            }
+        }
+        out.resize_UNSAFE(bytes_read);
+    }
+
+    void read_sequence(istream& in, Sequence& out) {
+        out.header.clear();
+        std::getline(in, out.header);
+        read_up_to(in, out.seq, '>');
+    }
+
+    void write_sequence(ostream& out, Sequence& s) {
+        out << '>';
+        out << s.header;
+        out << '\n';
+        out.write(s.seq.data(), s.seq.size());
+    }
+}
+
+namespace revcomp {
+    void reverse_complement_fasta_stream(istream& in, ostream& out) {
+        char c = in.get();
+        if (c != '>') {
+            throw runtime_error{"unexpected input: next char should be the start of a sequence header"};
+        }
+        in.unget();
+
+        Sequence s;
+        while (not in.eof()) {
+            read_sequence(in, s);
+            reverse_complement(s);
+            write_sequence(out, s);
+        }
+    }
+}
+
+#include <fstream>
+
+std::string input_data;
+
+void initialize() {
+    // No initialization needed here
+}
+
+void run_benchmark() {
+    std::istringstream in(input_data);
+    revcomp::reverse_complement_fasta_stream(in, std::cout);
+}
+
+void cleanup() {
+}
 
 int main(int argc, char *argv[]) {
-   // Read the entire input into memory
-   std::vector<char> inputData;
-   char buffer[8192];
-   size_t bytesRead;
+    int iterations = atoi(argv[1]);
 
-   while ((bytesRead = fread(buffer, 1, sizeof(buffer), stdin)) > 0) {
-      inputData.insert(inputData.end(), buffer, buffer + bytesRead);
-   }
-   size_t inputSize = inputData.size();
+    // Read input data once
+    std::cin.sync_with_stdio(false);
+    std::cout.sync_with_stdio(false);
+    input_data.assign(std::istreambuf_iterator<char>(std::cin), std::istreambuf_iterator<char>());
 
-   int count = 1;
-   if (argc > 1) {
-      count = atoi(argv[1]);
-      if (count <= 0)
-         count = 1;
-   }
-
-   for (int counter = 0; counter < count; counter++) {
-      // Clear stdout buffer to prevent mixing outputs from multiple iterations
-      fflush(stdout);
-      // Reset the static variable
-      Chunker::printQueue = 0;
-
-      start_rapl();
-      ReverseComplement revcom(inputData.data(), inputSize);
-      revcom.Run();
-      stop_rapl();
-   }
-
-   return 0;
+    for (int i = 0; i < iterations; ++i) {
+        initialize();
+        start_rapl();
+        run_benchmark();
+        stop_rapl();
+        cleanup();
+    }
+    return 0;
 }

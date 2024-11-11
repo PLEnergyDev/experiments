@@ -1,0 +1,6 @@
+Algorithm,Package Energy (J),Core Energy (J),Uncore Energy (J),DRAM Energy (J),Elapsed Time (ms),Total Memory (MB),Peak Memory (MB)
+polynomial-evaluation,0.68,0.56,0.0,0.01,13,0.0,0
+polynomial-evaluation,0.71,0.66,0.0,0.0,9,0.0,0
+polynomial-evaluation,0.78,0.63,0.0,0.01,8,0.0,0
+polynomial-evaluation,0.69,0.63,0.0,0.0,8,0.0,0
+polynomial-evaluation,0.62,0.58,0.0,0.0,8,0.0,0

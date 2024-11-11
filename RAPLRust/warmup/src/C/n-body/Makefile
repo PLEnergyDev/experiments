@@ -1,7 +1,8 @@
 CC=gcc
 
-OPT_FLAGS=-pipe -O3 -fomit-frame-pointer -march=native -fopenmp -mfpmath=sse -msse3
+OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=ivybridge
 LIB_FLAGS=-lm -L$(RAPL_DIR)/target/release -lrapl_lib -Wl,-rpath=$(RAPL_DIR)/target/release
+
 CFLAGS=$(OPT_FLAGS) $(LIB_FLAGS)
 
 TARGET=main
@@ -9,7 +10,8 @@ SRC=$(TARGET).c
 
 RAPL_DIR=../../rapl-interface
 RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
-COUNT=20
+
+COUNT=45
 INPUT=50000000
 
 $(RAPL):
@@ -25,7 +27,6 @@ run: $(TARGET) $(RAPL)
 	./$(TARGET) 1 $(INPUT)
 
 measure: $(TARGET) $(RAPL)
-	modprobe msr
 	./$(TARGET) $(COUNT) $(INPUT)
 
 mem: $(TARGET) $(RAPL)

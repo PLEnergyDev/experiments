@@ -1,49 +1,53 @@
 #include <iostream>
 #include <vector>
-#include <stdlib.h>
 
 extern "C" {
     void start_rapl();
     void stop_rapl();
 }
 
-std::vector<double> init_cs(int n) {
-    std::vector<double> cs(n);
+std::vector<double> cs;
+int n;
+
+void initialize() {
+    cs.resize(n);
     for (int i = 0; i < n; i++) {
         cs[i] = 1.1 * i;
         if (i % 3 == 0) {
-            cs[i] *= -1.0;
+            cs[i] *= -1;
         }
     }
-    return cs;
 }
 
-double polynomial_evaluation(int n) {
-    std::vector<double> cs = init_cs(n);
+double polynomial_evaluation() {
     double res = 0.0;
-
     for (int i = 0; i < n; i++) {
         res = cs[i] + 5.0 * res;
     }
-
     return res;
 }
 
+void run_benchmark() {
+    for (int i = 0; i < 1000; i++) {
+        double result = polynomial_evaluation();
+        std::cout << result << std::endl;
+    }
+}
+
+void cleanup() {
+    cs.clear();
+}
+
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        std::cerr << "Usage: " << argv[0] << " <n>" << std::endl;
-        return 1;
+    n = std::atoi(argv[2]);
+    int iterations = std::atoi(argv[1]);
+    for (int i = 0; i < iterations; i++) {
+        initialize();
+        start_rapl();
+        run_benchmark();
+        stop_rapl();
+        cleanup();
     }
 
-    int count = atoi(argv[1]);
-    int n = std::atoi(argv[2]);
-    for (int counter = 0; counter < count; counter++) {
-        start_rapl();
-        for (int i = 0; i < 1000; i++) {
-            double result = polynomial_evaluation(n);
-            std::cout << result << std::endl;
-        }
-        stop_rapl();
-    }
     return 0;
 }

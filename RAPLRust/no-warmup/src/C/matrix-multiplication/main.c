@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-////////////////////////////////////////////////////////////////////////////////////////
+void start_rapl();
+void stop_rapl();
+
 typedef struct {
   int rows, cols;
   double *data;
@@ -17,10 +19,13 @@ matrix init_matrix(int rows, int cols) {
   return m;
 }
 
-double MatrixMultiplication(int rows, int cols) {
-  matrix R = {rows, cols, (double *)malloc(rows * cols * sizeof(double))};
-  matrix A = init_matrix(rows, cols), B = init_matrix(rows, cols);
+void free_matrix(matrix *m) {
+  free(m->data);
+  m->data = NULL;
+}
 
+double run_benchmark(matrix A, matrix B, int rows, int cols) {
+  matrix R = {rows, cols, (double *)malloc(rows * cols * sizeof(double))};
   double sum;
   for (int r = 0; r < R.rows; r++) {
     for (int c = 0; c < R.cols; c++) {
@@ -31,20 +36,29 @@ double MatrixMultiplication(int rows, int cols) {
       R.data[r * R.cols + c] = sum;
     }
   }
-
-  free(A.data);
-  free(B.data);
   free(R.data);
   return sum;
 }
-////////////////////////////////////////////////////////////////////////////////////////
+
+void cleanup(matrix *A, matrix *B) {
+  free_matrix(A);
+  free_matrix(B);
+}
 
 int main(int argc, char *argv[]) {
-  int rows = atoi(argv[1]);
-  int cols = atoi(argv[2]);
-  for (int i = 0; i < 100; i++){
-    double result = MatrixMultiplication(rows, cols);
-    printf("%f\n", result);
+  int iterations = atoi(argv[1]);
+  for (int i = 0; i < iterations; i++) {
+    int rows = atoi(argv[2]);
+    int cols = atoi(argv[3]);
+    matrix A = init_matrix(rows, cols);
+    matrix B = init_matrix(rows, cols);
+    start_rapl();
+    for (int j = 0; j < 100; j++) {
+      double result = run_benchmark(A, B, rows, cols);
+      printf("%f\n", result);
+    }
+    stop_rapl();
+    cleanup(&A, &B);
   }
   return 0;
 }

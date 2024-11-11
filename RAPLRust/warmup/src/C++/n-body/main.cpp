@@ -1,160 +1,179 @@
 /* The Computer Language Benchmarks Game
-   http://benchmarksgame.alioth.debian.org/
-
-   contributed by Mark C. Lewis
-   modified slightly by Chad Whipkey
-   converted from java to c++,added sse support, by Branimir Maksimovic
-   converted from c++ to c, by Alexey Medvedchikov
-   converted from c to c++11, by Walter Landry
-   modified by Dmitri Naumov
+   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+   contributed by Martin Jambrek
+   based off the Java #2 program contributed by Mark C. Lewis and modified
+   slightly by Chad Whipkey
+   modified by Basit Ayantunde
 */
 
-#include <algorithm>
-#include <array>
 #include <cmath>
-#include <immintrin.h>
-#include <stdio.h>
-#include <stdlib.h>
-extern "C" {
-void start_rapl();
-void stop_rapl();
-}
-constexpr double PI(3.141592653589793);
-constexpr double SOLAR_MASS(4 * PI * PI);
-constexpr double DAYS_PER_YEAR(365.24);
+#include <cstdio>
+#include <cstdlib>
+#include <utility>
 
-struct body {
-  double x[3], fill, v[3], mass;
-  constexpr body(double x0, double x1, double x2, double v0, double v1,
-                 double v2, double Mass)
-      : x{x0, x1, x2}, fill(0), v{v0, v1, v2}, mass(Mass) {}
+extern "C" {
+    void start_rapl();
+    void stop_rapl();
+}
+
+constexpr double PI = 3.141592653589793;
+constexpr double SOLAR_MASS = 4 * PI * PI;
+constexpr double DAYS_PER_YEAR = 365.24;
+
+struct vec3 {
+    double x = 0, y = 0, z = 0, __pad = 0;
+    constexpr vec3() {}
+    constexpr vec3(double x, double y, double z) : x{x}, y{y}, z{z} {}
+
+    constexpr vec3 operator+(vec3 const &other) const {
+        return {x + other.x, y + other.y, z + other.z};
+    }
+
+    constexpr vec3 operator-(vec3 const &other) const {
+        return {x - other.x, y - other.y, z - other.z};
+    }
+
+    constexpr vec3 operator*(vec3 const &other) const {
+        return {x * other.x, y * other.y, z * other.z};
+    }
+
+    constexpr vec3 operator*(double other) const {
+        return {x * other, y * other, z * other};
+    }
+
+    constexpr double sum() const { return x + y + z; }
+
+    constexpr vec3 sqrt() const {
+        return {std::sqrt(x), std::sqrt(y), std::sqrt(z)};
+    }
+
+    constexpr double distance(vec3 const &other) const {
+        vec3 d = *this - other;
+        return std::sqrt((d * d).sum());
+    }
 };
 
-class N_Body_System {
-  static std::array<body, 5> bodies;
+struct Body {
+    vec3 x;
+    vec3 v;
+    double mass = 0;
+};
 
-  void offset_momentum() {
-    unsigned int k;
-    for (auto &body : bodies)
-      for (k = 0; k < 3; ++k)
-        bodies[0].v[k] -= body.v[k] * body.mass / SOLAR_MASS;
-  }
+constexpr size_t N_BODIES = 5;
 
-public:
-  N_Body_System() { offset_momentum(); }
-  void advance(double dt) {
-    constexpr unsigned int N = ((bodies.size() - 1) * bodies.size()) / 2;
+constexpr Body jupiter{{4.84143144246472090e+00, -1.16032004402742839e+00,
+                        -1.03622044471123109e-01},
+                       {1.66007664274403694e-03 * DAYS_PER_YEAR,
+                        7.69901118419740425e-03 * DAYS_PER_YEAR,
+                        -6.90460016972063023e-05 * DAYS_PER_YEAR},
+                       9.54791938424326609e-04 * SOLAR_MASS};
 
-    static double r[N][4];
-    static double mag[N];
+constexpr Body saturn{{8.34336671824457987e+00, 4.12479856412430479e+00,
+                       -4.03523417114321381e-01},
+                      {-2.76742510726862411e-03 * DAYS_PER_YEAR,
+                       4.99852801234917238e-03 * DAYS_PER_YEAR,
+                       2.30417297573763929e-05 * DAYS_PER_YEAR},
+                      2.85885980666130812e-04 * SOLAR_MASS};
 
-    unsigned int i, m;
-    __m128d dx[3], dsquared, distance, dmag;
+constexpr Body uranus{{1.28943695621391310e+01, -1.51111514016986312e+01,
+                       -2.23307578892655734e-01},
+                      {2.96460137564761618e-03 * DAYS_PER_YEAR,
+                       2.37847173959480950e-03 * DAYS_PER_YEAR,
+                       -2.96589568540237556e-05 * DAYS_PER_YEAR},
+                      4.36624404335156298e-05 * SOLAR_MASS};
 
-    i = 0;
-    for (auto bi(bodies.begin()); bi != bodies.end(); ++bi) {
-      auto bj(bi);
-      for (++bj; bj != bodies.end(); ++bj, ++i)
-        for (m = 0; m < 3; ++m)
-          r[i][m] = bi->x[m] - bj->x[m];
+constexpr Body neptune{{1.53796971148509165e+01, -2.59193146099879641e+01,
+                        1.79258772950371181e-01},
+                       {2.68067772490389322e-03 * DAYS_PER_YEAR,
+                        1.62824170038242295e-03 * DAYS_PER_YEAR,
+                        -9.51592254519715870e-05 * DAYS_PER_YEAR},
+                       5.15138902046611451e-05 * SOLAR_MASS};
+
+Body bodies[N_BODIES];
+
+void offset_momentum(Body bodies[N_BODIES]) {
+    Body &sun = bodies[0];
+    for (size_t i = 1; i < N_BODIES; i++) {
+        double m_ratio = bodies[i].mass / SOLAR_MASS;
+        sun.v = sun.v - bodies[i].v * m_ratio;
     }
+}
 
-    for (i = 0; i < N; i += 2) {
-      for (m = 0; m < 3; ++m) {
-        dx[m] = _mm_loadl_pd(dx[m], &r[i][m]);
-        dx[m] = _mm_loadh_pd(dx[m], &r[i + 1][m]);
-      }
-
-      dsquared = dx[0] * dx[0] + dx[1] * dx[1] + dx[2] * dx[2];
-      distance = _mm_cvtps_pd(_mm_rsqrt_ps(_mm_cvtpd_ps(dsquared)));
-
-      for (m = 0; m < 2; ++m)
-        distance =
-            distance * _mm_set1_pd(1.5) -
-            ((_mm_set1_pd(0.5) * dsquared) * distance) * (distance * distance);
-
-      dmag = _mm_set1_pd(dt) / (dsquared)*distance;
-      _mm_store_pd(&mag[i], dmag);
-    }
-
-    i = 0;
-    for (auto bi(bodies.begin()); bi != bodies.end(); ++bi) {
-      auto bj(bi);
-      for (++bj; bj != bodies.end(); ++bj, ++i)
-        for (m = 0; m < 3; ++m) {
-          const double x = r[i][m] * mag[i];
-          bi->v[m] -= x * bj->mass;
-          bj->v[m] += x * bi->mass;
+double energy(Body const bodies[N_BODIES]) {
+    double e = 0;
+    for (size_t i = 0; i < N_BODIES; i++) {
+        Body const &body = bodies[i];
+        e += body.mass * (body.v * body.v).sum() * 0.5;
+        for (size_t j = i + 1; j < N_BODIES; j++) {
+            double distance = body.x.distance(bodies[j].x);
+            e -= body.mass * bodies[j].mass / distance;
         }
-    }
-
-    for (auto &body : bodies)
-      for (m = 0; m < 3; ++m)
-        body.x[m] += dt * body.v[m];
-  }
-
-  double energy() {
-    double e(0.0);
-    for (auto bi(bodies.cbegin()); bi != bodies.cend(); ++bi) {
-      e += bi->mass *
-           (bi->v[0] * bi->v[0] + bi->v[1] * bi->v[1] + bi->v[2] * bi->v[2]) /
-           2.;
-
-      auto bj(bi);
-      for (++bj; bj != bodies.end(); ++bj) {
-        double distance = 0;
-        for (auto k = 0; k < 3; ++k) {
-          const double dx = bi->x[k] - bj->x[k];
-          distance += dx * dx;
-        }
-
-        e -= (bi->mass * bj->mass) / std::sqrt(distance);
-      }
     }
     return e;
-  }
-};
+}
 
-std::array<body, 5> N_Body_System::bodies{
-    {/* sun */
-     body(0., 0., 0., 0., 0., 0., SOLAR_MASS),
-     /* jupiter */
-     body(4.84143144246472090e+00, -1.16032004402742839e+00,
-          -1.03622044471123109e-01, 1.66007664274403694e-03 * DAYS_PER_YEAR,
-          7.69901118419740425e-03 * DAYS_PER_YEAR,
-          -6.90460016972063023e-05 * DAYS_PER_YEAR,
-          9.54791938424326609e-04 * SOLAR_MASS),
-     /* saturn */
-     body(8.34336671824457987e+00, 4.12479856412430479e+00,
-          -4.03523417114321381e-01, -2.76742510726862411e-03 * DAYS_PER_YEAR,
-          4.99852801234917238e-03 * DAYS_PER_YEAR,
-          2.30417297573763929e-05 * DAYS_PER_YEAR,
-          2.85885980666130812e-04 * SOLAR_MASS),
-     /* uranus */
-     body(1.28943695621391310e+01, -1.51111514016986312e+01,
-          -2.23307578892655734e-01, 2.96460137564761618e-03 * DAYS_PER_YEAR,
-          2.37847173959480950e-03 * DAYS_PER_YEAR,
-          -2.96589568540237556e-05 * DAYS_PER_YEAR,
-          4.36624404335156298e-05 * SOLAR_MASS),
-     /* neptune */
-     body(1.53796971148509165e+01, -2.59193146099879641e+01,
-          1.79258772950371181e-01, 2.68067772490389322e-03 * DAYS_PER_YEAR,
-          1.62824170038242295e-03 * DAYS_PER_YEAR,
-          -9.51592254519715870e-05 * DAYS_PER_YEAR,
-          5.15138902046611451e-05 * SOLAR_MASS)}};
+void advance(Body bodies[N_BODIES], double dt) {
+    constexpr size_t N = N_BODIES * (N_BODIES - 1) / 2;
+    vec3 r[N] = {};
+    size_t i = 0;
+    for (size_t j = 0; j < N_BODIES; j++) {
+        for (size_t k = j + 1; k < N_BODIES; k++) {
+            r[i] = bodies[j].x - bodies[k].x;
+            i += 1;
+        }
+    }
+    double mag[N] = {};
+    i = 0;
+    while (i < N) {
+        double d2s_x = (r[i] * r[i]).sum();
+        double d2s_y = (r[i + 1] * r[i + 1]).sum();
+        double dmag_x = dt / (d2s_x * std::sqrt(d2s_x));
+        double dmag_y = dt / (d2s_y * std::sqrt(d2s_y));
+        mag[i] = dmag_x;
+        mag[i + 1] = dmag_y;
+        i += 2;
+    }
+    i = 0;
+    for (size_t j = 0; j < N_BODIES; j++) {
+        for (size_t k = j + 1; k < N_BODIES; k++) {
+            vec3 f = r[i] * mag[i];
+            bodies[j].v = bodies[j].v - f * bodies[k].mass;
+            bodies[k].v = bodies[k].v + f * bodies[j].mass;
+            i += 1;
+        }
+    }
+    for (size_t i = 0; i < N_BODIES; i++) {
+        bodies[i].x = bodies[i].x + bodies[i].v * dt;
+    }
+}
 
-int main(int, char **argv) {
-  int count = atoi(argv[1]);
-  for (int counter = 0; counter < count; counter++) {
-    start_rapl();
-    int i, n = atoi(argv[2]);
-    N_Body_System system;
+void initialize() {
+    bodies[0] = Body{{}, {}, SOLAR_MASS};
+    bodies[1] = jupiter;
+    bodies[2] = saturn;
+    bodies[3] = uranus;
+    bodies[4] = neptune;
+    offset_momentum(bodies);
+}
 
-    printf("%.9f\n", system.energy());
-    for (i = 0; i < n; ++i)
-      system.advance(0.01);
-    printf("%.9f\n", system.energy());
-    stop_rapl();
-  }
-  return 0;
+void run_benchmark(int n) {
+    std::printf("%.9f\n", energy(bodies));
+    for (size_t i = 0; i < n; ++i)
+        advance(bodies, 0.01);
+    std::printf("%.9f\n", energy(bodies));
+}
+
+void cleanup() {}
+
+int main(int argc, char *argv[]) {
+    int iterations = std::atoi(argv[1]);
+    const auto n = std::atoi(argv[2]);
+    for (int i = 0; i < iterations; ++i) {
+        initialize();
+        start_rapl();
+        run_benchmark(n);
+        stop_rapl();
+        cleanup();
+    }
+    return 0;
 }

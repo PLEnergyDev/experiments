@@ -1,7 +1,8 @@
 CC=g++
 
-OPT_FLAGS=-pipe -O3 -fomit-frame-pointer -march=native -mfpmath=sse -msse2 -mfpmath=sse -msse2 -fopenmp -mno-fma --std=c++14
-LIB_FLAGS=-L$(RAPL_DIR)/target/release -lrapl_lib -Wl,-rpath=$(RAPL_DIR)/target/release
+OPT_FLAGS=-pipe -O3 -fomit-frame-pointer -march=ivybridge -fopenmp -mno-fma --std=c++14
+LIB_FLAGS=-lapr-1 -L$(RAPL_DIR)/target/release -lrapl_lib -Wl,-rpath=$(RAPL_DIR)/target/release
+
 CFLAGS=$(OPT_FLAGS) $(LIB_FLAGS)
 
 TARGET=main
@@ -9,7 +10,8 @@ SRC=$(TARGET).cpp
 
 RAPL_DIR=../../rapl-interface
 RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
-COUNT=20
+
+COUNT=45
 INPUT=16000
 
 $(RAPL):
@@ -25,13 +27,12 @@ run: $(TARGET) $(RAPL)
 	./$(TARGET) 1 $(INPUT)
 
 measure: $(TARGET) $(RAPL)
-	modprobe msr
 	./$(TARGET) $(COUNT) $(INPUT)
 
 mem: $(TARGET) $(RAPL)
 	time -v ./$(TARGET) 1 $(INPUT)
 
-valgrind: $(RAPL)
+valgrind: $(TARGET) $(RAPL)
 	valgrind --tool=massif --stacks=yes ./$(TARGET) 1 $(INPUT)
 
 clean:

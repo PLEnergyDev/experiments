@@ -1,20 +1,18 @@
 #include <iostream>
-#include <stdlib.h>
+#include <threads.h>
 #include <vector>
 
 extern "C" {
-void start_rapl();
-void stop_rapl();
+    void start_rapl();
+    void stop_rapl();
 }
 
 struct Matrix {
     int rows, cols;
     std::vector<double> data;
 
-    // Constructor to initialize the matrix and fill data
     Matrix(int rows, int cols) : rows(rows), cols(cols), data(rows * cols) {}
 
-    // Function to access matrix elements
     double& at(int row, int col) {
         return data[row * cols + col];
     }
@@ -49,21 +47,33 @@ double matrix_multiplication(int rows, int cols) {
     return sum;
 }
 
-int main(int argc, char *argv[]) {
-    if (argc < 4) {
-        std::cerr << "Usage: " << argv[0] << " <rows> <cols>" << std::endl;
-        return 1;
+int rows;
+int cols;
+
+void initialize() {
+}
+
+void run_benchmark() {
+    for (int i = 0; i < 100; i++) {
+        double result = matrix_multiplication(rows, cols);
+        std::cout << result << std::endl;
     }
-    int count = atoi(argv[1]);
-    for (int counter = 0; counter < count; counter++) {
+}
+
+void cleanup() {
+}
+
+int main(int argc, char *argv[]) {
+    int iterations = atoi(argv[1]);
+    rows = std::atoi(argv[2]);
+    cols = std::atoi(argv[3]);
+
+    for (int i = 0; i < iterations; i++) {
+        initialize();
         start_rapl();
-        int rows = std::atoi(argv[2]);
-        int cols = std::atoi(argv[3]);
-        for (int i = 0; i < 100; i++) {
-            double result = matrix_multiplication(rows, cols);
-            std::cout << result << std::endl;
-        }
+        run_benchmark();
         stop_rapl();
+        cleanup();
     }
 
     return 0;

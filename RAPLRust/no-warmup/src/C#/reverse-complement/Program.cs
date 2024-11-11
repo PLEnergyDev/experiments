@@ -1,4 +1,8 @@
-﻿using System;
+﻿/* The Computer Language Benchmarks Game
+   http://benchmarksgame.alioth.debian.org/
+*/
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -8,6 +12,15 @@ using System.Runtime.InteropServices;
 
 static class revcomp
 {
+    const string pathToLib = "../../rapl-interface/target/release/librapl_lib.so";
+
+    // DLL imports
+    [DllImport(pathToLib)]
+    static extern int start_rapl();
+
+    [DllImport(pathToLib)]
+    static extern void stop_rapl();
+
     static readonly int READER_BUFFER_SIZE = 1024 * 1024 * 16;
 
     static readonly byte[] comp = new byte[256];
@@ -15,10 +28,10 @@ static class revcomp
     const string Seq = "ABCDGHKMRTVYabcdghkmrtvy";
     const string Rev = "TVGHCDMKYABRTVGHCDMKYABR";
 
-    static void Main(string[] args)
+    static byte[] inputData;
+
+    public static void Main(string[] args)
     {
-        // Read the entire input into a buffer
-        byte[] inputData;
         using (var inS = Console.OpenStandardInput())
         {
             using (var ms = new MemoryStream())
@@ -28,13 +41,31 @@ static class revcomp
             }
         }
 
+        int iterations = int.Parse(args[0]);
+        for (int i = 0; i < iterations; i++)
+        {
+            initialize();
+            start_rapl();
+            run_benchmark();
+            stop_rapl();
+            cleanup();
+        }
+    }
+
+    static void initialize()
+    {
         InitComplements();
-
-        // Reset static variables for each iteration
         RCBlock.ResetSequenceNumbers();
+    }
 
+    static void run_benchmark()
+    {
         var processor = new ReverseComplementProcessor(inputData);
         processor.Process();
+    }
+
+    static void cleanup()
+    {
     }
 
     static void InitComplements()
@@ -341,7 +372,6 @@ static class revcomp
                 {
                     if (byteBuffer[num] == GT && num == bytePos)
                     {
-                        // Found next title
                         return dataBuffer;
                     }
                     num++;

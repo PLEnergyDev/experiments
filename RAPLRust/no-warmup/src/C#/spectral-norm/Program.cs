@@ -1,24 +1,54 @@
 ﻿/* The Computer Language Benchmarks Game
    http://benchmarksgame.alioth.debian.org/
- 
-   contributed by Isaac Gouy 
+
+   contributed by Isaac Gouy
    modified by Josh Goldfoot, based on the Java version by The Anh Tran
 */
 
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace SpectralNorms
 {
     class SpectralNorm
     {
+        const string pathToLib = "../../rapl-interface/target/release/librapl_lib.so";
+
+        // DLL imports
+        [DllImport(pathToLib)]
+        static extern int start_rapl();
+
+        [DllImport(pathToLib)]
+        static extern void stop_rapl();
+
         public static void Main(String[] args)
         {
             int n = 100;
-            if (args.Length > 0) n = Int32.Parse(args[0]); 
+            int iterations = int.Parse(args[0]);
+            if (args.Length > 0) n = Int32.Parse(args[1]);
+            for (int i = 0; i < iterations; i++)
+            {
+                initialize();
+                start_rapl();
+                run_benchmark(n);
+                stop_rapl();
+                cleanup();
+            }
+        }
 
+        static void initialize()
+        {
+        }
+
+        static void run_benchmark(int n)
+        {
             Console.WriteLine("{0:f9}", spectralnormGame(n));
+        }
+
+        static void cleanup()
+        {
         }
 
         private static double spectralnormGame(int n)
@@ -27,7 +57,6 @@ namespace SpectralNorms
             double[] v = new double[n];
             double[] tmp = new double[n];
 
-            // create unit vector
             for (int i = 0; i < n; i++)
                 u[i] = 1.0;
 
@@ -53,7 +82,6 @@ namespace SpectralNorms
 
             return Math.Sqrt(vBv / vv);
         }
-
     }
 
     public class Approximate
@@ -83,7 +111,6 @@ namespace SpectralNorms
 
         private void run()
         {
-            // 20 steps of the power method
             for (int i = 0; i < 10; i++)
             {
                 MultiplyAtAv(_u, _tmp, _v);
@@ -97,13 +124,11 @@ namespace SpectralNorms
             }
         }
 
-        /* return element i,j of infinite matrix A */
         private double eval_A(int i, int j)
         {
             return 1.0 / ((i + j) * (i + j + 1) / 2 + i + 1);
         }
 
-        /* multiply vector v by matrix A, each thread evaluate its range only */
         private void MultiplyAv(double[] v, double[] Av)
         {
             for (int i = range_begin; i < range_end; i++)
@@ -116,7 +141,6 @@ namespace SpectralNorms
             }
         }
 
-        /* multiply vector v by matrix A transposed */
         private void MultiplyAtv(double[] v, double[] Atv)
         {
             for (int i = range_begin; i < range_end; i++)
@@ -129,17 +153,12 @@ namespace SpectralNorms
             }
         }
 
-        /* multiply vector v by matrix A and then by matrix A transposed */
         private void MultiplyAtAv(double[] v, double[] tmp, double[] AtAv)
         {
-
             MultiplyAv(v, tmp);
-            // all thread must syn at completion
             barrier.SignalAndWait();
             MultiplyAtv(tmp, AtAv);
-            // all thread must syn at completion
             barrier.SignalAndWait();
         }
-
     }
 }

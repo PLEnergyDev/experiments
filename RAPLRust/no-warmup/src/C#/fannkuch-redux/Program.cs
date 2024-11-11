@@ -8,9 +8,19 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 class FannkuchRedux
 {
+    const string pathToLib = "../../rapl-interface/target/release/librapl_lib.so";
+
+    // DLL imports
+    [DllImport(pathToLib)]
+    static extern int start_rapl();
+
+    [DllImport(pathToLib)]
+    static extern void stop_rapl();
+
     static int NCHUNKS = 150;
     static int CHUNKSZ;
     static int NTASKS;
@@ -135,12 +145,24 @@ class FannkuchRedux
         }
     }
 
-
     static void Main(string[] args)
     {
         n = 7;
-        if (args.Length > 0) n = int.Parse(args[0]);
+        int iterations = int.Parse(args[0]);
+        if (args.Length > 0) n = int.Parse(args[1]);
 
+        for (int i = 0; i < iterations; i++)
+        {
+            initialize();
+            start_rapl();
+            run_benchmark();
+            stop_rapl();
+            cleanup();
+        }
+    }
+
+    static void initialize()
+    {
         var nLen = n + 1;
 
         Fact = new int[nLen];
@@ -155,35 +177,29 @@ class FannkuchRedux
         maxFlips = new int[NTASKS];
         chkSums = new int[NTASKS];
         taskId = -1;
+    }
 
+    static void run_benchmark()
+    {
         int nthreads = Environment.ProcessorCount + 1;
 
         Task[] tasks = new Task[nthreads];
         for (int i = 0; i < nthreads; ++i)
         {
             tasks[i] = Task.Run(() =>
-           {
-               new FannkuchRedux().Run();
-           });
+            {
+                new FannkuchRedux().Run();
+            });
         }
         Task.WaitAll(tasks);
 
         int res = 0, chk = 0;
 
-        //
-        // Would parallelizing this loop make any difference?
-        //
-        //for (int v = 0; v < NTASKS; v++)
-        //{
-        //    if (res < maxFlips[v]) res = maxFlips[v];
-        //    chk += chkSums[v];
-        //}
-
         Task[] t2 =
         {
             Task.Run(() =>
             {
-                for (int v=0; v < NTASKS; v++)
+                for (int v = 0; v < NTASKS; v++)
                 {
                     chk += chkSums[v];
                 }
@@ -191,7 +207,7 @@ class FannkuchRedux
 
             Task.Run(() =>
             {
-                for (int v=0; v < NTASKS; v++)
+                for (int v = 0; v < NTASKS; v++)
                 {
                     if (res < maxFlips[v]) res = maxFlips[v];
                 }
@@ -201,5 +217,12 @@ class FannkuchRedux
         Task.WaitAll(t2);
 
         Console.WriteLine("{0}\nPfannkuchen({1}) = {2}", chk, n, res);
+    }
+
+    static void cleanup()
+    {
+        Fact = null;
+        maxFlips = null;
+        chkSums = null;
     }
 }

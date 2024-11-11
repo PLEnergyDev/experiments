@@ -5,6 +5,7 @@
  * Contributed by Oleg Mazurov, June 2010
  *
  */
+
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -120,6 +121,66 @@ public final class fannkuchredux implements Runnable {
         }
     }
 
+    static int res;
+    static int chk;
+
+    public static void initialize(String[] args) {
+        n = args.length > 0 ? Integer.parseInt(args[1]) : 12;
+        if (n < 0 || n > 12) {
+            res = -1;
+            chk = -1;
+            return;
+        }
+        if (n <= 1) {
+            res = 0;
+            chk = 0;
+            return;
+        }
+
+        Fact = new int[n + 1];
+        Fact[0] = 1;
+        for (int i = 1; i < Fact.length; ++i) {
+            Fact[i] = Fact[i - 1] * i;
+        }
+
+        CHUNKSZ = (Fact[n] + NCHUNKS - 1) / NCHUNKS;
+        NTASKS = (Fact[n] + CHUNKSZ - 1) / CHUNKSZ;
+        maxFlips = new int[NTASKS];
+        chkSums = new int[NTASKS];
+        taskId = new AtomicInteger(0);
+    }
+
+    public static void run_benchmark() {
+        int nthreads = Runtime.getRuntime().availableProcessors();
+        Thread[] threads = new Thread[nthreads];
+        for (int i = 0; i < nthreads; ++i) {
+            threads[i] = new Thread(new fannkuchredux());
+            threads[i].start();
+        }
+        for (Thread t : threads) {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+            }
+        }
+
+        res = 0;
+        for (int v : maxFlips) {
+            res = Math.max(res, v);
+        }
+        chk = 0;
+        for (int v : chkSums) {
+            chk += v;
+        }
+    }
+
+    public static void cleanup() {
+        Fact = null;
+        maxFlips = null;
+        chkSums = null;
+        taskId = null;
+    }
+
     static void printResult(int n, int res, int chk) {
         System.out.println(chk + "\nPfannkuchen(" + n + ") = " + res);
     }
@@ -131,67 +192,28 @@ public final class fannkuchredux implements Runnable {
         // Loading functions
         MemorySegment start_rapl_symbol = SymbolLookup.loaderLookup().find("start_rapl").get();
         MethodHandle start_rapl = Linker.nativeLinker().downcallHandle(start_rapl_symbol,
-            FunctionDescriptor.of(ValueLayout.JAVA_INT));
+                FunctionDescriptor.of(ValueLayout.JAVA_INT));
 
         MemorySegment stop_rapl_symbol = SymbolLookup.loaderLookup().find("stop_rapl").get();
         MethodHandle stop_rapl = Linker.nativeLinker().downcallHandle(stop_rapl_symbol,
-            FunctionDescriptor.of(ValueLayout.JAVA_INT));
-        int count = Integer.parseInt(args[0]);
-        for (int counter = 0; counter < count; counter++) {
+                FunctionDescriptor.of(ValueLayout.JAVA_INT));
+
+        int iterations = Integer.parseInt(args[0]);
+        for (int i = 0; i < iterations; ++i) {
+            initialize(args);
             try {
                 start_rapl.invoke();
             } catch (Throwable e) {
                 e.printStackTrace();
             }
-            n = args.length > 0 ? Integer.parseInt(args[1]) : 12;
-            if (n < 0 || n > 12) { // 13! won't fit into int
-                printResult(n, -1, -1);
-                return;
-            }
-            if (n <= 1) {
-                printResult(n, 0, 0);
-                return;
-            }
-
-            Fact = new int[n + 1];
-            Fact[0] = 1;
-            for (int i = 1; i < Fact.length; ++i) {
-                Fact[i] = Fact[i - 1] * i;
-            }
-
-            CHUNKSZ = (Fact[n] + NCHUNKS - 1) / NCHUNKS;
-            NTASKS = (Fact[n] + CHUNKSZ - 1) / CHUNKSZ;
-            maxFlips = new int[NTASKS];
-            chkSums = new int[NTASKS];
-            taskId = new AtomicInteger(0);
-
-            int nthreads = Runtime.getRuntime().availableProcessors();
-            Thread[] threads = new Thread[nthreads];
-            for (int i = 0; i < nthreads; ++i) {
-                threads[i] = new Thread(new fannkuchredux());
-                threads[i].start();
-            }
-            for (Thread t: threads) {
-                try {
-                    t.join();
-                } catch (InterruptedException e) {}
-            }
-
-            int res = 0;
-            for (int v: maxFlips) {
-                res = Math.max(res, v);
-            }
-            int chk = 0;
-            for (int v: chkSums) {
-                chk += v;
-            }
-
+            run_benchmark();
             printResult(n, res, chk);
             try {
                 stop_rapl.invoke();
             } catch (Throwable e) {
                 e.printStackTrace();
             }
+            cleanup();
         }
     }
 }

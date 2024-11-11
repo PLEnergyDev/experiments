@@ -1,7 +1,8 @@
 CC=gcc
 
-OPT_FLAGS=-pipe -O3 -fomit-frame-pointer -march=native
+OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=ivybridge -fopenmp
 LIB_FLAGS=-L$(RAPL_DIR)/target/release -lrapl_lib -Wl,-rpath=$(RAPL_DIR)/target/release
+
 CFLAGS=$(OPT_FLAGS) $(LIB_FLAGS)
 
 TARGET=main
@@ -9,8 +10,9 @@ SRC=$(TARGET).c
 
 RAPL_DIR=../../rapl-interface
 RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
-COUNT=20
-INPUT=1000
+
+COUNT=45
+INPUT=10000
 
 $(RAPL):
 	@echo "Building rapl-interface with cargo in release mode..."
@@ -25,7 +27,6 @@ run: $(TARGET) $(RAPL)
 	./$(TARGET) 1 $(INPUT)
 
 measure: $(TARGET) $(RAPL)
-	modprobe msr
 	./$(TARGET) $(COUNT) $(INPUT)
 
 mem: $(TARGET) $(RAPL)

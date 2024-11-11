@@ -4,13 +4,13 @@ JAVA=java
 CFLAGS=--enable-preview --release 21
 RFLAGS=--enable-preview --enable-native-access=ALL-UNNAMED
 
-RAPL_DIR=../../rapl-interface
-RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
-
 CLASS=binarytrees
 SRC=$(CLASS).java
 
-COUNT=20
+RAPL_DIR=../../rapl-interface
+RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
+
+COUNT=45
 INPUT=21
 
 $(RAPL):

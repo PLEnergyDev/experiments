@@ -1,22 +1,52 @@
 ﻿/* The Computer Language Benchmarks Game
    http://benchmarksgame.alioth.debian.org/
- *
- * submitted by Josh Goldfoot
- * 
- */
+
+   submitted by Josh Goldfoot
+*/
 
 using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.InteropServices;
 
 public class Program
 {
+    const string pathToLib = "../../rapl-interface/target/release/librapl_lib.so";
+
+    [DllImport(pathToLib)]
+    static extern int start_rapl();
+
+    [DllImport(pathToLib)]
+    static extern void stop_rapl();
+
+    static byte[] buffer;
+    static byte[] tonum = new byte[256];
+    static char[] tochar = new char[4];
+    static byte[] cachedThreeBuffer = null;
+
     public static void Main(string[] args)
     {
+        int iterations = int.Parse(args[0]);
+        for (int i = 0; i < iterations; i++)
+        {
+            initialize();
+            start_rapl();
+            run_benchmark();
+            stop_rapl();
+            cleanup();
+        }
+    }
+
+    static void initialize()
+    {
         PrepareLookups();
-        var buffer = GetBytesForThirdSequence();
+        buffer = GetBytesForThirdSequence();
+    }
+
+    static void run_benchmark()
+    {
         var fragmentLengths = new[] { 1, 2, 3, 4, 6, 12, 18 };
         var dicts =
             (from fragmentLength in fragmentLengths.AsParallel()
@@ -31,9 +61,13 @@ public class Program
         WriteCount(dicts[6], "GGTATTTTAATTTATAGT");
     }
 
+    static void cleanup()
+    {
+        buffer = null;
+    }
+
     private static void WriteFrequencies(Dictionary<ulong, Wrapper> freq, int buflen, int fragmentLength)
     {
-
         double percent = 100.0 / (buflen - fragmentLength + 1);
         foreach (var line in (from k in freq.Keys
                               orderby freq[k].V descending
@@ -53,8 +87,8 @@ public class Program
             key |= tonum[keybytes[i]];
         }
         Wrapper w;
-        Console.WriteLine("{0}\t{1}", 
-            dictionary.TryGetValue(key, out w) ? w.V : 0, 
+        Console.WriteLine("{0}\t{1}",
+            dictionary.TryGetValue(key, out w) ? w.V : 0,
             fragment);
     }
 
@@ -100,6 +134,9 @@ public class Program
 
     private static byte[] GetBytesForThirdSequence()
     {
+        if (cachedThreeBuffer != null)
+            return cachedThreeBuffer;
+
         const int buffersize = 2500120;
         byte[] threebuffer = null;
         var buffer = new byte[buffersize];
@@ -130,11 +167,12 @@ public class Program
         }
         int toread = threebuflen - tocopy;
         source.Read(threebuffer, tocopy, toread);
+
+        cachedThreeBuffer = threebuffer;
+
         return threebuffer;
     }
-    
-    private static byte[] tonum = new byte[256];
-    private static char[] tochar = new char[4];
+
     private static void PrepareLookups()
     {
         tonum['a'] = 0;

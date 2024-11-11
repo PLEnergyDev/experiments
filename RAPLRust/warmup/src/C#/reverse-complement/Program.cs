@@ -1,3 +1,7 @@
+﻿/* The Computer Language Benchmarks Game
+   http://benchmarksgame.alioth.debian.org/
+*/
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -8,12 +12,6 @@ using System.Runtime.InteropServices;
 
 static class revcomp
 {
-    static readonly int READER_BUFFER_SIZE = 1024 * 1024 * 16;
-
-    static readonly byte[] comp = new byte[256];
-    static readonly byte LF = 10;
-    const string Seq = "ABCDGHKMRTVYabcdghkmrtvy";
-    const string Rev = "TVGHCDMKYABRTVGHCDMKYABR";
     const string pathToLib = "../../rapl-interface/target/release/librapl_lib.so";
 
     // DLL imports
@@ -23,10 +21,17 @@ static class revcomp
     [DllImport(pathToLib)]
     static extern void stop_rapl();
 
-    static void Main(string[] args)
+    static readonly int READER_BUFFER_SIZE = 1024 * 1024 * 16;
+
+    static readonly byte[] comp = new byte[256];
+    static readonly byte LF = 10;
+    const string Seq = "ABCDGHKMRTVYabcdghkmrtvy";
+    const string Rev = "TVGHCDMKYABRTVGHCDMKYABR";
+
+    static byte[] inputData;
+
+    public static void Main(string[] args)
     {
-        // Read the entire input into a buffer
-        byte[] inputData;
         using (var inS = Console.OpenStandardInput())
         {
             using (var ms = new MemoryStream())
@@ -36,19 +41,31 @@ static class revcomp
             }
         }
 
-        InitComplements();
-
-        int count = int.Parse(args[0]);
-        for (int counter = 0; counter < count; counter++)
+        int iterations = int.Parse(args[0]);
+        for (int i = 0; i < iterations; i++)
         {
+            initialize();
             start_rapl();
-            // Reset static variables for each iteration
-            RCBlock.ResetSequenceNumbers();
-
-            var processor = new ReverseComplementProcessor(inputData);
-            processor.Process();
+            run_benchmark();
             stop_rapl();
+            cleanup();
         }
+    }
+
+    static void initialize()
+    {
+        InitComplements();
+        RCBlock.ResetSequenceNumbers();
+    }
+
+    static void run_benchmark()
+    {
+        var processor = new ReverseComplementProcessor(inputData);
+        processor.Process();
+    }
+
+    static void cleanup()
+    {
     }
 
     static void InitComplements()
@@ -355,7 +372,6 @@ static class revcomp
                 {
                     if (byteBuffer[num] == GT && num == bytePos)
                     {
-                        // Found next title
                         return dataBuffer;
                     }
                     num++;

@@ -1,5 +1,14 @@
-import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+/*
+ * The Computer Language Benchmarks Game
+ * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+ * 
+ * contributed by James McIlree
+ * modified by Tagir Valeev
+ */
 
+import java.lang.foreign.*;
+import java.lang.invoke.MethodHandle;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,26 +19,68 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.lang.foreign.*;
-import java.lang.invoke.MethodHandle;
+import java.util.concurrent.*;
 
 public class knucleotide {
-    static final byte[] codes = {-1, 0, -1, 1, 3, -1, -1, 2};
-    static final char[] nucleotides = {'A', 'C', 'G', 'T'};
+    static final byte[] codes = { -1, 0, -1, 1, 3, -1, -1, 2 };
+    static final char[] nucleotides = { 'A', 'C', 'G', 'T' };
+    static byte[] sequence;
 
-    static class Result {
-        Long2IntOpenHashMap map = new Long2IntOpenHashMap();
-        int keyLength;
+    public static void main(String[] args) throws Exception {
+        var dll_path = System.getProperty("user.dir") + "/../../rapl-interface/target/release/librapl_lib.so";
+        System.load(dll_path);
 
-        public Result(int keyLength) {
-            this.keyLength = keyLength;
+        // Loading functions
+        MemorySegment start_rapl_symbol = SymbolLookup.loaderLookup().find("start_rapl").get();
+        MethodHandle start_rapl = Linker.nativeLinker().downcallHandle(start_rapl_symbol,
+                FunctionDescriptor.of(ValueLayout.JAVA_INT));
+
+        MemorySegment stop_rapl_symbol = SymbolLookup.loaderLookup().find("stop_rapl").get();
+        MethodHandle stop_rapl = Linker.nativeLinker().downcallHandle(stop_rapl_symbol,
+                FunctionDescriptor.of(ValueLayout.JAVA_INT));
+
+        int iterations = Integer.parseInt(args[0]);
+        initialize();
+        for (int i = 0; i < iterations; i++) {
+            try {
+                start_rapl.invoke();
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+            run_benchmark();
+            try {
+                stop_rapl.invoke();
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
         }
+        cleanup();
+    }
+
+    private static void initialize() throws IOException {
+        sequence = read(System.in);
+    }
+
+    private static void run_benchmark() throws Exception {
+        ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        int[] fragmentLengths = { 1, 2, 3, 4, 6, 12, 18 };
+        List<Future<Result>> futures = pool.invokeAll(createFragmentTasks(sequence, fragmentLengths));
+        pool.shutdown();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(writeFrequencies(sequence.length, futures.get(0).get()));
+        sb.append(writeFrequencies(sequence.length - 1, sumTwoMaps(futures.get(1).get(), futures.get(2).get())));
+
+        String[] nucleotideFragments = { "GGT", "GGTA", "GGTATT", "GGTATTTTAATT", "GGTATTTTAATTTATAGT" };
+        for (String nucleotideFragment : nucleotideFragments) {
+            sb.append(writeCount(futures, nucleotideFragment));
+        }
+        System.out.print(sb);
+    }
+
+    private static void cleanup() {
+        // Clean up resources if needed
     }
 
     static ArrayList<Callable<Result>> createFragmentTasks(final byte[] sequence, int[] fragmentLengths) {
@@ -61,7 +112,7 @@ public class knucleotide {
     static String writeFrequencies(float totalCount, Result frequencies) {
         List<Entry<String, Integer>> freq = new ArrayList<>(frequencies.map.size());
         frequencies.map.forEach((key, cnt) -> freq.add(new SimpleEntry<>(keyToString(key, frequencies.keyLength), cnt)));
-        freq.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+        freq.sort(Entry.comparingByValue(Comparator.reverseOrder()));
         StringBuilder sb = new StringBuilder();
         for (Entry<String, Integer> entry : freq) {
             sb.append(String.format(Locale.ENGLISH, "%s %.3f\n", entry.getKey(), entry.getValue() * 100.0f / totalCount));
@@ -85,7 +136,7 @@ public class knucleotide {
     static String keyToString(long key, int length) {
         char[] res = new char[length];
         for (int i = 0; i < length; i++) {
-            res[length - i - 1] = nucleotides[(int)(key & 0x3)];
+            res[length - i - 1] = nucleotides[(int) (key & 0x3)];
             key >>= 2;
         }
         return new String(res);
@@ -108,13 +159,12 @@ public class knucleotide {
     }
 
     static byte[] read(InputStream is) throws IOException {
-        String line;
         BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.ISO_8859_1));
+        String line;
         while ((line = in.readLine()) != null) {
             if (line.startsWith(">THREE"))
                 break;
         }
-
         byte[] bytes = new byte[1048576];
         int position = 0;
         while ((line = in.readLine()) != null && line.charAt(0) != '>') {
@@ -123,58 +173,19 @@ public class knucleotide {
                 System.arraycopy(bytes, 0, newBytes, 0, position);
                 bytes = newBytes;
             }
-            for (int i = 0; i < line.length(); i++)
+            for (int i = 0; i < line.length(); i++) {
                 bytes[position++] = (byte) line.charAt(i);
+            }
         }
-
         return toCodes(bytes, position);
     }
 
-    public static void main(String[] args) throws Exception {
-        var dll_path = System.getProperty("user.dir") + "/../../rapl-interface/target/release/librapl_lib.so";
-        System.load(dll_path);
+    static class Result {
+        Long2IntOpenHashMap map = new Long2IntOpenHashMap();
+        int keyLength;
 
-        // Loading functions
-        MemorySegment start_rapl_symbol = SymbolLookup.loaderLookup().find("start_rapl").get();
-        MethodHandle start_rapl = Linker.nativeLinker().downcallHandle(start_rapl_symbol, FunctionDescriptor.of(ValueLayout.JAVA_INT));
-
-        MemorySegment stop_rapl_symbol = SymbolLookup.loaderLookup().find("stop_rapl").get();
-        MethodHandle stop_rapl = Linker.nativeLinker().downcallHandle(stop_rapl_symbol, FunctionDescriptor.of(ValueLayout.JAVA_INT));
-
-        // Read the input once before the loop
-        byte[] sequence = read(System.in);
-
-        int count = Integer.parseInt(args[0]);
-
-        for (int counter = 0; counter < count; counter++) {
-            try {
-                start_rapl.invoke();
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
-
-            ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-            int[] fragmentLengths = {1, 2, 3, 4, 6, 12, 18};
-            List<Future<Result>> futures = pool.invokeAll(createFragmentTasks(sequence, fragmentLengths));
-            pool.shutdown();
-
-            StringBuilder sb = new StringBuilder();
-
-            sb.append(writeFrequencies(sequence.length, futures.get(0).get()));
-            sb.append(writeFrequencies(sequence.length - 1, sumTwoMaps(futures.get(1).get(), futures.get(2).get())));
-
-            String[] nucleotideFragments = {"GGT", "GGTA", "GGTATT", "GGTATTTTAATT", "GGTATTTTAATTTATAGT"};
-            for (String nucleotideFragment : nucleotideFragments) {
-                sb.append(writeCount(futures, nucleotideFragment));
-            }
-
-            System.out.print(sb);
-
-            try {
-                stop_rapl.invoke();
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
+        public Result(int keyLength) {
+            this.keyLength = keyLength;
         }
     }
 }

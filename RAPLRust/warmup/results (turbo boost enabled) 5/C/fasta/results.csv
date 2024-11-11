@@ -1,0 +1,6 @@
+Algorithm,Package Energy (J),Core Energy (J),Uncore Energy (J),DRAM Energy (J),Elapsed Time (ms),Total Memory (MB),Peak Memory (MB)
+fasta,569.74,481.18,0.0,4.48,8002,12.23,0
+fasta,549.49,455.77,0.0,4.73,8471,12.23,0
+fasta,509.64,422.74,0.0,4.39,7849,12.23,0
+fasta,609.8,505.8,0.0,5.26,9393,12.23,0
+fasta,588.47,488.17,0.0,5.06,9061,12.23,0

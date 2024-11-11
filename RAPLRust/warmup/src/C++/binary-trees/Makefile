@@ -1,17 +1,17 @@
 CC=g++
 
-OPT_FLAGS=-pipe -O3 -fomit-frame-pointer -march=native -fopenmp -std=c++14
+OPT_FLAGS=-pipe -O3 -fomit-frame-pointer -march=ivybridge -std=c++14 -fopenmp -I/usr/include/apr-1.0
 LIB_FLAGS=-lapr-1 -L$(RAPL_DIR)/target/release -lrapl_lib -Wl,-rpath=$(RAPL_DIR)/target/release
-INCLUDE_FLAGS=-I/usr/include/apr-1.0 -D_FILE_OFFSET_BITS=64
 
-CFLAGS=$(OPT_FLAGS) $(LIB_FLAGS) $(INCLUDE_FLAGS)
+CFLAGS=$(OPT_FLAGS) $(LIB_FLAGS)
 
 TARGET=main
 SRC=$(TARGET).cpp
 
 RAPL_DIR=../../rapl-interface
 RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
-COUNT=20
+
+COUNT=45
 INPUT=21
 
 $(RAPL):
@@ -27,7 +27,6 @@ run: $(TARGET) $(RAPL)
 	./$(TARGET) 1 $(INPUT)
 
 measure: $(TARGET) $(RAPL)
-	modprobe msr
 	./$(TARGET) $(COUNT) $(INPUT)
 
 mem: $(TARGET) $(RAPL)

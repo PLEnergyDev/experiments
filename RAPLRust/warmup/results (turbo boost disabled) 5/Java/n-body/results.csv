@@ -1,0 +1,6 @@
+Algorithm,Package Energy (J),Core Energy (J),Uncore Energy (J),DRAM Energy (J),Elapsed Time (ms),Total Memory (MB),Peak Memory (MB)
+n-body,103.67,46.84,0.0,2.86,5133,1.87,0
+n-body,104.15,47.12,0.0,2.87,5154,1.87,0
+n-body,103.54,46.82,0.0,2.85,5124,1.87,0
+n-body,103.31,46.65,0.0,2.85,5118,1.87,0
+n-body,103.57,46.83,0.0,2.85,5127,1.87,0

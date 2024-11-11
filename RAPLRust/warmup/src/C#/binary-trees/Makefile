@@ -1,13 +1,14 @@
 CC=dotnet
 
 CFLAGS=-c Release
-RAPL_DIR=../../rapl-interface
-RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
 
 TARGET=bin/Release/net8.0/binary-trees
 SRC=Program.cs
 
-COUNT=20
+RAPL_DIR=../../rapl-interface
+RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
+
+COUNT=45
 INPUT=21
 
 $(RAPL):
@@ -20,17 +21,16 @@ $(TARGET): $(SRC) $(RAPL)
 	$(CC) build $(CFLAGS)
 
 run: $(TARGET) $(RAPL)
-	$(TARGET) 1 $(INPUT)
+	./$(TARGET) 1 $(INPUT)
 
 measure: $(TARGET) $(RAPL)
-	modprobe msr
-	$(TARGET) $(COUNT) $(INPUT)
+	./$(TARGET) $(COUNT) $(INPUT)
 
 mem: $(TARGET) $(RAPL)
-	time -v $(TARGET) 1 $(INPUT)
+	time -v ./$(TARGET) 1 $(INPUT)
 
 valgrind: $(RAPL)
-	valgrind --tool=massif --stacks=yes $(TARGET) 1 $(INPUT)
+	valgrind --tool=massif --stacks=yes ./$(TARGET) 1 $(INPUT)
 
 clean:
 	rm -rf bin obj

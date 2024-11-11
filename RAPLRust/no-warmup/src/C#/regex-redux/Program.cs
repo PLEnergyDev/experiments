@@ -1,9 +1,8 @@
 ﻿/* The Computer Language Benchmarks Game
    http://benchmarksgame.alioth.debian.org/
- * 
- * Regex-Redux
- * by Josh Goldfoot
- *
+
+   Regex-Redux
+   by Josh Goldfoot
 */
 
 using System;
@@ -11,31 +10,63 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
 
 class regexredux
 {
-    static void Main(string[] args)
+    const string pathToLib = "../../rapl-interface/target/release/librapl_lib.so";
+
+    // DLL imports
+    [DllImport(pathToLib)]
+    static extern int start_rapl();
+
+    [DllImport(pathToLib)]
+    static extern void stop_rapl();
+
+    static string sequence;
+    static string originalSequence;  // Cached original sequence to ensure repeatability
+    static int initialLength;
+    static int codeLength;
+
+    public static void Main(string[] args)
     {
+        int iterations = int.Parse(args[0]);
+        initialize(); // Load the input once and cache it
+        for (int i = 0; i < iterations; i++)
+        {
+            prepareIteration();  // Reset sequence to the original state
+            start_rapl();
+            run_benchmark();
+            stop_rapl();
+            cleanup();
+        }
+    }
 
-        // read FASTA sequence
-        String sequence = Console.In.ReadToEnd();
-        int initialLength = sequence.Length;
+    static void initialize()
+    {
+        originalSequence = Console.In.ReadToEnd(); // Read and cache the input sequence
+        initialLength = originalSequence.Length;
+    }
 
-        // remove FASTA sequence descriptions and new-lines
+    static void prepareIteration()
+    {
+        // Reset the sequence for each iteration to ensure consistency
+        sequence = originalSequence;
         sequence = Regex.Replace(sequence, ">.*\n|\n", "");
-        int codeLength = sequence.Length;
+        codeLength = sequence.Length;
+    }
 
+    static void run_benchmark()
+    {
         Task<int> substitution = Task.Run(() => {
-            // regex substitution
             string newseq = Regex.Replace(sequence, "tHa[Nt]", "<4>");
             newseq = Regex.Replace(newseq, "aND|caN|Ha[DS]|WaS", "<3>");
             newseq = Regex.Replace(newseq, "a[NSt]|BY", "<2>");
             newseq = Regex.Replace(newseq, "<[^>]*>", "|");
-            newseq = Regex.Replace(newseq, "\\|[^|][^|]*\\|" , "-");
+            newseq = Regex.Replace(newseq, "\\|[^|][^|]*\\|", "-");
             return newseq.Length;
         });
 
-        // divide large sequence into chunks (one per core) and search each in parallel
         int[][] sums = Chunks(sequence).AsParallel().Select(CountRegexes).ToArray();
 
         var variants = Variants.variantsCopy();
@@ -44,6 +75,11 @@ class regexredux
 
         Console.WriteLine("\n{0}\n{1}\n{2}",
            initialLength, codeLength, substitution.Result);
+    }
+
+    static void cleanup()
+    {
+        sequence = null;
     }
 
     private static IEnumerable<string> Chunks(string sequence)
@@ -63,7 +99,6 @@ class regexredux
 
     private static int[] CountRegexes(string chunk)
     {
-        // regex match
         int[] counts = new int[9];
         string[] variants = Variants.variantsCopy();
 

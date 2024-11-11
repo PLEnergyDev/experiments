@@ -1,5 +1,5 @@
 /* The Computer Language Benchmarks Game
-   http://benchmarksgame.alioth.debian.org/
+   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
    contributed by Mark C. Lewis
    modified slightly by Chad Whipkey
@@ -8,7 +8,24 @@
 */
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
+
 public final class nbody {
+    public static void initialize() {
+    }
+
+    public static void run_benchmark(String[] args) {
+        int n = Integer.parseInt(args[1]);
+
+        NBodySystem bodies = new NBodySystem();
+        System.out.printf("%.9f\n", bodies.energy());
+        for (int i = 0; i < n; ++i)
+            bodies.advance(0.01);
+        System.out.printf("%.9f\n", bodies.energy());
+    }
+
+    public static void cleanup() {
+    }
+
     public static void main(String[] args) {
         var dll_path = System.getProperty("user.dir") + "/../../rapl-interface/target/release/librapl_lib.so";
         System.load(dll_path);
@@ -16,30 +33,27 @@ public final class nbody {
         // Loading functions
         MemorySegment start_rapl_symbol = SymbolLookup.loaderLookup().find("start_rapl").get();
         MethodHandle start_rapl = Linker.nativeLinker().downcallHandle(start_rapl_symbol,
-            FunctionDescriptor.of(ValueLayout.JAVA_INT));
+                FunctionDescriptor.of(ValueLayout.JAVA_INT));
 
         MemorySegment stop_rapl_symbol = SymbolLookup.loaderLookup().find("stop_rapl").get();
         MethodHandle stop_rapl = Linker.nativeLinker().downcallHandle(stop_rapl_symbol,
-            FunctionDescriptor.of(ValueLayout.JAVA_INT));
-        int count = Integer.parseInt(args[0]);
-        for (int counter = 0; counter < count; counter++) {
+                FunctionDescriptor.of(ValueLayout.JAVA_INT));
+
+        int iterations = Integer.parseInt(args[0]);
+        for (int i = 0; i < iterations; ++i) {
+            initialize();
             try {
                 start_rapl.invoke();
             } catch (Throwable e) {
                 e.printStackTrace();
             }
-            int n = Integer.parseInt(args[1]);
-
-            NBodySystem bodies = new NBodySystem();
-            System.out.printf("%.9f\n", bodies.energy());
-            for (int i = 0; i < n; ++i)
-                bodies.advance(0.01);
-            System.out.printf("%.9f\n", bodies.energy());
+            run_benchmark(args);
             try {
                 stop_rapl.invoke();
             } catch (Throwable e) {
                 e.printStackTrace();
             }
+            cleanup();
         }
     }
 }
@@ -52,10 +66,10 @@ final class NBodySystem {
     public NBodySystem() {
         bodies = new Body[] {
             Body.sun(),
-                Body.jupiter(),
-                Body.saturn(),
-                Body.uranus(),
-                Body.neptune()
+            Body.jupiter(),
+            Body.saturn(),
+            Body.uranus(),
+            Body.neptune()
         };
 
         double px = 0.0;
@@ -113,9 +127,9 @@ final class NBodySystem {
         for (int i = 0; i < bodies.length; ++i) {
             Body iBody = bodies[i];
             e += 0.5 * iBody.mass *
-                (iBody.vx * iBody.vx +
-                    iBody.vy * iBody.vy +
-                    iBody.vz * iBody.vz);
+                (iBody.vx * iBody.vx
+                + iBody.vy * iBody.vy
+                + iBody.vz * iBody.vz);
 
             for (int j = i + 1; j < bodies.length; ++j) {
                 Body jBody = bodies[j];
@@ -131,7 +145,6 @@ final class NBodySystem {
     }
 }
 
-
 final class Body {
     static final double PI = 3.141592653589793;
     static final double SOLAR_MASS = 4 * PI * PI;
@@ -139,7 +152,8 @@ final class Body {
 
     public double x, y, z, vx, vy, vz, mass;
 
-    public Body() {}
+    public Body() {
+    }
 
     static Body jupiter() {
         Body p = new Body();

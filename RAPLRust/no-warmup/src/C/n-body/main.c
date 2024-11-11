@@ -1,5 +1,5 @@
 /* The Computer Language Benchmarks Game
-   http://benchmarksgame.alioth.debian.org/
+   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
    contributed by Mark C. Lewis
    modified slightly by Chad Whipkey
@@ -11,6 +11,9 @@
 #include <math.h>
 #include <stdlib.h>
 #include <immintrin.h>
+
+void start_rapl();
+void stop_rapl();
 
 #define PI 3.141592653589793
 #define SOLAR_MASS ( 4 * PI * PI )
@@ -76,8 +79,7 @@ void offset_momentum(struct body *bodies, unsigned int nbodies)
    unsigned int i, k;
    for (i = 0; i < nbodies; ++i)
       for (k = 0; k < 3; ++k)
-         bodies[0].v[k] -= bodies[i].v[k] * bodies[i].mass
-            / SOLAR_MASS;
+         bodies[0].v[k] -= bodies[i].v[k] * bodies[i].mass / SOLAR_MASS;
 }
 
 void bodies_advance(struct body *bodies, unsigned int nbodies, double dt)
@@ -116,10 +118,8 @@ void bodies_advance(struct body *bodies, unsigned int nbodies, double dt)
    for (i = 0, k = 0; i < nbodies - 1; ++i)
       for ( j = i + 1; j < nbodies; ++j, ++k)
          for ( m = 0; m < 3; ++m) {
-            bodies[i].v[m] -= r[k].dx[m] * bodies[j].mass
-               * mag[k];
-            bodies[j].v[m] += r[k].dx[m] * bodies[i].mass
-               * mag[k];
+            bodies[i].v[m] -= r[k].dx[m] * bodies[j].mass * mag[k];
+            bodies[j].v[m] += r[k].dx[m] * bodies[i].mass * mag[k];
          }
 
    for (i = 0; i < nbodies; ++i)
@@ -148,13 +148,31 @@ double bodies_energy(struct body *bodies, unsigned int nbodies) {
    return e;
 }
 
+void initialize(int argc, char** argv) {
+   offset_momentum(solar_bodies, BODIES_SIZE);
+}
+
+void run_benchmark(int n) {
+   for (int i = 0; i < n; ++i)
+      bodies_advance(solar_bodies, BODIES_SIZE, 0.01);
+}
+
+void cleanup() {
+   // Cleanup logic if needed, currently empty as no persistent state needs resetting
+}
+
 int main(int argc, char** argv)
 {
-   int i, n = atoi(argv[1]);
-   offset_momentum(solar_bodies, BODIES_SIZE);
-   printf("%.9f\n", bodies_energy(solar_bodies, BODIES_SIZE));
-   for (i = 0; i < n; ++i)
-      bodies_advance(solar_bodies, BODIES_SIZE, 0.01);
-   printf("%.9f\n", bodies_energy(solar_bodies, BODIES_SIZE));
+   int iterations = atoi(argv[1]);
+   for (int i = 0; i < iterations; ++i) {
+      int n = atoi(argv[2]);
+      initialize(argc, argv);
+      start_rapl();
+      printf("%.9f\n", bodies_energy(solar_bodies, BODIES_SIZE));
+      run_benchmark(n);
+      printf("%.9f\n", bodies_energy(solar_bodies, BODIES_SIZE));
+      stop_rapl();
+      cleanup();
+   }
    return 0;
 }

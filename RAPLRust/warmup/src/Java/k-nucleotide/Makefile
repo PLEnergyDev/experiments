@@ -4,13 +4,13 @@ JAVA=java
 CFLAGS=--enable-preview --release 21 -cp .:/usr/local/src/java-libs/fastutil-7.0.12.jar
 RFLAGS=--enable-preview --enable-native-access=ALL-UNNAMED -cp .:/usr/local/src/java-libs/fastutil-7.0.12.jar
 
-RAPL_DIR=../../rapl-interface
-RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
-
 CLASS=knucleotide
 SRC=$(CLASS).java
 
-COUNT=20
+RAPL_DIR=../../rapl-interface
+RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
+
+COUNT=45
 INPUT=../../knucleotide-input25000000.txt
 
 $(RAPL):

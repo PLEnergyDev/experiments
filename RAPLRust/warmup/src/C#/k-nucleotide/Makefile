@@ -1,13 +1,14 @@
 CC=dotnet
 
 CFLAGS=-c Release
-RAPL_DIR=../../rapl-interface
-RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
 
 TARGET=bin/Release/net8.0/k-nucleotide
 SRC=Program.cs
 
-COUNT=20
+RAPL_DIR=../../rapl-interface
+RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
+
+COUNT=45
 INPUT=../../knucleotide-input25000000.txt
 
 $(RAPL):
@@ -23,7 +24,6 @@ run: $(TARGET) $(RAPL)
 	./$(TARGET) 1 < $(INPUT)
 
 measure: $(TARGET) $(RAPL)
-	modprobe msr
 	./$(TARGET) $(COUNT) < $(INPUT)
 
 mem: $(TARGET) $(RAPL)

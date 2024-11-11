@@ -4,13 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-futures = "0.1.31"
-futures-cpupool = "0.1.8"
-ordermap = "0.5.3"
-
+fnv = "1.0.7"
+rapl-lib = { path = "../../rapl-interface/rapl-lib" }
 
 [profile.release]
 opt-level = 3
 lto = true
 codegen-units = 1
-target-cpu = "core2"
+target-cpu = "ivybridge"

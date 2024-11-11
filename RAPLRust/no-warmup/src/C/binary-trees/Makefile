@@ -1,40 +1,42 @@
 CC=gcc
 
-OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp
-DEFINES=-D_FILE_OFFSET_BITS=64
-INCLUDE_FLAGS=-I/usr/include/apr-1.0
-LIB_FLAGS=-lapr-1 -lgomp -lm
+OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=ivybridge -fopenmp -I/usr/include/apr-1.0 -D_FILE_OFFSET_BITS=64
+LIB_FLAGS=-lapr-1 -lgmp -lm -L$(RAPL_DIR)/target/release -lrapl_lib -Wl,-rpath=$(RAPL_DIR)/target/release
 
-CFLAGS=$(OPT_FLAGS) $(DEFINES) $(INCLUDE_FLAGS)
+CFLAGS=$(OPT_FLAGS) $(LIB_FLAGS)
 
 TARGET=main
 SRC=$(TARGET).c
 
-RAPL_DIR=../../RAPL
-RAPL=$(RAPL_DIR)/target/release/RAPL
+RAPL_DIR=../../rapl-interface
+RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
+
+COUNT=30
 INPUT=21
 
 $(RAPL):
-	@echo "Building RAPL interface..."
+	@echo "Building rapl-interface with cargo in release mode..."
 	@cd $(RAPL_DIR) && cargo build --release
 
 all: $(RAPL) $(TARGET)
 
 $(TARGET): $(SRC) $(RAPL)
-	$(CC) $(SRC) -o $(TARGET) $(CFLAGS) $(LIB_FLAGS)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS)
 
 run: $(TARGET) $(RAPL)
-	./$(TARGET) $(INPUT)
+	./$(TARGET) 1 $(INPUT)
 
 measure: $(TARGET) $(RAPL)
 	modprobe msr
-	$(RAPL) "./$(TARGET) $(INPUT)"
+	@for i in $$(seq 0 $(COUNT)); do \
+		./$(TARGET) 1 $(INPUT); \
+	done
 
 mem: $(TARGET) $(RAPL)
-	time -v ./$(TARGET) $(INPUT)
+	time -v ./$(TARGET) 1 $(INPUT)
 
 valgrind: $(TARGET) $(RAPL)
-	valgrind --tool=massif --stacks=yes ./$(TARGET) $(INPUT)
+	valgrind --tool=massif --stacks=yes ./$(TARGET) 1 $(INPUT)
 
 clean:
 	rm -f $(TARGET)

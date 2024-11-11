@@ -1,16 +1,18 @@
 /*
  * The Computer Language Benchmarks Game
- * http://benchmarksgame.alioth.debian.org/
+ * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
  * 
  * modified by Mehmet D. AKIN
  * modified by Daryl Griffith
- */
+*/
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.lang.foreign.*;
+import java.lang.invoke.MethodHandle;
 
 public class fasta {
 
@@ -31,55 +33,82 @@ public class fasta {
     static int last = 42;
 
     public static void main(String[] args) {
-        int n = 1000;
+        var dll_path = System.getProperty("user.dir") + "/../../rapl-interface/target/release/librapl_lib.so";
+        System.load(dll_path);
 
-        if (args.length > 0) {
-            n = Integer.parseInt(args[0]);
+        // Loading functions
+        MemorySegment start_rapl_symbol = SymbolLookup.loaderLookup().find("start_rapl").get();
+        MethodHandle start_rapl = Linker.nativeLinker().downcallHandle(start_rapl_symbol,
+                FunctionDescriptor.of(ValueLayout.JAVA_INT));
+
+        MemorySegment stop_rapl_symbol = SymbolLookup.loaderLookup().find("stop_rapl").get();
+        MethodHandle stop_rapl = Linker.nativeLinker().downcallHandle(stop_rapl_symbol,
+                FunctionDescriptor.of(ValueLayout.JAVA_INT));
+
+        int iterations = Integer.parseInt(args[0]);
+        int n = Integer.parseInt(args[1]);
+        
+        for (int i = 0; i < iterations; i++) {
+            initialize();
+            try {
+                start_rapl.invoke();
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+            run_benchmark(n);
+            try {
+                stop_rapl.invoke();
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+            cleanup();
         }
+    }
+
+    private static void initialize() {
         for (int i = 0; i < WORKERS.length; i++) {
             WORKERS[i] = new NucleotideSelector();
             WORKERS[i].setDaemon(true);
             WORKERS[i].start();
         }
+    }
+
+    private static void run_benchmark(int n) {
         try (OutputStream writer = System.out;) {
             final int bufferSize = LINE_COUNT * LINE_LENGTH;
-
             for (int i = 0; i < BUFFERS_IN_PLAY; i++) {
-                lineFillALU(
-                        new AluBuffer(LINE_LENGTH, bufferSize, i * bufferSize));
+                lineFillALU(new AluBuffer(LINE_LENGTH, bufferSize, i * bufferSize));
             }
             speciesFillALU(writer, n * 2, ">ONE Homo sapiens alu\n");
             for (int i = 0; i < BUFFERS_IN_PLAY; i++) {
                 writeBuffer(writer);
                 lineFillRandom(new Buffer(true, LINE_LENGTH, bufferSize));
             }
-            speciesFillRandom(writer
-                    , n * 3
-                    , ">TWO IUB ambiguity codes\n"
-                    , true);
+            speciesFillRandom(writer, n * 3, ">TWO IUB ambiguity codes\n", true);
             for (int i = 0; i < BUFFERS_IN_PLAY; i++) {
                 writeBuffer(writer);
                 lineFillRandom(new Buffer(false, LINE_LENGTH, bufferSize));
             }
-            speciesFillRandom(writer
-                    , n * 5
-                    , ">THREE Homo sapiens frequency\n"
-                    , false);
+            speciesFillRandom(writer, n * 5, ">THREE Homo sapiens frequency\n", false);
             for (int i = 0; i < BUFFERS_IN_PLAY; i++) {
                 writeBuffer(writer);
             }
         } catch (IOException ex) {
         }
-     }
+    }
+
+    private static void cleanup() {
+        for (NucleotideSelector worker : WORKERS) {
+            worker.interrupt();
+        }
+    }
 
     private static void lineFillALU(AbstractBuffer buffer) {
         WORKERS[OUT.incrementAndGet() % WORKERS.length].put(buffer);
     }
 
-    private static void bufferFillALU(OutputStream writer
-            , int buffers) throws IOException {
+    private static void bufferFillALU(OutputStream writer, int buffers) throws IOException {
         AbstractBuffer buffer;
-
         for (int i = 0; i < buffers; i++) {
             buffer = WORKERS[IN.incrementAndGet() % WORKERS.length].take();
             writer.write(buffer.nucleotides);
@@ -87,9 +116,7 @@ public class fasta {
         }
     }
 
-    private static void speciesFillALU(final OutputStream writer
-            , final int nChars
-            , final String name) throws IOException {
+    private static void speciesFillALU(final OutputStream writer, final int nChars, final String name) throws IOException {
         final int bufferSize = LINE_COUNT * LINE_LENGTH;
         final int bufferCount = nChars / bufferSize;
         final int bufferLoops = bufferCount - BUFFERS_IN_PLAY;
@@ -99,10 +126,7 @@ public class fasta {
         bufferFillALU(writer, bufferLoops);
         if (charsLeftover > 0) {
             writeBuffer(writer);
-            lineFillALU(
-                    new AluBuffer(LINE_LENGTH
-                            , charsLeftover
-                            , nChars - charsLeftover));
+            lineFillALU(new AluBuffer(LINE_LENGTH, charsLeftover, nChars - charsLeftover));
         }
     }
 
@@ -114,10 +138,8 @@ public class fasta {
         WORKERS[OUT.incrementAndGet() % WORKERS.length].put(buffer);
     }
 
-    private static void bufferFillRandom(OutputStream writer
-            , int loops) throws IOException {
+    private static void bufferFillRandom(OutputStream writer, int loops) throws IOException {
         AbstractBuffer buffer;
-
         for (int i = 0; i < loops; i++) {
             buffer = WORKERS[IN.incrementAndGet() % WORKERS.length].take();
             writer.write(buffer.nucleotides);
@@ -125,10 +147,7 @@ public class fasta {
         }
     }
 
-    private static void speciesFillRandom(final OutputStream writer
-            , final int nChars
-            , final String name
-            , final boolean isIUB) throws IOException {
+    private static void speciesFillRandom(final OutputStream writer, final int nChars, final String name, final boolean isIUB) throws IOException {
         final int bufferSize = LINE_COUNT * LINE_LENGTH;
         final int bufferCount = nChars / bufferSize;
         final int bufferLoops = bufferCount - BUFFERS_IN_PLAY;
@@ -143,18 +162,12 @@ public class fasta {
     }
 
     private static void writeBuffer(OutputStream writer) throws IOException {
-        writer.write(
-                WORKERS[IN.incrementAndGet() % WORKERS.length]
-                        .take()
-                        .nucleotides);
+        writer.write(WORKERS[IN.incrementAndGet() % WORKERS.length].take().nucleotides);
     }
 
     public static class NucleotideSelector extends Thread {
-
-        private final BlockingQueue<AbstractBuffer> 
-                in = new ArrayBlockingQueue<>(BUFFERS_IN_PLAY);
-        private final BlockingQueue<AbstractBuffer> 
-                out = new ArrayBlockingQueue<>(BUFFERS_IN_PLAY);
+        private final BlockingQueue<AbstractBuffer> in = new ArrayBlockingQueue<>(BUFFERS_IN_PLAY);
+        private final BlockingQueue<AbstractBuffer> out = new ArrayBlockingQueue<>(BUFFERS_IN_PLAY);
 
         public void put(AbstractBuffer line) {
             try {
@@ -166,7 +179,6 @@ public class fasta {
         @Override
         public void run() {
             AbstractBuffer line;
-
             try {
                 for (;;) {
                     line = in.take();
@@ -187,7 +199,6 @@ public class fasta {
     }
 
     public abstract static class AbstractBuffer {
-
         final int LINE_LENGTH;
         final int LINE_COUNT;
         byte[] chars;
@@ -199,14 +210,11 @@ public class fasta {
             final int outputLineLength = lineLength + 1;
             LINE_COUNT = nChars / lineLength;
             CHARS_LEFTOVER = nChars % lineLength;
-            final int nucleotidesSize 
-                    = nChars + LINE_COUNT + (CHARS_LEFTOVER == 0 ? 0 : 1);
+            final int nucleotidesSize = nChars + LINE_COUNT + (CHARS_LEFTOVER == 0 ? 0 : 1);
             final int lastNucleotide = nucleotidesSize - 1;
 
             nucleotides = new byte[nucleotidesSize];
-            for (int i = lineLength
-                    ; i < lastNucleotide
-                    ; i += outputLineLength) {
+            for (int i = lineLength; i < lastNucleotide; i += outputLineLength) {
                 nucleotides[i] = '\n';
             }
             nucleotides[nucleotides.length - 1] = '\n';
@@ -216,7 +224,6 @@ public class fasta {
     }
 
     public static class AluBuffer extends AbstractBuffer {
-
         final String ALU =
                 "GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGG"
                 + "GAGGCCGAGGCGGGCGGATCACCTGAGGTCAGGAGTTCGAGA"
@@ -231,9 +238,7 @@ public class fasta {
         int charIndex;
         int nucleotideIndex;
 
-        public AluBuffer(final int lineLength
-                , final int nChars
-                , final int offset) {
+        public AluBuffer(final int lineLength, final int nChars, final int offset) {
             super(lineLength, nChars);
             this.nChars = nChars;
             chars = (ALU + ALU.substring(0, LINE_LENGTH)).getBytes();
@@ -249,50 +254,39 @@ public class fasta {
             if (CHARS_LEFTOVER > 0) {
                 ALUFillLine(CHARS_LEFTOVER);
             }
-            charIndex = (charIndex + (nChars * (BUFFERS_IN_PLAY - 1))) 
-                    % ALU.length();
+            charIndex = (charIndex + (nChars * (BUFFERS_IN_PLAY - 1))) % ALU.length();
         }
 
         private void ALUFillLine(final int charCount) {
-            System.arraycopy(chars
-                    , charIndex
-                    , nucleotides
-                    , nucleotideIndex
-                    , charCount);
+            System.arraycopy(chars, charIndex, nucleotides, nucleotideIndex, charCount);
             charIndex += charIndex < MAX_ALU_INDEX ? charCount : ALU_ADJUST;
             nucleotideIndex += charCount + 1;
         }
     }
 
     public static class Buffer extends AbstractBuffer {
-
         final byte[] iubChars = new byte[]{
-            'a', 'c', 'g', 't',
-            'B', 'D', 'H', 'K',
-            'M', 'N', 'R', 'S',
-            'V', 'W', 'Y'};
+                'a', 'c', 'g', 't',
+                'B', 'D', 'H', 'K',
+                'M', 'N', 'R', 'S',
+                'V', 'W', 'Y'};
         final double[] iubProbs = new double[]{
-            0.27, 0.12, 0.12, 0.27,
-            0.02, 0.02, 0.02, 0.02,
-            0.02, 0.02, 0.02, 0.02,
-            0.02, 0.02, 0.02,};
+                0.27, 0.12, 0.12, 0.27,
+                0.02, 0.02, 0.02, 0.02,
+                0.02, 0.02, 0.02, 0.02,
+                0.02, 0.02, 0.02,};
         final byte[] sapienChars = new byte[]{
-            'a',
-            'c',
-            'g',
-            't'};
+                'a', 'c', 'g', 't'};
         final double[] sapienProbs = new double[]{
-            0.3029549426680,
-            0.1979883004921,
-            0.1975473066391,
-            0.3015094502008};
+                0.3029549426680,
+                0.1979883004921,
+                0.1975473066391,
+                0.3015094502008};
         final float[] probs;
         final float[] randoms;
         final int charsInFullLines;
 
-        public Buffer(final boolean isIUB
-                , final int lineLength
-                , final int nChars) {
+        public Buffer(final boolean isIUB, final int lineLength, final int nChars) {
             super(lineLength, nChars);
             double cp = 0;
             final double[] dblProbs = isIUB ? iubProbs : sapienProbs;

@@ -15,23 +15,100 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 class Fasta
 {
+    const string pathToLib = "../../rapl-interface/target/release/librapl_lib.so";
+
+    // DLL imports
+    [DllImport(pathToLib)]
+    static extern int start_rapl();
+
+    [DllImport(pathToLib)]
+    static extern void stop_rapl();
+
     const int LineLength = 60;
 
     const int IM = 139968;
     const int IA = 3877;
     const int IC = 29573;
-    static int seed = 42;
+    static int seed;
+
+    static Frequency[] IUB;
+    static Frequency[] HomoSapiens;
+
+    static string ALU =
+      "GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGG" +
+      "GAGGCCGAGGCGGGCGGATCACCTGAGGTCAGGAGTTCGAGA" +
+      "CCAGCCTGGCCAACATGGTGAAACCCCGTCTCTACTAAAAAT" +
+      "ACAAAAATTAGCCGGGCGTGGTGGCGCGCGCCTGTAATCCCA" +
+      "GCTACTCGGGAGGCTGAGGCAGGAGAATCGCTTGAACCCGGG" +
+      "AGGCGGAGGTTGCAGTGAGCCGAGATCGCGCCACTGCACTCC" +
+      "AGCCTGGGCGACAGAGCGAGACTCCGTCTCAAAAA";
+
+    struct Frequency
+    {
+        public readonly byte c;
+        public double p;
+
+        public Frequency(char c, double p)
+        {
+            this.c = (byte)c;
+            this.p = (p * IM);
+        }
+    }
 
     public static void Main(string[] args)
     {
-        int n = args.Length > 0 ? Int32.Parse(args[0]) : 1000;
+        int iterations = int.Parse(args[0]);
+        int n = args.Length > 0 ? Int32.Parse(args[1]) : 1000;
+
+        for (int i = 0; i < iterations; i++)
+        {
+            initialize();
+            start_rapl();
+            run_benchmark(n);
+            stop_rapl();
+            cleanup();
+        }
+    }
+
+    static void initialize()
+    {
+        seed = 42;
+
+        IUB = new Frequency[] {
+            new Frequency ('a', 0.27)
+            ,new Frequency ('c', 0.12)
+            ,new Frequency ('g', 0.12)
+            ,new Frequency ('t', 0.27)
+            ,new Frequency ('B', 0.02)
+            ,new Frequency ('D', 0.02)
+            ,new Frequency ('H', 0.02)
+            ,new Frequency ('K', 0.02)
+            ,new Frequency ('M', 0.02)
+            ,new Frequency ('N', 0.02)
+            ,new Frequency ('R', 0.02)
+            ,new Frequency ('S', 0.02)
+            ,new Frequency ('V', 0.02)
+            ,new Frequency ('W', 0.02)
+            ,new Frequency ('Y', 0.02)
+        };
+
+        HomoSapiens = new Frequency[] {
+            new Frequency ('a', 0.3029549426680)
+            ,new Frequency ('c', 0.1979883004921)
+            ,new Frequency ('g', 0.1975473066391)
+            ,new Frequency ('t', 0.3015094502008)
+        };
 
         MakeCumulative(IUB);
         MakeCumulative(HomoSapiens);
+    }
 
+    static void run_benchmark(int n)
+    {
         using (var s = Console.OpenStandardOutput())
         {
             MakeRepeatFasta("ONE", "Homo sapiens alu", Encoding.ASCII.GetBytes(ALU), n * 2, s);
@@ -40,43 +117,23 @@ class Fasta
         }
     }
 
-
-
-    public static IEnumerable<R> TransformQueue<T, R>(BlockingCollection<T> queue,
-        Func<T, R> transform, int threadCount)
+    static void cleanup()
     {
-        var tasks = new Task<R>[threadCount];
+        IUB = null;
+        HomoSapiens = null;
+    }
 
-        for (int i = 0; i < threadCount; ++i)
+    static void MakeCumulative(Frequency[] a)
+    {
+        double cp = 0;
+        for (int i = 0; i < a.Length; i++)
         {
-            T input;
-            if (!queue.TryTake(out input, Timeout.Infinite))
-                break;
-
-            tasks[i] = Task.Run(() => transform(input));
-        }
-
-        int pos = 0;
-        while (true)
-        {
-            if (tasks[pos] == null)
-                break;
-
-            yield return tasks[pos].Result;
-
-            T input;
-            tasks[pos] = queue.TryTake(out input, Timeout.Infinite)
-                ? Task.Run(() => transform(input))
-                : null;
-
-            pos = (pos + 1) % threadCount;
+            cp += a[i].p;
+            a[i].p = cp;
         }
     }
 
-
-
-    static void MakeRandomFasta(string id, string desc,
-                                Frequency[] a, int n, Stream s)
+    static void MakeRandomFasta(string id, string desc, Frequency[] a, int n, Stream s)
     {
         var queue = new BlockingCollection<int[]>(2);
 
@@ -108,10 +165,40 @@ class Fasta
         {
             s.Write(r, 0, r.Length);
         }
-
     }
 
-    private static byte[] SelectNucleotides(Frequency[] a, int[] rnd)
+    static IEnumerable<R> TransformQueue<T, R>(BlockingCollection<T> queue,
+        Func<T, R> transform, int threadCount)
+    {
+        var tasks = new Task<R>[threadCount];
+
+        for (int i = 0; i < threadCount; ++i)
+        {
+            T input;
+            if (!queue.TryTake(out input, Timeout.Infinite))
+                break;
+
+            tasks[i] = Task.Run(() => transform(input));
+        }
+
+        int pos = 0;
+        while (true)
+        {
+            if (tasks[pos] == null)
+                break;
+
+            yield return tasks[pos].Result;
+
+            T input;
+            tasks[pos] = queue.TryTake(out input, Timeout.Infinite)
+                ? Task.Run(() => transform(input))
+                : null;
+
+            pos = (pos + 1) % threadCount;
+        }
+    }
+
+    static byte[] SelectNucleotides(Frequency[] a, int[] rnd)
     {
         var resLength = (rnd.Length / LineLength) * (LineLength + 1);
         if (rnd.Length % LineLength != 0)
@@ -125,20 +212,16 @@ class Fasta
         {
             var len = Math.Min(LineLength, rnd.Length - i);
             for (var j = 0; j < len; ++j)
-                buf[index++] = SelectRandom(a, (int)rnd[i + j]);
+                buf[index++] = SelectRandom(a, rnd[i + j]);
             buf[index++] = (byte)'\n';
         }
         return buf;
     }
 
-    static void MakeRepeatFasta(string id, string desc,
-                                byte[] alu, int n, Stream s)
+    static void MakeRepeatFasta(string id, string desc, byte[] alu, int n, Stream s)
     {
         byte[] descStr = Encoding.ASCII.GetBytes(">" + id + " " + desc + "\n");
         s.Write(descStr, 0, descStr.Length);
-
-        /* JG: fasta_repeat repeats every len(alu) * line-length = 287 * 61 = 17507 characters.
-	       So, calculate this once, then just print that buffer over and over. */
 
         byte[] sequence;
         int sequenceLength;
@@ -198,7 +281,6 @@ class Fasta
             s.Write(buf, 0, index);
     }
 
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static byte SelectRandom(Frequency[] a, int r)
     {
@@ -208,64 +290,6 @@ class Fasta
 
         return a[a.Length - 1].c;
     }
-
-    static void MakeCumulative(Frequency[] a)
-    {
-        double cp = 0;
-        for (int i = 0; i < a.Length; i++)
-        {
-            cp += a[i].p;
-            a[i].p = cp;
-        }
-    }
-
-    static string ALU =
-      "GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGG" +
-      "GAGGCCGAGGCGGGCGGATCACCTGAGGTCAGGAGTTCGAGA" +
-      "CCAGCCTGGCCAACATGGTGAAACCCCGTCTCTACTAAAAAT" +
-      "ACAAAAATTAGCCGGGCGTGGTGGCGCGCGCCTGTAATCCCA" +
-      "GCTACTCGGGAGGCTGAGGCAGGAGAATCGCTTGAACCCGGG" +
-      "AGGCGGAGGTTGCAGTGAGCCGAGATCGCGCCACTGCACTCC" +
-      "AGCCTGGGCGACAGAGCGAGACTCCGTCTCAAAAA";
-
-    struct Frequency
-    {
-        public readonly byte c;
-        public double p;
-
-        public Frequency(char c, double p)
-        {
-            this.c = (byte)c;
-            this.p = (p * IM);
-        }
-    }
-
-    static Frequency[] IUB = {
-    new Frequency ('a', 0.27)
-        ,new Frequency ('c', 0.12)
-        ,new Frequency ('g', 0.12)
-        ,new Frequency ('t', 0.27)
-
-        ,new Frequency ('B', 0.02)
-        ,new Frequency ('D', 0.02)
-        ,new Frequency ('H', 0.02)
-        ,new Frequency ('K', 0.02)
-        ,new Frequency ('M', 0.02)
-        ,new Frequency ('N', 0.02)
-        ,new Frequency ('R', 0.02)
-        ,new Frequency ('S', 0.02)
-        ,new Frequency ('V', 0.02)
-        ,new Frequency ('W', 0.02)
-        ,new Frequency ('Y', 0.02)
-};
-
-    static Frequency[] HomoSapiens = {
-    new Frequency ('a', 0.3029549426680)
-        ,new Frequency ('c', 0.1979883004921)
-        ,new Frequency ('g', 0.1975473066391)
-        ,new Frequency ('t', 0.3015094502008)
-};
-
 
     private static void FillRandom(int[] result)
     {
