@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 CC=gcc
 
 OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=ivybridge -fopenmp -I/usr/include/apr-1.0 -D_FILE_OFFSET_BITS=64
@@ -12,6 +14,7 @@ RAPL_DIR=../../rapl-interface
 RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
 
 COUNT=45
+CACHE_MEASURE_FREQ_MS=500
 INPUT=21
 
 $(RAPL):
@@ -27,7 +30,10 @@ run: $(TARGET) $(RAPL)
 	./$(TARGET) 1 $(INPUT)
 
 measure: $(TARGET) $(RAPL)
-	./$(TARGET) $(COUNT) $(INPUT)
+	perf stat --all-cpus -I $(CACHE_MEASURE_FREQ_MS) \
+		--append --output cache.txt \
+		-e cache-misses,cache-references,LLC-loads-misses,LLC-loads \
+		./$(TARGET) $(COUNT) $(INPUT)
 
 mem: $(TARGET) $(RAPL)
 	time -v ./$(TARGET) 1 $(INPUT)

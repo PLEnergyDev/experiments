@@ -1,8 +1,8 @@
 JAVAC=javac
 JAVA=java
 
-CFLAGS=--enable-preview --release 21 -cp .:/usr/local/src/java-libs/fastutil-7.0.12.jar
-RFLAGS=--enable-preview --enable-native-access=ALL-UNNAMED -cp .:/usr/local/src/java-libs/fastutil-7.0.12.jar
+CFLAGS=--enable-preview --release 21 -cp .:/usr/local/src/java-libs/fastutil-7.2.0.jar
+RFLAGS=--enable-preview --enable-native-access=ALL-UNNAMED -cp .:/usr/local/src/java-libs/fastutil-7.2.0.jar
 
 CLASS=knucleotide
 SRC=$(CLASS).java

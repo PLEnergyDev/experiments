@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 CC=dotnet
 
 CFLAGS=-c Release
@@ -8,7 +10,8 @@ SRC=Program.cs
 RAPL_DIR=../../rapl-interface
 RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
 
-COUNT=30
+COUNT=45
+CACHE_MEASURE_FREQ_MS=500
 INPUT=50000000
 
 $(RAPL):
@@ -24,10 +27,12 @@ run: $(TARGET) $(RAPL)
 	./$(TARGET) 1 $(INPUT)
 
 measure: $(TARGET) $(RAPL)
-	modprobe msr
-	@for i in $$(seq 0 $(COUNT)); do \
-		./$(TARGET) 1 $(INPUT); \
-	done
+	perf stat --all-cpus -I $(CACHE_MEASURE_FREQ_MS) \
+		--append --output cache.txt \
+		-e cache-misses,cache-references,LLC-load-misses,LLC-loads \
+		bash -c 'for i in $$(seq 1 $(COUNT)); do \
+			./$(TARGET) 1 $(INPUT); \
+		done'
 
 mem: $(TARGET) $(RAPL)
 	time -v ./$(TARGET) 1 $(INPUT)

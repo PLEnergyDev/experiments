@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 CC=g++
 
 OPT_FLAGS=-pipe -O3 -fomit-frame-pointer -march=ivybridge -mfpmath=sse -msse3 --std=c++11 -fopenmp
@@ -11,7 +13,8 @@ SRC=$(TARGET).cpp
 RAPL_DIR=../../rapl-interface
 RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
 
-COUNT=30
+COUNT=45
+CACHE_MEASURE_FREQ_MS=500
 INPUT=20
 
 $(RAPL):
@@ -27,10 +30,12 @@ run: $(TARGET) $(RAPL)
 	./$(TARGET) 1 $(INPUT)
 
 measure: $(TARGET) $(RAPL)
-	modprobe msr
-	@for i in $$(seq 0 $(COUNT)); do \
-		./$(TARGET) 1 $(INPUT); \
-	done
+	perf stat --all-cpus -I $(CACHE_MEASURE_FREQ_MS) \
+		--append --output cache.txt \
+		-e cache-misses,cache-references,LLC-load-misses,LLC-loads \
+		bash -c 'for i in $$(seq 1 $(COUNT)); do \
+			./$(TARGET) 1 $(INPUT); \
+		done'
 
 mem: $(TARGET) $(RAPL)
 	time -v ./$(TARGET) 1 $(INPUT)

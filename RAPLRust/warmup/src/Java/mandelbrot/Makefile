@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 JAVAC=javac
 JAVA=java
 
@@ -11,6 +13,7 @@ RAPL_DIR=../../rapl-interface
 RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
 
 COUNT=45
+CACHE_MEASURE_FREQ_MS=500
 INPUT=16000
 
 $(RAPL):
@@ -26,8 +29,10 @@ run: $(CLASS) $(RAPL)
 	$(JAVA) $(RFLAGS) $(CLASS) 1 $(INPUT)
 
 measure: $(CLASS) $(RAPL)
-	modprobe msr
-	$(JAVA) $(RFLAGS) $(CLASS) $(COUNT) $(INPUT)
+	perf stat --all-cpus -I $(CACHE_MEASURE_FREQ_MS) \
+		--append --output cache.txt \
+		-e cache-misses,cache-references,LLC-loads-misses,LLC-loads \
+		$(JAVA) $(RFLAGS) $(CLASS) $(COUNT) $(INPUT)
 
 mem: $(CLASS) $(RAPL)
 	time -v $(JAVA) $(RFLAGS) $(CLASS) 1 $(INPUT)

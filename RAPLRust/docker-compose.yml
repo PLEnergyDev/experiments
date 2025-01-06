@@ -1,0 +1,22 @@
+services:
+  experiments:
+    image: experiments:latest
+    container_name: experiments
+    build: .
+    volumes:
+      - ./:/experiments
+    privileged: true
+    devices:
+      - /dev/cpu/0:/dev/cpu/0
+      - /dev/cpu/1:/dev/cpu/1
+      - /dev/cpu/2:/dev/cpu/2
+      - /dev/cpu/3:/dev/cpu/3
+      - /dev/cpu/microcode:/dev/cpu/microcode
+    cap_add:
+      - SYS_RAWIO
+      - SYS_NICE
+    cpuset: "0,1,2,3"
+    cpu_count: 4
+    stdin_open: true
+    tty: true
+    entrypoint: bash

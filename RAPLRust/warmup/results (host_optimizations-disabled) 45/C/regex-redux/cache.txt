@@ -1,0 +1,713 @@
+# started on Wed Nov 27 01:48:21 2024
+
+#           time             counts unit events
+     1.000584524         11,259,190      cache-misses                     #   39.37% of all cache refs         
+     1.000584524         28,598,341      cache-references                                                      
+     1.000584524            316,245      LLC-loads-misses                 #   27.00% of all LL-cache accesses  
+     1.000584524          1,171,204      LLC-loads                                                             
+     2.009986022          6,832,657      cache-misses                     #   45.81% of all cache refs         
+     2.009986022         14,913,933      cache-references                                                      
+     2.009986022            113,877      LLC-loads-misses                 #   23.59% of all LL-cache accesses  
+     2.009986022            482,698      LLC-loads                                                             
+     3.014978930          2,694,455      cache-misses                     #   30.78% of all cache refs         
+     3.014978930          8,754,719      cache-references                                                      
+     3.014978930             41,520      LLC-loads-misses                 #   14.86% of all LL-cache accesses  
+     3.014978930            279,326      LLC-loads                                                             
+     4.020554181          3,879,424      cache-misses                     #   40.90% of all cache refs         
+     4.020554181          9,484,192      cache-references                                                      
+     4.020554181             47,813      LLC-loads-misses                 #   18.29% of all LL-cache accesses  
+     4.020554181            261,383      LLC-loads                                                             
+     5.022567194         10,153,283      cache-misses                     #   39.14% of all cache refs         
+     5.022567194         25,941,399      cache-references                                                      
+     5.022567194            104,619      LLC-loads-misses                 #   16.26% of all LL-cache accesses  
+     5.022567194            643,466      LLC-loads                                                             
+     6.028603380          6,437,470      cache-misses                     #   42.42% of all cache refs         
+     6.028603380         15,175,935      cache-references                                                      
+     6.028603380            110,468      LLC-loads-misses                 #   22.75% of all LL-cache accesses  
+     6.028603380            485,667      LLC-loads                                                             
+     7.035193285          2,799,902      cache-misses                     #   31.52% of all cache refs         
+     7.035193285          8,882,594      cache-references                                                      
+     7.035193285             41,195      LLC-loads-misses                 #   14.80% of all LL-cache accesses  
+     7.035193285            278,266      LLC-loads                                                             
+     8.040109180          5,156,408      cache-misses                     #   40.53% of all cache refs         
+     8.040109180         12,721,534      cache-references                                                      
+     8.040109180             70,823      LLC-loads-misses                 #   19.04% of all LL-cache accesses  
+     8.040109180            371,917      LLC-loads                                                             
+     9.046124157          9,792,319      cache-misses                     #   39.63% of all cache refs         
+     9.046124157         24,711,885      cache-references                                                      
+     9.046124157            116,885      LLC-loads-misses                 #   17.92% of all LL-cache accesses  
+     9.046124157            652,258      LLC-loads                                                             
+    10.049402265          5,647,629      cache-misses                     #   40.56% of all cache refs         
+    10.049402265         13,923,308      cache-references                                                      
+    10.049402265            105,045      LLC-loads-misses                 #   23.44% of all LL-cache accesses  
+    10.049402265            448,177      LLC-loads                                                             
+    11.052470126          3,118,048      cache-misses                     #   32.76% of all cache refs         
+    11.052470126          9,518,911      cache-references                                                      
+    11.052470126             42,481      LLC-loads-misses                 #   15.22% of all LL-cache accesses  
+    11.052470126            279,170      LLC-loads                                                             
+    12.055447187          6,880,474      cache-misses                     #   44.51% of all cache refs         
+    12.055447187         15,459,415      cache-references                                                      
+    12.055447187             86,161      LLC-loads-misses                 #   20.68% of all LL-cache accesses  
+    12.055447187            416,543      LLC-loads                                                             
+    13.060598663          8,589,614      cache-misses                     #   34.58% of all cache refs         
+    13.060598663         24,839,552      cache-references                                                      
+    13.060598663            100,108      LLC-loads-misses                 #   15.37% of all LL-cache accesses  
+    13.060598663            651,420      LLC-loads                                                             
+    14.069950930          4,008,927      cache-misses                     #   35.98% of all cache refs         
+    14.069950930         11,140,925      cache-references                                                      
+    14.069950930             73,075      LLC-loads-misses                 #   19.54% of all LL-cache accesses  
+    14.069950930            374,036      LLC-loads                                                             
+    15.073462799          3,259,018      cache-misses                     #   33.07% of all cache refs         
+    15.073462799          9,855,805      cache-references                                                      
+    15.073462799             45,369      LLC-loads-misses                 #   15.73% of all LL-cache accesses  
+    15.073462799            288,382      LLC-loads                                                             
+    16.080991775          7,911,162      cache-misses                     #   41.23% of all cache refs         
+    16.080991775         19,188,533      cache-references                                                      
+    16.080991775             91,201      LLC-loads-misses                 #   19.20% of all LL-cache accesses  
+    16.080991775            474,951      LLC-loads                                                             
+    17.089837548          8,841,768      cache-misses                     #   41.79% of all cache refs         
+    17.089837548         21,157,548      cache-references                                                      
+    17.089837548            123,689      LLC-loads-misses                 #   20.89% of all LL-cache accesses  
+    17.089837548            592,082      LLC-loads                                                             
+    18.094698299          3,611,982      cache-misses                     #   35.72% of all cache refs         
+    18.094698299         10,113,195      cache-references                                                      
+    18.094698299             70,593      LLC-loads-misses                 #   20.05% of all LL-cache accesses  
+    18.094698299            352,066      LLC-loads                                                             
+    19.097651179          3,886,620      cache-misses                     #   36.12% of all cache refs         
+    19.097651179         10,760,480      cache-references                                                      
+    19.097651179             60,834      LLC-loads-misses                 #   19.43% of all LL-cache accesses  
+    19.097651179            313,123      LLC-loads                                                             
+    20.102669252          9,262,266      cache-misses                     #   38.50% of all cache refs         
+    20.102669252         24,059,419      cache-references                                                      
+    20.102669252             98,417      LLC-loads-misses                 #   16.24% of all LL-cache accesses  
+    20.102669252            606,009      LLC-loads                                                             
+    21.105568087          6,453,031      cache-misses                     #   40.32% of all cache refs         
+    21.105568087         16,002,779      cache-references                                                      
+    21.105568087             80,629      LLC-loads-misses                 #   16.82% of all LL-cache accesses  
+    21.105568087            479,323      LLC-loads                                                             
+    22.116131061          3,127,575      cache-misses                     #   32.15% of all cache refs         
+    22.116131061          9,728,092      cache-references                                                      
+    22.116131061             63,175      LLC-loads-misses                 #   19.61% of all LL-cache accesses  
+    22.116131061            322,087      LLC-loads                                                             
+    23.120668329          3,993,691      cache-misses                     #   38.41% of all cache refs         
+    23.120668329         10,396,679      cache-references                                                      
+    23.120668329             60,466      LLC-loads-misses                 #   20.87% of all LL-cache accesses  
+    23.120668329            289,781      LLC-loads                                                             
+    24.124576325          9,405,938      cache-misses                     #   38.70% of all cache refs         
+    24.124576325         24,304,234      cache-references                                                      
+    24.124576325             97,292      LLC-loads-misses                 #   16.18% of all LL-cache accesses  
+    24.124576325            601,281      LLC-loads                                                             
+    25.127587171          5,816,348      cache-misses                     #   38.20% of all cache refs         
+    25.127587171         15,225,817      cache-references                                                      
+    25.127587171             76,668      LLC-loads-misses                 #   16.54% of all LL-cache accesses  
+    25.127587171            463,474      LLC-loads                                                             
+    26.138768044          3,181,347      cache-misses                     #   32.19% of all cache refs         
+    26.138768044          9,881,865      cache-references                                                      
+    26.138768044             64,636      LLC-loads-misses                 #   19.33% of all LL-cache accesses  
+    26.138768044            334,368      LLC-loads                                                             
+#           time             counts unit events
+    27.143603800          4,102,986      cache-misses                     #   36.60% of all cache refs         
+    27.143603800         11,210,287      cache-references                                                      
+    27.143603800             64,887      LLC-loads-misses                 #   19.80% of all LL-cache accesses  
+    27.143603800            327,739      LLC-loads                                                             
+    28.147572497          9,963,578      cache-misses                     #   39.27% of all cache refs         
+    28.147572497         25,372,940      cache-references                                                      
+    28.147572497            107,509      LLC-loads-misses                 #   16.62% of all LL-cache accesses  
+    28.147572497            646,938      LLC-loads                                                             
+    29.155866619          7,562,003      cache-misses                     #   47.50% of all cache refs         
+    29.155866619         15,921,552      cache-references                                                      
+    29.155866619            135,671      LLC-loads-misses                 #   25.59% of all LL-cache accesses  
+    29.155866619            530,209      LLC-loads                                                             
+    30.159100837          2,795,843      cache-misses                     #   30.52% of all cache refs         
+    30.159100837          9,160,907      cache-references                                                      
+    30.159100837             42,652      LLC-loads-misses                 #   14.82% of all LL-cache accesses  
+    30.159100837            287,737      LLC-loads                                                             
+    31.164553928          4,497,416      cache-misses                     #   40.12% of all cache refs         
+    31.164553928         11,208,660      cache-references                                                      
+    31.164553928             60,507      LLC-loads-misses                 #   18.96% of all LL-cache accesses  
+    31.164553928            319,117      LLC-loads                                                             
+    32.166573501          9,080,464      cache-misses                     #   37.01% of all cache refs         
+    32.166573501         24,534,108      cache-references                                                      
+    32.166573501             97,550      LLC-loads-misses                 #   15.05% of all LL-cache accesses  
+    32.166573501            647,982      LLC-loads                                                             
+    33.176832247          6,015,801      cache-misses                     #   41.65% of all cache refs         
+    33.176832247         14,442,589      cache-references                                                      
+    33.176832247            105,184      LLC-loads-misses                 #   22.41% of all LL-cache accesses  
+    33.176832247            469,323      LLC-loads                                                             
+    34.183030006          2,907,519      cache-misses                     #   31.82% of all cache refs         
+    34.183030006          9,137,466      cache-references                                                      
+    34.183030006             42,153      LLC-loads-misses                 #   15.39% of all LL-cache accesses  
+    34.183030006            273,847      LLC-loads                                                             
+    35.190553408          5,646,495      cache-misses                     #   41.79% of all cache refs         
+    35.190553408         13,511,415      cache-references                                                      
+    35.190553408             75,047      LLC-loads-misses                 #   19.45% of all LL-cache accesses  
+    35.190553408            385,817      LLC-loads                                                             
+    36.192757498          8,136,899      cache-misses                     #   35.72% of all cache refs         
+    36.192757498         22,781,263      cache-references                                                      
+    36.192757498             82,365      LLC-loads-misses                 #   13.32% of all LL-cache accesses  
+    36.192757498            618,576      LLC-loads                                                             
+    37.197857903          6,387,035      cache-misses                     #   45.07% of all cache refs         
+    37.197857903         14,169,959      cache-references                                                      
+    37.197857903            109,172      LLC-loads-misses                 #   22.68% of all LL-cache accesses  
+    37.197857903            481,450      LLC-loads                                                             
+    38.200930855          3,040,300      cache-misses                     #   32.04% of all cache refs         
+    38.200930855          9,489,476      cache-references                                                      
+    38.200930855             44,997      LLC-loads-misses                 #   15.65% of all LL-cache accesses  
+    38.200930855            287,429      LLC-loads                                                             
+    39.205913035          6,270,904      cache-misses                     #   43.35% of all cache refs         
+    39.205913035         14,466,713      cache-references                                                      
+    39.205913035             81,341      LLC-loads-misses                 #   19.88% of all LL-cache accesses  
+    39.205913035            409,068      LLC-loads                                                             
+    40.213560092          9,163,778      cache-misses                     #   37.70% of all cache refs         
+    40.213560092         24,309,178      cache-references                                                      
+    40.213560092            107,574      LLC-loads-misses                 #   16.57% of all LL-cache accesses  
+    40.213560092            649,317      LLC-loads                                                             
+    41.218826031          4,361,614      cache-misses                     #   35.22% of all cache refs         
+    41.218826031         12,383,385      cache-references                                                      
+    41.218826031             82,042      LLC-loads-misses                 #   19.23% of all LL-cache accesses  
+    41.218826031            426,656      LLC-loads                                                             
+    42.223904275          3,162,925      cache-misses                     #   33.19% of all cache refs         
+    42.223904275          9,531,173      cache-references                                                      
+    42.223904275             46,265      LLC-loads-misses                 #   16.27% of all LL-cache accesses  
+    42.223904275            284,420      LLC-loads                                                             
+    43.228889038          7,025,499      cache-misses                     #   45.29% of all cache refs         
+    43.228889038         15,512,436      cache-references                                                      
+    43.228889038             84,551      LLC-loads-misses                 #   20.32% of all LL-cache accesses  
+    43.228889038            416,036      LLC-loads                                                             
+    44.232890806          8,472,816      cache-misses                     #   35.36% of all cache refs         
+    44.232890806         23,959,781      cache-references                                                      
+    44.232890806            101,071      LLC-loads-misses                 #   15.59% of all LL-cache accesses  
+    44.232890806            648,486      LLC-loads                                                             
+    45.239355810          3,626,316      cache-misses                     #   33.88% of all cache refs         
+    45.239355810         10,702,057      cache-references                                                      
+    45.239355810             69,079      LLC-loads-misses                 #   19.65% of all LL-cache accesses  
+    45.239355810            351,626      LLC-loads                                                             
+    46.245917612          3,279,145      cache-misses                     #   33.37% of all cache refs         
+    46.245917612          9,827,581      cache-references                                                      
+    46.245917612             45,438      LLC-loads-misses                 #   15.92% of all LL-cache accesses  
+    46.245917612            285,477      LLC-loads                                                             
+    47.248592115          8,237,835      cache-misses                     #   40.92% of all cache refs         
+    47.248592115         20,130,544      cache-references                                                      
+    47.248592115             98,556      LLC-loads-misses                 #   19.44% of all LL-cache accesses  
+    47.248592115            506,920      LLC-loads                                                             
+    48.257582763          8,171,526      cache-misses                     #   41.85% of all cache refs         
+    48.257582763         19,527,574      cache-references                                                      
+    48.257582763             98,053      LLC-loads-misses                 #   17.32% of all LL-cache accesses  
+    48.257582763            566,285      LLC-loads                                                             
+    49.269823495          3,449,732      cache-misses                     #   34.14% of all cache refs         
+    49.269823495         10,105,088      cache-references                                                      
+    49.269823495             67,565      LLC-loads-misses                 #   19.65% of all LL-cache accesses  
+    49.269823495            343,759      LLC-loads                                                             
+    50.273918430          3,410,409      cache-misses                     #   34.36% of all cache refs         
+    50.273918430          9,924,647      cache-references                                                      
+    50.273918430             47,191      LLC-loads-misses                 #   16.27% of all LL-cache accesses  
+    50.273918430            290,038      LLC-loads                                                             
+    51.278577607          9,377,708      cache-misses                     #   40.00% of all cache refs         
+    51.278577607         23,446,745      cache-references                                                      
+    51.278577607            107,793      LLC-loads-misses                 #   18.66% of all LL-cache accesses  
+    51.278577607            577,801      LLC-loads                                                             
+    52.285609670          6,312,173      cache-misses                     #   36.34% of all cache refs         
+    52.285609670         17,369,944      cache-references                                                      
+    52.285609670             80,645      LLC-loads-misses                 #   15.17% of all LL-cache accesses  
+    52.285609670            531,535      LLC-loads                                                             
+#           time             counts unit events
+    53.295833063          3,130,546      cache-misses                     #   32.13% of all cache refs         
+    53.295833063          9,743,643      cache-references                                                      
+    53.295833063             64,376      LLC-loads-misses                 #   19.68% of all LL-cache accesses  
+    53.295833063            327,118      LLC-loads                                                             
+    54.299927796          3,877,241      cache-misses                     #   36.02% of all cache refs         
+    54.299927796         10,764,317      cache-references                                                      
+    54.299927796             63,027      LLC-loads-misses                 #   19.94% of all LL-cache accesses  
+    54.299927796            316,066      LLC-loads                                                             
+    55.302896639          9,427,010      cache-misses                     #   39.77% of all cache refs         
+    55.302896639         23,702,411      cache-references                                                      
+    55.302896639             98,243      LLC-loads-misses                 #   16.44% of all LL-cache accesses  
+    55.302896639            597,557      LLC-loads                                                             
+    56.307095569          7,703,941      cache-misses                     #   49.17% of all cache refs         
+    56.307095569         15,666,965      cache-references                                                      
+    56.307095569             93,891      LLC-loads-misses                 #   19.22% of all LL-cache accesses  
+    56.307095569            488,404      LLC-loads                                                             
+    57.320886366          3,332,051      cache-misses                     #   32.92% of all cache refs         
+    57.320886366         10,122,236      cache-references                                                      
+    57.320886366             66,524      LLC-loads-misses                 #   19.57% of all LL-cache accesses  
+    57.320886366            340,002      LLC-loads                                                             
+    58.325909154          4,019,540      cache-misses                     #   36.65% of all cache refs         
+    58.325909154         10,968,638      cache-references                                                      
+    58.325909154             63,479      LLC-loads-misses                 #   19.99% of all LL-cache accesses  
+    58.325909154            317,543      LLC-loads                                                             
+    59.330572442          9,768,846      cache-misses                     #   41.05% of all cache refs         
+    59.330572442         23,798,637      cache-references                                                      
+    59.330572442            100,441      LLC-loads-misses                 #   16.50% of all LL-cache accesses  
+    59.330572442            608,883      LLC-loads                                                             
+    60.336835848          6,497,105      cache-misses                     #   43.69% of all cache refs         
+    60.336835848         14,871,410      cache-references                                                      
+    60.336835848             83,701      LLC-loads-misses                 #   18.25% of all LL-cache accesses  
+    60.336835848            458,606      LLC-loads                                                             
+    61.340100707          3,216,880      cache-misses                     #   32.41% of all cache refs         
+    61.340100707          9,925,822      cache-references                                                      
+    61.340100707             61,370      LLC-loads-misses                 #   19.47% of all LL-cache accesses  
+    61.340100707            315,269      LLC-loads                                                             
+    62.344159310          4,114,734      cache-misses                     #   36.94% of all cache refs         
+    62.344159310         11,139,479      cache-references                                                      
+    62.344159310             66,111      LLC-loads-misses                 #   20.40% of all LL-cache accesses  
+    62.344159310            324,073      LLC-loads                                                             
+    63.347559555         10,008,095      cache-misses                     #   40.31% of all cache refs         
+    63.347559555         24,825,566      cache-references                                                      
+    63.347559555            109,697      LLC-loads-misses                 #   17.32% of all LL-cache accesses  
+    63.347559555            633,316      LLC-loads                                                             
+    64.351349049          5,474,098      cache-misses                     #   39.06% of all cache refs         
+    64.351349049         14,013,704      cache-references                                                      
+    64.351349049             72,328      LLC-loads-misses                 #   17.04% of all LL-cache accesses  
+    64.351349049            424,503      LLC-loads                                                             
+    65.358149139          3,178,279      cache-misses                     #   32.95% of all cache refs         
+    65.358149139          9,644,337      cache-references                                                      
+    65.358149139             60,501      LLC-loads-misses                 #   19.73% of all LL-cache accesses  
+    65.358149139            306,681      LLC-loads                                                             
+    66.364167227          4,272,609      cache-misses                     #   37.67% of all cache refs         
+    66.364167227         11,342,009      cache-references                                                      
+    66.364167227             67,385      LLC-loads-misses                 #   20.63% of all LL-cache accesses  
+    66.364167227            326,713      LLC-loads                                                             
+    67.370593293          9,744,395      cache-misses                     #   39.14% of all cache refs         
+    67.370593293         24,898,261      cache-references                                                      
+    67.370593293            103,164      LLC-loads-misses                 #   15.82% of all LL-cache accesses  
+    67.370593293            652,313      LLC-loads                                                             
+    68.377837859          6,153,229      cache-misses                     #   41.08% of all cache refs         
+    68.377837859         14,980,203      cache-references                                                      
+    68.377837859            106,000      LLC-loads-misses                 #   22.29% of all LL-cache accesses  
+    68.377837859            475,595      LLC-loads                                                             
+    69.380912344          2,711,380      cache-misses                     #   30.26% of all cache refs         
+    69.380912344          8,961,498      cache-references                                                      
+    69.380912344             41,053      LLC-loads-misses                 #   15.07% of all LL-cache accesses  
+    69.380912344            272,440      LLC-loads                                                             
+    70.386555670          4,207,821      cache-misses                     #   36.31% of all cache refs         
+    70.386555670         11,589,219      cache-references                                                      
+    70.386555670             61,040      LLC-loads-misses                 #   17.73% of all LL-cache accesses  
+    70.386555670            344,260      LLC-loads                                                             
+    71.388580117          9,159,409      cache-misses                     #   36.95% of all cache refs         
+    71.388580117         24,790,056      cache-references                                                      
+    71.388580117             96,550      LLC-loads-misses                 #   15.28% of all LL-cache accesses  
+    71.388580117            631,731      LLC-loads                                                             
+    72.395247998          6,252,189      cache-misses                     #   42.23% of all cache refs         
+    72.395247998         14,806,634      cache-references                                                      
+    72.395247998            107,077      LLC-loads-misses                 #   22.80% of all LL-cache accesses  
+    72.395247998            469,663      LLC-loads                                                             
+    73.398906575          2,854,162      cache-misses                     #   31.01% of all cache refs         
+    73.398906575          9,202,744      cache-references                                                      
+    73.398906575             41,081      LLC-loads-misses                 #   15.23% of all LL-cache accesses  
+    73.398906575            269,749      LLC-loads                                                             
+    74.402950532          5,531,945      cache-misses                     #   41.33% of all cache refs         
+    74.402950532         13,384,030      cache-references                                                      
+    74.402950532             76,431      LLC-loads-misses                 #   20.03% of all LL-cache accesses  
+    74.402950532            381,647      LLC-loads                                                             
+    75.412059794          8,650,601      cache-misses                     #   36.31% of all cache refs         
+    75.412059794         23,823,782      cache-references                                                      
+    75.412059794             88,920      LLC-loads-misses                 #   14.32% of all LL-cache accesses  
+    75.412059794            620,879      LLC-loads                                                             
+    76.417844680          6,363,058      cache-misses                     #   50.38% of all cache refs         
+    76.417844680         12,630,061      cache-references                                                      
+    76.417844680            105,936      LLC-loads-misses                 #   24.47% of all LL-cache accesses  
+    76.417844680            432,951      LLC-loads                                                             
+    77.422439966          2,981,193      cache-misses                     #   32.55% of all cache refs         
+    77.422439966          9,157,674      cache-references                                                      
+    77.422439966             43,299      LLC-loads-misses                 #   15.21% of all LL-cache accesses  
+    77.422439966            284,582      LLC-loads                                                             
+    78.426171463          6,027,664      cache-misses                     #   44.04% of all cache refs         
+    78.426171463         13,686,969      cache-references                                                      
+    78.426171463             79,958      LLC-loads-misses                 #   20.53% of all LL-cache accesses  
+    78.426171463            389,444      LLC-loads                                                             
+#           time             counts unit events
+    79.431047287          8,485,034      cache-misses                     #   34.84% of all cache refs         
+    79.431047287         24,352,949      cache-references                                                      
+    79.431047287             94,471      LLC-loads-misses                 #   14.68% of all LL-cache accesses  
+    79.431047287            643,736      LLC-loads                                                             
+    80.437920599          5,420,020      cache-misses                     #   42.56% of all cache refs         
+    80.437920599         12,734,954      cache-references                                                      
+    80.437920599             91,240      LLC-loads-misses                 #   22.03% of all LL-cache accesses  
+    80.437920599            414,091      LLC-loads                                                             
+    81.443048839          3,092,232      cache-misses                     #   32.65% of all cache refs         
+    81.443048839          9,471,632      cache-references                                                      
+    81.443048839             43,291      LLC-loads-misses                 #   15.90% of all LL-cache accesses  
+    81.443048839            272,224      LLC-loads                                                             
+    82.449051561          6,719,453      cache-misses                     #   44.31% of all cache refs         
+    82.449051561         15,164,759      cache-references                                                      
+    82.449051561             81,769      LLC-loads-misses                 #   20.05% of all LL-cache accesses  
+    82.449051561            407,865      LLC-loads                                                             
+    83.453573442          8,726,865      cache-misses                     #   34.89% of all cache refs         
+    83.453573442         25,014,236      cache-references                                                      
+    83.453573442            101,379      LLC-loads-misses                 #   15.04% of all LL-cache accesses  
+    83.453573442            673,977      LLC-loads                                                             
+    84.457759726          4,262,452      cache-misses                     #   41.20% of all cache refs         
+    84.457759726         10,346,973      cache-references                                                      
+    84.457759726             76,386      LLC-loads-misses                 #   20.76% of all LL-cache accesses  
+    84.457759726            367,861      LLC-loads                                                             
+    85.460422970          3,203,074      cache-misses                     #   33.06% of all cache refs         
+    85.460422970          9,687,401      cache-references                                                      
+    85.460422970             44,346      LLC-loads-misses                 #   15.53% of all LL-cache accesses  
+    85.460422970            285,611      LLC-loads                                                             
+    86.465560336          7,520,139      cache-misses                     #   40.07% of all cache refs         
+    86.465560336         18,767,942      cache-references                                                      
+    86.465560336             97,568      LLC-loads-misses                 #   19.56% of all LL-cache accesses  
+    86.465560336            498,738      LLC-loads                                                             
+    87.467577231          7,852,365      cache-misses                     #   35.72% of all cache refs         
+    87.467577231         21,981,549      cache-references                                                      
+    87.467577231             96,961      LLC-loads-misses                 #   15.13% of all LL-cache accesses  
+    87.467577231            640,779      LLC-loads                                                             
+    88.480036323          3,359,653      cache-misses                     #   31.97% of all cache refs         
+    88.480036323         10,509,530      cache-references                                                      
+    88.480036323             68,256      LLC-loads-misses                 #   19.41% of all LL-cache accesses  
+    88.480036323            351,735      LLC-loads                                                             
+    89.485047274          3,331,006      cache-misses                     #   34.02% of all cache refs         
+    89.485047274          9,790,957      cache-references                                                      
+    89.485047274             44,331      LLC-loads-misses                 #   15.29% of all LL-cache accesses  
+    89.485047274            289,923      LLC-loads                                                             
+    90.487729739          8,967,920      cache-misses                     #   40.62% of all cache refs         
+    90.487729739         22,075,781      cache-references                                                      
+    90.487729739            109,935      LLC-loads-misses                 #   19.14% of all LL-cache accesses  
+    90.487729739            574,457      LLC-loads                                                             
+    91.492822400          7,371,844      cache-misses                     #   39.51% of all cache refs         
+    91.492822400         18,656,415      cache-references                                                      
+    91.492822400             89,448      LLC-loads-misses                 #   15.93% of all LL-cache accesses  
+    91.492822400            561,385      LLC-loads                                                             
+    92.498593112          3,180,811      cache-misses                     #   32.23% of all cache refs         
+    92.498593112          9,868,888      cache-references                                                      
+    92.498593112             66,655      LLC-loads-misses                 #   19.70% of all LL-cache accesses  
+    92.498593112            338,387      LLC-loads                                                             
+    93.503614411          3,795,307      cache-misses                     #   35.42% of all cache refs         
+    93.503614411         10,715,643      cache-references                                                      
+    93.503614411             60,442      LLC-loads-misses                 #   19.25% of all LL-cache accesses  
+    93.503614411            314,040      LLC-loads                                                             
+    94.508585628          9,125,564      cache-misses                     #   39.28% of all cache refs         
+    94.508585628         23,230,927      cache-references                                                      
+    94.508585628             99,605      LLC-loads-misses                 #   16.89% of all LL-cache accesses  
+    94.508585628            589,754      LLC-loads                                                             
+    95.513793472          6,473,299      cache-misses                     #   39.02% of all cache refs         
+    95.513793472         16,588,718      cache-references                                                      
+    95.513793472             81,586      LLC-loads-misses                 #   15.81% of all LL-cache accesses  
+    95.513793472            516,049      LLC-loads                                                             
+    96.521071294          3,065,500      cache-misses                     #   31.96% of all cache refs         
+    96.521071294          9,591,672      cache-references                                                      
+    96.521071294             63,532      LLC-loads-misses                 #   19.49% of all LL-cache accesses  
+    96.521071294            325,954      LLC-loads                                                             
+    97.527055063          3,914,154      cache-misses                     #   36.15% of all cache refs         
+    97.527055063         10,827,790      cache-references                                                      
+    97.527055063             62,740      LLC-loads-misses                 #   19.78% of all LL-cache accesses  
+    97.527055063            317,143      LLC-loads                                                             
+    98.531020217          9,355,461      cache-misses                     #   37.98% of all cache refs         
+    98.531020217         24,629,977      cache-references                                                      
+    98.531020217            100,218      LLC-loads-misses                 #   15.65% of all LL-cache accesses  
+    98.531020217            640,209      LLC-loads                                                             
+    99.539223699          5,977,899      cache-misses                     #   39.26% of all cache refs         
+    99.539223699         15,224,508      cache-references                                                      
+    99.539223699             77,158      LLC-loads-misses                 #   15.62% of all LL-cache accesses  
+    99.539223699            493,845      LLC-loads                                                             
+   100.545915162          3,140,135      cache-misses                     #   32.13% of all cache refs         
+   100.545915162          9,773,857      cache-references                                                      
+   100.545915162             63,016      LLC-loads-misses                 #   19.54% of all LL-cache accesses  
+   100.545915162            322,457      LLC-loads                                                             
+   101.550052676          4,033,847      cache-misses                     #   36.56% of all cache refs         
+   101.550052676         11,034,901      cache-references                                                      
+   101.550052676             63,897      LLC-loads-misses                 #   20.24% of all LL-cache accesses  
+   101.550052676            315,774      LLC-loads                                                             
+   102.553060412          9,632,353      cache-misses                     #   38.80% of all cache refs         
+   102.553060412         24,825,760      cache-references                                                      
+   102.553060412            102,772      LLC-loads-misses                 #   16.43% of all LL-cache accesses  
+   102.553060412            625,599      LLC-loads                                                             
+   103.558888170          5,718,436      cache-misses                     #   39.21% of all cache refs         
+   103.558888170         14,584,654      cache-references                                                      
+   103.558888170             75,098      LLC-loads-misses                 #   16.11% of all LL-cache accesses  
+   103.558888170            466,266      LLC-loads                                                             
+   104.563483596          3,194,428      cache-misses                     #   32.68% of all cache refs         
+   104.563483596          9,773,516      cache-references                                                      
+   104.563483596             62,710      LLC-loads-misses                 #   19.52% of all LL-cache accesses  
+   104.563483596            321,265      LLC-loads                                                             
+#           time             counts unit events
+   105.569997992          4,114,346      cache-misses                     #   36.92% of all cache refs         
+   105.569997992         11,144,435      cache-references                                                      
+   105.569997992             62,948      LLC-loads-misses                 #   20.01% of all LL-cache accesses  
+   105.569997992            314,654      LLC-loads                                                             
+   106.574013093          9,439,297      cache-misses                     #   36.17% of all cache refs         
+   106.574013093         26,098,280      cache-references                                                      
+   106.574013093            101,199      LLC-loads-misses                 #   14.71% of all LL-cache accesses  
+   106.574013093            688,072      LLC-loads                                                             
+   107.577830573          6,317,552      cache-misses                     #   42.20% of all cache refs         
+   107.577830573         14,969,428      cache-references                                                      
+   107.577830573            107,825      LLC-loads-misses                 #   22.01% of all LL-cache accesses  
+   107.577830573            489,994      LLC-loads                                                             
+   108.584100515          2,752,022      cache-misses                     #   30.29% of all cache refs         
+   108.584100515          9,086,077      cache-references                                                      
+   108.584100515             45,043      LLC-loads-misses                 #   15.98% of all LL-cache accesses  
+   108.584100515            281,857      LLC-loads                                                             
+   109.590013679          3,874,241      cache-misses                     #   36.45% of all cache refs         
+   109.590013679         10,629,808      cache-references                                                      
+   109.590013679             49,184      LLC-loads-misses                 #   16.35% of all LL-cache accesses  
+   109.590013679            300,820      LLC-loads                                                             
+   110.594974922          9,581,311      cache-misses                     #   36.57% of all cache refs         
+   110.594974922         26,201,505      cache-references                                                      
+   110.594974922            105,095      LLC-loads-misses                 #   15.02% of all LL-cache accesses  
+   110.594974922            699,672      LLC-loads                                                             
+   111.599692680          6,249,665      cache-misses                     #   45.04% of all cache refs         
+   111.599692680         13,877,281      cache-references                                                      
+   111.599692680            106,574      LLC-loads-misses                 #   22.62% of all LL-cache accesses  
+   111.599692680            471,244      LLC-loads                                                             
+   112.606303179          2,759,919      cache-misses                     #   30.34% of all cache refs         
+   112.606303179          9,096,922      cache-references                                                      
+   112.606303179             41,314      LLC-loads-misses                 #   14.87% of all LL-cache accesses  
+   112.606303179            277,902      LLC-loads                                                             
+   113.608626392          4,637,079      cache-misses                     #   37.99% of all cache refs         
+   113.608626392         12,207,333      cache-references                                                      
+   113.608626392             65,062      LLC-loads-misses                 #   18.15% of all LL-cache accesses  
+   113.608626392            358,408      LLC-loads                                                             
+   114.615577203          9,043,052      cache-misses                     #   35.70% of all cache refs         
+   114.615577203         25,330,602      cache-references                                                      
+   114.615577203            100,109      LLC-loads-misses                 #   15.25% of all LL-cache accesses  
+   114.615577203            656,500      LLC-loads                                                             
+   115.624977917          6,619,787      cache-misses                     #   47.23% of all cache refs         
+   115.624977917         14,015,449      cache-references                                                      
+   115.624977917            107,913      LLC-loads-misses                 #   23.86% of all LL-cache accesses  
+   115.624977917            452,345      LLC-loads                                                             
+   116.628266718          2,887,896      cache-misses                     #   31.24% of all cache refs         
+   116.628266718          9,244,830      cache-references                                                      
+   116.628266718             41,683      LLC-loads-misses                 #   15.11% of all LL-cache accesses  
+   116.628266718            275,891      LLC-loads                                                             
+   117.632554829          5,670,998      cache-misses                     #   41.30% of all cache refs         
+   117.632554829         13,730,772      cache-references                                                      
+   117.632554829             79,540      LLC-loads-misses                 #   20.10% of all LL-cache accesses  
+   117.632554829            395,651      LLC-loads                                                             
+   118.634743117          8,268,968      cache-misses                     #   34.47% of all cache refs         
+   118.634743117         23,986,374      cache-references                                                      
+   118.634743117             84,159      LLC-loads-misses                 #   12.99% of all LL-cache accesses  
+   118.634743117            648,023      LLC-loads                                                             
+   119.637925990          5,997,465      cache-misses                     #   43.11% of all cache refs         
+   119.637925990         13,913,535      cache-references                                                      
+   119.637925990            103,845      LLC-loads-misses                 #   23.07% of all LL-cache accesses  
+   119.637925990            450,099      LLC-loads                                                             
+   120.642320586          3,021,164      cache-misses                     #   32.17% of all cache refs         
+   120.642320586          9,390,925      cache-references                                                      
+   120.642320586             42,065      LLC-loads-misses                 #   15.28% of all LL-cache accesses  
+   120.642320586            275,321      LLC-loads                                                             
+   121.646290248          6,296,175      cache-misses                     #   43.96% of all cache refs         
+   121.646290248         14,321,663      cache-references                                                      
+   121.646290248             82,242      LLC-loads-misses                 #   20.44% of all LL-cache accesses  
+   121.646290248            402,292      LLC-loads                                                             
+   122.652596391          9,216,640      cache-misses                     #   35.88% of all cache refs         
+   122.652596391         25,685,569      cache-references                                                      
+   122.652596391            107,383      LLC-loads-misses                 #   16.18% of all LL-cache accesses  
+   122.652596391            663,837      LLC-loads                                                             
+   123.659913600          4,439,364      cache-misses                     #   38.78% of all cache refs         
+   123.659913600         11,448,752      cache-references                                                      
+   123.659913600             78,907      LLC-loads-misses                 #   20.10% of all LL-cache accesses  
+   123.659913600            392,587      LLC-loads                                                             
+   124.664303690          3,134,877      cache-misses                     #   32.27% of all cache refs         
+   124.664303690          9,713,469      cache-references                                                      
+   124.664303690             44,124      LLC-loads-misses                 #   14.91% of all LL-cache accesses  
+   124.664303690            295,838      LLC-loads                                                             
+   125.667306035          7,009,420      cache-misses                     #   44.55% of all cache refs         
+   125.667306035         15,732,145      cache-references                                                      
+   125.667306035             89,330      LLC-loads-misses                 #   20.40% of all LL-cache accesses  
+   125.667306035            437,838      LLC-loads                                                             
+   126.670590849          8,970,716      cache-misses                     #   36.60% of all cache refs         
+   126.670590849         24,507,841      cache-references                                                      
+   126.670590849            104,835      LLC-loads-misses                 #   15.55% of all LL-cache accesses  
+   126.670590849            674,309      LLC-loads                                                             
+   127.676801918          3,960,754      cache-misses                     #   36.32% of all cache refs         
+   127.676801918         10,905,502      cache-references                                                      
+   127.676801918             73,109      LLC-loads-misses                 #   19.34% of all LL-cache accesses  
+   127.676801918            377,993      LLC-loads                                                             
+   128.683278729          3,287,780      cache-misses                     #   34.97% of all cache refs         
+   128.683278729          9,401,738      cache-references                                                      
+   128.683278729             44,495      LLC-loads-misses                 #   16.58% of all LL-cache accesses  
+   128.683278729            268,415      LLC-loads                                                             
+   129.690596651          8,231,459      cache-misses                     #   40.41% of all cache refs         
+   129.690596651         20,367,821      cache-references                                                      
+   129.690596651            101,310      LLC-loads-misses                 #   19.60% of all LL-cache accesses  
+   129.690596651            516,841      LLC-loads                                                             
+   130.696617690          7,934,019      cache-misses                     #   39.22% of all cache refs         
+   130.696617690         20,229,635      cache-references                                                      
+   130.696617690             94,822      LLC-loads-misses                 #   16.27% of all LL-cache accesses  
+   130.696617690            582,915      LLC-loads                                                             
+#           time             counts unit events
+   131.705816818          3,566,470      cache-misses                     #   34.94% of all cache refs         
+   131.705816818         10,206,987      cache-references                                                      
+   131.705816818             69,466      LLC-loads-misses                 #   19.86% of all LL-cache accesses  
+   131.705816818            349,697      LLC-loads                                                             
+   132.709280171          3,373,165      cache-misses                     #   33.76% of all cache refs         
+   132.709280171          9,990,988      cache-references                                                      
+   132.709280171             44,008      LLC-loads-misses                 #   15.45% of all LL-cache accesses  
+   132.709280171            284,834      LLC-loads                                                             
+   133.711610078          9,380,075      cache-misses                     #   40.87% of all cache refs         
+   133.711610078         22,948,427      cache-references                                                      
+   133.711610078            109,398      LLC-loads-misses                 #   19.08% of all LL-cache accesses  
+   133.711610078            573,245      LLC-loads                                                             
+   134.720576756          7,077,904      cache-misses                     #   39.61% of all cache refs         
+   134.720576756         17,867,168      cache-references                                                      
+   134.720576756             89,459      LLC-loads-misses                 #   15.88% of all LL-cache accesses  
+   134.720576756            563,294      LLC-loads                                                             
+   135.731836555          3,117,566      cache-misses                     #   32.29% of all cache refs         
+   135.731836555          9,655,799      cache-references                                                      
+   135.731836555             63,896      LLC-loads-misses                 #   19.34% of all LL-cache accesses  
+   135.731836555            330,410      LLC-loads                                                             
+   136.735267358          3,859,879      cache-misses                     #   35.67% of all cache refs         
+   136.735267358         10,821,444      cache-references                                                      
+   136.735267358             61,876      LLC-loads-misses                 #   19.79% of all LL-cache accesses  
+   136.735267358            312,592      LLC-loads                                                             
+   137.739275468          9,461,408      cache-misses                     #   39.78% of all cache refs         
+   137.739275468         23,786,678      cache-references                                                      
+   137.739275468            104,409      LLC-loads-misses                 #   17.10% of all LL-cache accesses  
+   137.739275468            610,428      LLC-loads                                                             
+   138.742794897          6,252,359      cache-misses                     #   39.55% of all cache refs         
+   138.742794897         15,807,835      cache-references                                                      
+   138.742794897             81,294      LLC-loads-misses                 #   16.12% of all LL-cache accesses  
+   138.742794897            504,355      LLC-loads                                                             
+   139.749920517          3,100,118      cache-misses                     #   30.54% of all cache refs         
+   139.749920517         10,152,520      cache-references                                                      
+   139.749920517             64,081      LLC-loads-misses                 #   19.12% of all LL-cache accesses  
+   139.749920517            335,136      LLC-loads                                                             
+   140.754628414          3,955,038      cache-misses                     #   36.06% of all cache refs         
+   140.754628414         10,967,734      cache-references                                                      
+   140.754628414             63,520      LLC-loads-misses                 #   19.81% of all LL-cache accesses  
+   140.754628414            320,692      LLC-loads                                                             
+   141.759579495          9,366,520      cache-misses                     #   38.05% of all cache refs         
+   141.759579495         24,617,642      cache-references                                                      
+   141.759579495            107,988      LLC-loads-misses                 #   16.92% of all LL-cache accesses  
+   141.759579495            638,402      LLC-loads                                                             
+   142.766200733          5,865,094      cache-misses                     #   39.00% of all cache refs         
+   142.766200733         15,038,566      cache-references                                                      
+   142.766200733             78,201      LLC-loads-misses                 #   16.66% of all LL-cache accesses  
+   142.766200733            469,392      LLC-loads                                                             
+   143.774911473          3,121,284      cache-misses                     #   31.80% of all cache refs         
+   143.774911473          9,816,524      cache-references                                                      
+   143.774911473             62,854      LLC-loads-misses                 #   19.72% of all LL-cache accesses  
+   143.774911473            318,719      LLC-loads                                                             
+   144.778055731          4,061,162      cache-misses                     #   37.00% of all cache refs         
+   144.778055731         10,977,461      cache-references                                                      
+   144.778055731             64,181      LLC-loads-misses                 #   20.10% of all LL-cache accesses  
+   144.778055731            319,281      LLC-loads                                                             
+   145.780574521          9,392,625      cache-misses                     #   37.55% of all cache refs         
+   145.780574521         25,015,294      cache-references                                                      
+   145.780574521            100,171      LLC-loads-misses                 #   15.44% of all LL-cache accesses  
+   145.780574521            648,809      LLC-loads                                                             
+   146.789882478          5,463,800      cache-misses                     #   37.30% of all cache refs         
+   146.789882478         14,647,837      cache-references                                                      
+   146.789882478             75,373      LLC-loads-misses                 #   16.62% of all LL-cache accesses  
+   146.789882478            453,496      LLC-loads                                                             
+   147.793074449          3,128,754      cache-misses                     #   32.83% of all cache refs         
+   147.793074449          9,530,752      cache-references                                                      
+   147.793074449             61,076      LLC-loads-misses                 #   20.07% of all LL-cache accesses  
+   147.793074449            304,338      LLC-loads                                                             
+   148.798063050          4,182,895      cache-misses                     #   37.18% of all cache refs         
+   148.798063050         11,251,595      cache-references                                                      
+   148.798063050             64,456      LLC-loads-misses                 #   20.80% of all LL-cache accesses  
+   148.798063050            309,836      LLC-loads                                                             
+   149.802569848          9,700,065      cache-misses                     #   36.58% of all cache refs         
+   149.802569848         26,514,806      cache-references                                                      
+   149.802569848            106,575      LLC-loads-misses                 #   15.48% of all LL-cache accesses  
+   149.802569848            688,643      LLC-loads                                                             
+   150.812993097          7,117,543      cache-misses                     #   46.57% of all cache refs         
+   150.812993097         15,284,942      cache-references                                                      
+   150.812993097            116,847      LLC-loads-misses                 #   23.85% of all LL-cache accesses  
+   150.812993097            489,945      LLC-loads                                                             
+   151.816907535          2,707,825      cache-misses                     #   29.91% of all cache refs         
+   151.816907535          9,052,658      cache-references                                                      
+   151.816907535             40,610      LLC-loads-misses                 #   14.60% of all LL-cache accesses  
+   151.816907535            278,125      LLC-loads                                                             
+   152.825552973          3,916,308      cache-misses                     #   35.04% of all cache refs         
+   152.825552973         11,178,216      cache-references                                                      
+   152.825552973             57,097      LLC-loads-misses                 #   17.33% of all LL-cache accesses  
+   152.825552973            329,437      LLC-loads                                                             
+   153.827579347          9,621,134      cache-misses                     #   38.79% of all cache refs         
+   153.827579347         24,802,973      cache-references                                                      
+   153.827579347            105,503      LLC-loads-misses                 #   16.44% of all LL-cache accesses  
+   153.827579347            641,555      LLC-loads                                                             
+   154.835789462          5,915,607      cache-misses                     #   40.16% of all cache refs         
+   154.835789462         14,729,690      cache-references                                                      
+   154.835789462            105,225      LLC-loads-misses                 #   22.17% of all LL-cache accesses  
+   154.835789462            474,569      LLC-loads                                                             
+   155.840304847          2,825,587      cache-misses                     #   31.04% of all cache refs         
+   155.840304847          9,103,482      cache-references                                                      
+   155.840304847             41,263      LLC-loads-misses                 #   15.22% of all LL-cache accesses  
+   155.840304847            271,138      LLC-loads                                                             
+   156.844305660          5,159,232      cache-misses                     #   40.36% of all cache refs         
+   156.844305660         12,783,472      cache-references                                                      
+   156.844305660             70,119      LLC-loads-misses                 #   19.26% of all LL-cache accesses  
+   156.844305660            364,159      LLC-loads                                                             
+#           time             counts unit events
+   157.847217835          9,328,504      cache-misses                     #   39.23% of all cache refs         
+   157.847217835         23,778,719      cache-references                                                      
+   157.847217835             94,059      LLC-loads-misses                 #   14.80% of all LL-cache accesses  
+   157.847217835            635,447      LLC-loads                                                             
+   158.850626253          6,426,547      cache-misses                     #   46.90% of all cache refs         
+   158.850626253         13,701,954      cache-references                                                      
+   158.850626253            109,625      LLC-loads-misses                 #   23.30% of all LL-cache accesses  
+   158.850626253            470,459      LLC-loads                                                             
+   159.854307020          2,969,357      cache-misses                     #   31.68% of all cache refs         
+   159.854307020          9,371,679      cache-references                                                      
+   159.854307020             43,284      LLC-loads-misses                 #   15.59% of all LL-cache accesses  
+   159.854307020            277,610      LLC-loads                                                             
+   160.857303277          5,931,839      cache-misses                     #   42.70% of all cache refs         
+   160.857303277         13,890,444      cache-references                                                      
+   160.857303277             78,327      LLC-loads-misses                 #   20.11% of all LL-cache accesses  
+   160.857303277            389,515      LLC-loads                                                             
+   161.861578722          8,475,250      cache-misses                     #   35.68% of all cache refs         
+   161.861578722         23,750,242      cache-references                                                      
+   161.861578722             93,938      LLC-loads-misses                 #   14.46% of all LL-cache accesses  
+   161.861578722            649,631      LLC-loads                                                             
+   162.871173071          5,386,691      cache-misses                     #   41.45% of all cache refs         
+   162.871173071         12,996,220      cache-references                                                      
+   162.871173071             92,534      LLC-loads-misses                 #   21.71% of all LL-cache accesses  
+   162.871173071            426,293      LLC-loads                                                             
+   163.874294646          3,089,465      cache-misses                     #   32.85% of all cache refs         
+   163.874294646          9,405,665      cache-references                                                      
+   163.874294646             43,752      LLC-loads-misses                 #   15.94% of all LL-cache accesses  
+   163.874294646            274,406      LLC-loads                                                             
+   164.878292877          6,685,441      cache-misses                     #   44.78% of all cache refs         
+   164.878292877         14,930,505      cache-references                                                      
+   164.878292877             83,858      LLC-loads-misses                 #   20.46% of all LL-cache accesses  
+   164.878292877            409,862      LLC-loads                                                             
+   165.885559475          8,873,217      cache-misses                     #   36.11% of all cache refs         
+   165.885559475         24,572,556      cache-references                                                      
+   165.885559475            103,698      LLC-loads-misses                 #   15.39% of all LL-cache accesses  
+   165.885559475            673,860      LLC-loads                                                             
+   166.890806397          4,224,036      cache-misses                     #   37.75% of all cache refs         
+   166.890806397         11,190,229      cache-references                                                      
+   166.890806397             76,597      LLC-loads-misses                 #   19.64% of all LL-cache accesses  
+   166.890806397            390,036      LLC-loads                                                             
+   167.895286517          3,213,194      cache-misses                     #   34.52% of all cache refs         
+   167.895286517          9,308,440      cache-references                                                      
+   167.895286517             46,206      LLC-loads-misses                 #   16.73% of all LL-cache accesses  
+   167.895286517            276,178      LLC-loads                                                             
+   168.898644930          7,546,059      cache-misses                     #   41.48% of all cache refs         
+   168.898644930         18,191,433      cache-references                                                      
+   168.898644930             95,681      LLC-loads-misses                 #   20.09% of all LL-cache accesses  
+   168.898644930            476,211      LLC-loads                                                             
+   169.900575605          8,430,302      cache-misses                     #   38.23% of all cache refs         
+   169.900575605         22,052,463      cache-references                                                      
+   169.900575605            100,637      LLC-loads-misses                 #   15.87% of all LL-cache accesses  
+   169.900575605            634,116      LLC-loads                                                             
+   170.907195841          3,464,643      cache-misses                     #   33.71% of all cache refs         
+   170.907195841         10,279,192      cache-references                                                      
+   170.907195841             68,974      LLC-loads-misses                 #   19.18% of all LL-cache accesses  
+   170.907195841            359,635      LLC-loads                                                             
+   171.913304772          3,332,320      cache-misses                     #   33.75% of all cache refs         
+   171.913304772          9,873,328      cache-references                                                      
+   171.913304772             45,351      LLC-loads-misses                 #   15.71% of all LL-cache accesses  
+   171.913304772            288,729      LLC-loads                                                             
+   172.918590841          8,814,769      cache-misses                     #   40.89% of all cache refs         
+   172.918590841         21,555,659      cache-references                                                      
+   172.918590841            104,181      LLC-loads-misses                 #   19.22% of all LL-cache accesses  
+   172.918590841            542,173      LLC-loads                                                             
+   173.931803914          7,994,336      cache-misses                     #   41.40% of all cache refs         
+   173.931803914         19,308,400      cache-references                                                      
+   173.931803914             97,567      LLC-loads-misses                 #   16.39% of all LL-cache accesses  
+   173.931803914            595,128      LLC-loads                                                             
+   174.942156550          3,184,914      cache-misses                     #   31.56% of all cache refs         
+   174.942156550         10,090,390      cache-references                                                      
+   174.942156550             67,677      LLC-loads-misses                 #   19.47% of all LL-cache accesses  
+   174.942156550            347,576      LLC-loads                                                             
+   175.946042266          3,808,193      cache-misses                     #   35.33% of all cache refs         
+   175.946042266         10,777,597      cache-references                                                      
+   175.946042266             60,259      LLC-loads-misses                 #   19.37% of all LL-cache accesses  
+   175.946042266            311,173      LLC-loads                                                             
+   176.390038017          1,601,761      cache-misses                     #   30.91% of all cache refs         
+   176.390038017          5,182,347      cache-references                                                      
+   176.390038017             34,506      LLC-loads-misses                 #   17.80% of all LL-cache accesses  
+   176.390038017            193,852      LLC-loads                                                             
