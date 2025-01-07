@@ -23,7 +23,7 @@ public class Program
         {
             initialize();
             start_rapl();
-            for (int j = 0; j < 100; j++) {
+            for (int j = 0; j < 1000; j++) {
                 run_benchmark(rows, cols);
             }
             stop_rapl();

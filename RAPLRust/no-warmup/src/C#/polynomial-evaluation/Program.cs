@@ -20,7 +20,7 @@ public class Program
         for (int i = 0; i < iterations; i++)
         {
             start_rapl();
-            for (int j = 0; j < 1000; j++)
+            for (int j = 0; j < 20000; j++)
             {
                 run_benchmark(n);
             }

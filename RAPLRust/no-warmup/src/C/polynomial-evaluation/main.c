@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     int n = atoi(argv[2]);
     double *cs = initialize(n);
     start_rapl();
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 20000; i++) {
       double result = run_benchmark(cs, n);
       printf("%f\n", result);
     }

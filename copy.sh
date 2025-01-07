@@ -29,14 +29,3 @@ ssh -t $REMOTE_URL "
 
 rm "$ARCHIVE_NAME" || { echo "[ERROR] Failed to cleanup"; exit 1; }
 echo "[Ok] Copying complete"
-
-# convert sh to python script
-#   - there should only be one script that traverses all dirs
-#   - the script does the measuring, copying and structuring the data for every experiment in one go
-#   - at the end of everything, does the average and plots
-#   - if one experiments fail move to the next one
-#
-# assembly code analysis. Difference between IL and Assembly
-#
-# optinally get the JIT thing to work
-#

@@ -61,7 +61,7 @@ public class polynomialevaluation {
             } catch (Throwable e) {
                 e.printStackTrace();
             }
-            for (int j = 0; j < 1000; j++) {
+            for (int j = 0; j < 20000; j++) {
                 run_benchmark();
                 System.out.printf("%f%n", result);
             }

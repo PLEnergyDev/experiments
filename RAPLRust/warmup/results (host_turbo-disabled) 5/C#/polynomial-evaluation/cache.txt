@@ -1,7 +1,0 @@
-# started on Wed Nov 20 11:48:39 2024
-
-#           time             counts unit events
-     0.405525048          4,331,624      cache-misses                     #    5.17% of all cache refs         
-     0.405525048         83,847,155      cache-references                                                      
-     0.405525048            261,713      LLC-loads-misses                 #    6.43% of all LL-cache accesses  
-     0.405525048          4,071,408      LLC-loads                                                             

@@ -1,6 +1,0 @@
-Language (Energy),Energy (J),Normalized Energy,Language (Time),Time (ms),Normalized Time,Language (Memory),Memory (MB),Normalized Memory,Language (Peak),Peak (MB),Normalized Peak
-Rust,147.57,1.0,Rust,2220.86,1.0,C,58.47,1.0,C,0.0,
-C,153.48,1.04,C,2313.29,1.04,C++,58.47,1.0,C++,0.0,
-C++,196.06,1.33,Java,2956.0,1.33,C#,58.47,1.0,C#,0.0,
-Java,196.25,1.33,C++,3285.04,1.48,Rust,58.47,1.0,Rust,0.0,
-C#,249.39,1.69,C#,3964.35,1.79,Java,58.47,1.0,Java,0.0,

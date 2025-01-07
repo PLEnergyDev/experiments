@@ -5,7 +5,7 @@ use rapl_lib::ffi::stop_rapl;
 fn initialize() {}
 
 fn run_benchmark(n: usize) {
-    for _ in 0..1000 {
+    for _ in 0..20000 {
         let result = polynomial_evaluation(n);
         println!("{}", result);
     }

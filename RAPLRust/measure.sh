@@ -1,8 +1,7 @@
 #!/bin/bash
 
 BENCHMARK_SETS=("no-warmup" "warmup")
-# BENCHMARK_LANGUAGES=("C" "C++" "C#" "Java" "Rust")
-BENCHMARK_LANGUAGES=("C#" "Java")
+BENCHMARK_LANGUAGES=("C" "C++" "C#" "Java" "Rust")
 BENCHMARKS=("binary-trees" "division-loop" "fannkuch-redux" "fasta" "k-nucleotide" "mandelbrot" "matrix-multiplication" "n-body" "polynomial-evaluation" "regex-redux" "reverse-complement" "spectral-norm")
 
 PYTHON_FASTA_BENCHMARK="Python/fasta/fasta.python3-3.py"
@@ -29,8 +28,6 @@ if ! modprobe msr; then
     echo "[ERROR] Failed to load 'msr' kernel module. Ensure it is available and try again."
     exit 1
 fi
-
-bash optimizations.sh disable || { echo "[ERROR] Failed to disable OS optimizations. Exiting."; exit 1; }
 
 # Check for Python interpreters
 if command -v python3 &>/dev/null; then

@@ -65,12 +65,3 @@ if [[ $1 == "disable" ]]; then
 else
     echo "[INFO] CPU frequency restored to maximum."
 fi
-
-# Another optimization you can make is
-# to give OS first priority to the process
-# with 'nice -n -20 %command%'
-
-# Another optimization you can make is
-# to containerize your process in a docker
-# container and limit the number of CPU's
-# using the docker flag --cpuset-cpus="<comma separated CPU indexes>"

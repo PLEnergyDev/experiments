@@ -1,7 +1,0 @@
-Algorithm,Package Energy (J),Core Energy (J),Uncore Energy (J),DRAM Energy (J),Elapsed Time (ms),Total Memory (MB),Peak Memory (MB)
-matrix-multiplication,3.89,1.92,0.0,0.1,179,0.0,0
-matrix-multiplication,4.0,2.02,0.0,0.1,178,0.0,0
-matrix-multiplication,3.99,2.02,0.0,0.1,178,0.0,0
-matrix-multiplication,3.98,2.0,0.0,0.1,179,0.0,0
-matrix-multiplication,4.03,2.04,0.0,0.1,178,0.0,0
-matrix-multiplication,4.03,2.04,0.0,0.1,178,0.0,0

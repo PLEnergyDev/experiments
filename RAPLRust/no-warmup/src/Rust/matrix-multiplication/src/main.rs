@@ -63,7 +63,7 @@ fn main() {
     for i in 0..iterations {
         initialize();
         start_rapl();
-        for _ in 0..100 {
+        for _ in 0..1000 {
             run_benchmark(rows, cols);
         }
         stop_rapl();

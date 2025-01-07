@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
     matrix A = init_matrix(rows, cols);
     matrix B = init_matrix(rows, cols);
     start_rapl();
-    for (int j = 0; j < 100; j++) {
+    for (int j = 0; j < 1000; j++) {
       double result = run_benchmark(A, B, rows, cols);
       printf("%f\n", result);
     }

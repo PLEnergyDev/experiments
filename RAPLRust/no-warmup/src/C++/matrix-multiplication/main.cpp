@@ -54,7 +54,7 @@ void initialize() {
 }
 
 void run_benchmark() {
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 1000; i++) {
         double result = matrix_multiplication(rows, cols);
         std::cout << result << std::endl;
     }

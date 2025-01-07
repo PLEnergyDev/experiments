@@ -28,7 +28,7 @@ double polynomial_evaluation() {
 }
 
 void run_benchmark() {
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 20000; i++) {
         double result = polynomial_evaluation();
         std::cout << result << std::endl;
     }
