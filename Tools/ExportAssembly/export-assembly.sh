@@ -21,35 +21,55 @@
 # - https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/
 # - https://github.com/EgorBo/Disasmo
 
+## Configuration.
+set -e
+
 ## Helper Functions.
 usage() {
-  echo "usage: bash export-assembly.sh input-file [-f subroutine-name -i]"
+  echo "usage: bash export-assembly.sh input-file [-foh]"
   exit 1
 }
 
-usage_if_no_argument() {
+help() {
+cat << HELP
+usage: bash export-assembly.sh input-file [optional-arguments]
+
+OPTIONAL ARGUMENTS:
+-f subroutine-pattern
+-o objdump-command
+-h
+
+SUBROUTINE PATTERN:
+.c      see --disassemble=symbol in man objdump
+.cpp    see --disassemble=symbol in man objdump
+.rust   see --disassemble=symbol in man objdump
+.zig    see --disassemble=symbol in man objdump
+ELF     see --disassemble=symbol in man objdump
+.cs     see https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/jit/viewing-jit-dumps.md#specifying-method-names
+.java   see -XX:CompileCommand=command,method[,option] in https://docs.oracle.com/en/java/javase/23/docs/specs/man/java.html
+
+OBJDUMP COMMAND:
+stats   show a summary of the assembly instructions used
+source  inline source code and assembly for C, C++, and Zig
+jumps   visualize jumps by drawing lines between addresses
+HELP
+  exit 1
+}
+
+error() {
+  echo "ERROR: $1" 1>&2
+  exit 1
+}
+
+error_if_no_argument() {
   if [[ ! $1 -le $2 ]] then
-    usage
+    error "missing argument for the flag $3"
   fi
 }
 
-inline_only_for_c_cpp_zig() {
-  if [[ ! -z $1 ]]
-  then
-    echo "Inlining of source code is only supported for C, C++, and Zig".
-    exit 1
-  fi
-}
-
-objdump_argument() {
-  if [[ -z $2 && -z $3 ]] then
-    objdump "$1" --disassemble --demangle --no-addresses --no-show-raw-insn 
-  elif [[ -z $2 ]] then
-    objdump "$1" --disassemble --demangle --source --no-addresses --no-show-raw-insn
-  elif [[ -z $3 ]] then
-    objdump "$1" --disassemble --demangle --disassemble="$2" --no-addresses --no-show-raw-insn
-  else
-    objdump "$1" --disassemble --demangle --disassemble="$2" --source --no-addresses --no-show-raw-insn
+error_if_objdump() {
+  if [[ ! -z $1 ]] then
+    error "objdump commands are not supported by C# and Java"
   fi
 }
 
@@ -58,46 +78,70 @@ count_instructions() {
   awk '/^\t/{acc[$1]++} END { for(op in acc) { print acc[op],op } }' "$1" | sort -n -r >> "$1"
 }
 
+objdump_with_command() {
+  objdump_shell_command="objdump $1 --disassemble --demangle --no-addresses --no-show-raw-insn  --disassembler-color=extended-color"
+
+  if [[ ! -z "$2" ]] then
+    objdump_shell_command="$objdump_shell_command --disassemble=$2"
+  fi
+
+  if [[ "$3" == "stats" ]] then
+    objdump_shell_command="$objdump_shell_command > $1.s"
+    eval "$objdump_shell_command"
+    count_instructions "$1.s"
+  elif [[ "$3" == "source" ]] then
+    objdump_shell_command="$objdump_shell_command --source  > $1.s"
+    eval "$objdump_shell_command"
+  elif [[ "$3" == "jumps" ]] then
+    objdump_shell_command="$objdump_shell_command --visualize-jumps=extended-color  > $1.s"
+    eval "$objdump_shell_command"
+  elif [[ ! -z $3 ]] then
+    error "$3 is not a supported objdump command"
+  else
+    objdump_shell_command="$objdump_shell_command > $1.s"
+    eval "$objdump_shell_command"
+  fi
+}
+
 cat_and_clean() {
-  rm "$1.bin"
-  rm "$1.bin.o"
-  cat "$1.s"
-  rm "$1.s"
+  rm -f "$1.bin"
+  rm -f "$1.bin.o"
+  cat "$1.bin.s"
+  rm -f "$1.bin.s"
 }
 
 ## Type Functions.
 clang_c() {
-  clang "$1" -g -O3 -march=native -o "$1.bin"
-  objdump_argument "$1.bin" "$2" "$3" > "$1.s"
-  count_instructions "$1.s"
+  gcc "$1" -g -O3 -march=native -o "$1.bin"
+  objdump_with_command "$1.bin" "$2" "$3"
   cat_and_clean "$1"
 }
 
 clang_cpp() {
   clang++ "$1" -g -O3 -march=native -o "$1.bin"
-  objdump_argument "$1.bin" "$2" "$3" > "$1.s"
-  count_instructions "$1.s"
+  objdump_with_command "$1.bin" "$2" "$3"
   cat_and_clean "$1"
 }
 
 rustc_rs() {
-  inline_only_for_c_cpp_zig $3
-
   rustc "$1" -g -C opt-level=3 -C target-cpu=native -o "$1.bin"
-  objdump_argument "$1.bin" "$2" "$3" > "$1.s"
-  count_instructions "$1.s"
+  objdump_with_command "$1.bin" "$2" "$3"
   cat_and_clean "$1"
 }
 
 zig_zig() {
   zig build-exe "$1" -fno-strip -O ReleaseFast -mcpu native -femit-bin="$1.bin"
-  objdump_argument "$1.bin" "$2" "$3" > "$1.s"
-  count_instructions "$1.s"
+  objdump_with_command "$1.bin" "$2" "$3"
+  cat_and_clean "$1"
+}
+
+elf() {
+  objdump_with_command "$1" "$2" "$3"
   cat_and_clean "$1"
 }
 
 dotnet_scd_jit_cs() {
-  inline_only_for_c_cpp_zig $3
+  error_if_objdump "$3"
 
   current_working_directory="$(pwd)"
   temporary_directory="$(mktemp -d)"
@@ -120,7 +164,7 @@ dotnet_scd_jit_cs() {
 }
 
 openjdk_java() {
-  inline_only_for_c_cpp_zig $3
+  error_if_objdump "$3"
 
   if [[ -f hsdis-amd64.so ]] then
     curl -s -O https://chriswhocodes.com/hsdis/hsdis-amd64.so
@@ -140,23 +184,35 @@ openjdk_java() {
 }
 
 ## Main.
-if [[ $# -lt 1 || $# -gt 4 || ! -f "$1" ]] then
+if [[ $# -lt 1 ]] then
   usage
+fi
+
+if [[ "$1" == "-h" ]] then
+  help
+fi
+
+if [[ ! -f "$1" ]] then
+  error "the file \"$1\" does not exist."
 fi
 
 suffix="${1##*.}"
 subroutine_pattern=
-inline_source_code=
+objdump_command=
 
 argument_index=2
 while [[ $argument_index -le $# ]]
 do
   if [[ ${!argument_index} == "-f" ]] then
     let argument_index+=1
-    usage_if_no_argument $argument_index $#
+    error_if_no_argument $argument_index $# "-f"
     subroutine_pattern="${!argument_index}"
-  elif [[ ${!argument_index} == "-i" ]] then
-    inline_source_code=true
+  elif [[ ${!argument_index} == "-o" ]] then
+    let argument_index+=1
+    error_if_no_argument $argument_index $# "-o"
+    objdump_command="${!argument_index}"
+  elif [[ ${!argument_index} == "-h" ]] then
+    help
   else
     usage
   fi
@@ -165,24 +221,27 @@ done
 
 case $suffix in
   "c")
-    clang_c "$1" "$subroutine_pattern" "$inline_source_code"
+    clang_c "$1" "$subroutine_pattern" "$objdump_command"
     ;;
   "cpp")
-    clang_cpp "$1" "$subroutine_pattern" "$inline_source_code"
+    clang_cpp "$1" "$subroutine_pattern" "$objdump_command"
     ;;
   "rs")
-    rustc_rs "$1" "$subroutine_pattern" "$inline_source_code"
+    rustc_rs "$1" "$subroutine_pattern" "$objdump_command"
     ;;
   "zig")
-    zig_zig "$1" "$subroutine_pattern" "$inline_source_code"
+    zig_zig "$1" "$subroutine_pattern" "$objdump_command"
     ;;
   "cs")
-    dotnet_scd_jit_cs "$1" "$subroutine_pattern" "$inline_source_code"
+    dotnet_scd_jit_cs "$1" "$subroutine_pattern" "$objdump_command"
     ;;
   "java")
-    openjdk_java "$1" "$subroutine_pattern" "$inline_source_code"
+    openjdk_java "$1" "$subroutine_pattern" "$objdump_command"
     ;;
   *)
-    echo "$input_file_suffix files are not support"
-    exit 1
+    if file "$1" | grep -q ": ELF"; then
+      elf "$1" "$subroutine_pattern" "$objdump_command"
+    else
+      error "\"$1\" is not an ELF file or supported source code"
+    fi
 esac
