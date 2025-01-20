@@ -46,7 +46,9 @@ SUBROUTINE PATTERN:
 .zig    see --disassemble=symbol in man objdump
 ELF     see --disassemble=symbol in man objdump
 .cs     see https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/jit/viewing-jit-dumps.md#specifying-method-names
+.dll    see https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/jit/viewing-jit-dumps.md#specifying-method-names
 .java   see -XX:CompileCommand=command,method[,option] in https://docs.oracle.com/en/java/javase/23/docs/specs/man/java.html
+.class  see -XX:CompileCommand=command,method[,option] in https://docs.oracle.com/en/java/javase/23/docs/specs/man/java.html
 
 OBJDUMP COMMAND:
 stats   show a summary of the assembly instructions used
@@ -147,40 +149,50 @@ dotnet_scd_jit_cs() {
   temporary_directory="$(mktemp -d)"
   execute_file="$(basename "$temporary_directory")"
 
+  pushd "$temporary_directory" > /dev/null
+  dotnet new console > /dev/null
+  cp "$current_working_directory/$1" "Program.cs"
+  dotnet build -c Release > /dev/null
+  dotnet_scd_jit_dll "bin/Release/"*"/$execute_file.dll" "$2" "$3"
+  popd > /dev/null
+
+  rm -rf "$temporary_directory"
+}
+
+dotnet_scd_jit_dll() {
+  error_if_objdump "$3"
+
   if [[ -z $2 ]] then
     jit_disasm="*"
   else
     jit_disasm="$2"
   fi
 
-  pushd "$temporary_directory" > /dev/null
-  dotnet new console > /dev/null
-  cp "$current_working_directory/$1" "Program.cs"
-  dotnet build -c Release > /dev/null
-  DOTNET_JitDisasm="$jit_disasm" "./bin/Release/"*"/$execute_file"
-  popd > /dev/null
-
-  rm -rf "$temporary_directory"
+  DOTNET_JitDisasm="$jit_disasm" "dotnet" "$1"
 }
 
 openjdk_java() {
   error_if_objdump "$3"
+  javac "$1"
+  class_file="$(grep class "$1" | cut -d' ' -f2).class"
+  openjdk_class "$class_file" "$2" "$3"
+  rm "$class.class"
+}
 
-  if [[ -f hsdis-amd64.so ]] then
+openjdk_class() {
+  error_if_objdump "$3"
+
+  if [[ ! -f hsdis-amd64.so ]] then
     curl -s -O https://chriswhocodes.com/hsdis/hsdis-amd64.so
   fi
 
-  javac "$1"
-
-  class="$(grep class "$1" | cut -d' ' -f2)"
+  class=${1%.class}
 
   if [[ -z "$2" ]] then
     LD_LIBRARY_PATH=. java -XX:+UnlockDiagnosticVMOptions -XX:+PrintAssembly "$class"
   else
     LD_LIBRARY_PATH=. java -XX:CompileCommand=print,"$2" "$class"
   fi
-
-  rm "$class.class"
 }
 
 ## Main.
@@ -235,8 +247,14 @@ case $suffix in
   "cs")
     dotnet_scd_jit_cs "$1" "$subroutine_pattern" "$objdump_command"
     ;;
+  "dll")
+    dotnet_scd_jit_dll "$1" "$subroutine_pattern" "$objdump_command"
+    ;;
   "java")
     openjdk_java "$1" "$subroutine_pattern" "$objdump_command"
+    ;;
+  "class")
+    openjdk_class "$1" "$subroutine_pattern" "$objdump_command"
     ;;
   *)
     if file "$1" | grep -q ": ELF"; then
