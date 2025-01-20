@@ -1,6 +1,6 @@
-#include<cstdio>
+#include <iostream>
 
 int main() {
-  puts("Hello World");
+  std::cout << "Hello World\n";
   return 0;
 }
