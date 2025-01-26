@@ -34,15 +34,13 @@ run: $(TARGET) $(RAPL)
 measure: $(TARGET) $(RAPL)
 	perf stat --all-cpus -I $(CACHE_MEASURE_FREQ_MS) \
 		--append --output cache.txt \
-		-e cache-misses,cache-references,LLC-loads-misses,LLC-loads \
+		-e cache-misses,branch-misses,LLC-loads-misses,msr/cpu_thermal_margin/,cpu-clock,cycles \
+		-e cstate_core/c3-residency/,cstate_core/c6-residency/,cstate_core/c7-residency/ \
 		./$(TARGET) $(COUNT) $(INPUT)
 
 jit: $(TARGET) $(RAPL)
-	perf stat --all-cpus -I $(CACHE_MEASURE_FREQ_MS) \
-		--append --output cache.txt \
-		-e cache-misses,cache-references,LLC-loads-misses,LLC-loads \
-		env DOTNET_JitStdOutFile=$(DOTNET_JitStdOutFile) DOTNET_JitDisasm=$(DOTNET_JitDisasm) DOTNET_JitDisasmDiffable=$(DOTNET_JitDisasmDiffable) DOTNET_JitDisasmOnlyOptimized=$(DOTNET_JitDisasmOnlyOptimized) \
-		./$(TARGET) $(COUNT) $(INPUT)
+	env DOTNET_JitStdOutFile=$(DOTNET_JitStdOutFile) DOTNET_JitDisasm=$(DOTNET_JitDisasm) DOTNET_JitDisasmDiffable=$(DOTNET_JitDisasmDiffable) DOTNET_JitDisasmOnlyOptimized=$(DOTNET_JitDisasmOnlyOptimized) \
+	./$(TARGET) $(COUNT) $(INPUT)
 
 mem: $(TARGET) $(RAPL)
 	time -v ./$(TARGET) 1 $(INPUT)

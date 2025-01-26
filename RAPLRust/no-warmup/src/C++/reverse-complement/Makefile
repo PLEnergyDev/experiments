@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 CC=g++
 
-OPT_FLAGS=-pipe -O3 -fomit-frame-pointer -march=ivybridge -DSIMD -std=c++11
+OPT_FLAGS=-pipe -O3 -fomit-frame-pointer -march=native -DSIMD -std=c++11
 LIB_FLAGS=-lapr-1 -L$(RAPL_DIR)/target/release -lrapl_lib -Wl,-rpath=$(RAPL_DIR)/target/release
 
 CFLAGS=$(OPT_FLAGS) $(LIB_FLAGS)

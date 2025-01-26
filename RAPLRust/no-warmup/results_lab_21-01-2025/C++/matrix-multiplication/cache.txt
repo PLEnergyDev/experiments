@@ -1,0 +1,1539 @@
+# started on Mon Jan 20 21:26:49 2025
+
+#           time             counts unit events
+     0.500643061            196,296      cache-misses                                                          
+     0.500643061          3,138,516      branch-misses                                                         
+     0.500643061             34,090      LLC-loads-misses                                                      
+     0.500643061                 69 C    msr/cpu_thermal_margin/          #   11.374 /sec                      
+     0.500643061           6,066.32 msec cpu-clock                        #   12.133 CPUs utilized             
+     0.500643061        531,033,050      cycles                           #    0.088 GHz                       
+     0.500643061          5,182,400      cstate_core/c3-residency/        #  854.291 K/sec                     
+     0.500643061        919,009,216      cstate_core/c6-residency/        #  151.494 M/sec                     
+     0.500643061      6,443,020,704      cstate_core/c7-residency/        #    1.062 G/sec                     
+     1.007734384            105,395      cache-misses                                                          
+     1.007734384          3,442,509      branch-misses                                                         
+     1.007734384             27,156      LLC-loads-misses                                                      
+     1.007734384                 71 C    msr/cpu_thermal_margin/          #   11.703 /sec                      
+     1.007734384           6,066.88 msec cpu-clock                        #   12.134 CPUs utilized             
+     1.007734384        538,157,716      cycles                           #    0.089 GHz                       
+     1.007734384          4,912,000      cstate_core/c3-residency/        #  809.642 K/sec                     
+     1.007734384        600,550,944      cstate_core/c6-residency/        #   98.988 M/sec                     
+     1.007734384      6,672,441,760      cstate_core/c7-residency/        #    1.100 G/sec                     
+     1.512797184            103,690      cache-misses                                                          
+     1.512797184          3,537,447      branch-misses                                                         
+     1.512797184             27,006      LLC-loads-misses                                                      
+     1.512797184                 72 C    msr/cpu_thermal_margin/          #   11.871 /sec                      
+     1.512797184           6,065.04 msec cpu-clock                        #   12.130 CPUs utilized             
+     1.512797184        540,610,008      cycles                           #    0.089 GHz                       
+     1.512797184         10,603,744      cstate_core/c3-residency/        #    1.748 M/sec                     
+     1.512797184        860,336,480      cstate_core/c6-residency/        #  141.852 M/sec                     
+     1.512797184      6,336,600,064      cstate_core/c7-residency/        #    1.045 G/sec                     
+     2.018800247            139,335      cache-misses                                                          
+     2.018800247          3,458,898      branch-misses                                                         
+     2.018800247             30,195      LLC-loads-misses                                                      
+     2.018800247                 70 C    msr/cpu_thermal_margin/          #   11.490 /sec                      
+     2.018800247           6,091.99 msec cpu-clock                        #   12.184 CPUs utilized             
+     2.018800247        539,172,143      cycles                           #    0.089 GHz                       
+     2.018800247          7,246,752      cstate_core/c3-residency/        #    1.190 M/sec                     
+     2.018800247      1,287,835,328      cstate_core/c6-residency/        #  211.398 M/sec                     
+     2.018800247      6,022,864,800      cstate_core/c7-residency/        #  988.653 M/sec                     
+     2.523803439            106,883      cache-misses                                                          
+     2.523803439          3,372,789      branch-misses                                                         
+     2.523803439             28,337      LLC-loads-misses                                                      
+     2.523803439                 69 C    msr/cpu_thermal_margin/          #   11.387 /sec                      
+     2.523803439           6,059.61 msec cpu-clock                        #   12.119 CPUs utilized             
+     2.523803439        539,677,830      cycles                           #    0.089 GHz                       
+     2.523803439          6,189,824      cstate_core/c3-residency/        #    1.021 M/sec                     
+     2.523803439        619,932,544      cstate_core/c6-residency/        #  102.306 M/sec                     
+     2.523803439      6,574,250,976      cstate_core/c7-residency/        #    1.085 G/sec                     
+     3.028918482             96,585      cache-misses                                                          
+     3.028918482          3,389,958      branch-misses                                                         
+     3.028918482             27,296      LLC-loads-misses                                                      
+     3.028918482                 70 C    msr/cpu_thermal_margin/          #   11.528 /sec                      
+     3.028918482           6,072.10 msec cpu-clock                        #   12.144 CPUs utilized             
+     3.028918482        540,862,867      cycles                           #    0.089 GHz                       
+     3.028918482          7,495,136      cstate_core/c3-residency/        #    1.234 M/sec                     
+     3.028918482        623,961,184      cstate_core/c6-residency/        #  102.759 M/sec                     
+     3.028918482      6,572,916,256      cstate_core/c7-residency/        #    1.082 G/sec                     
+     3.534923311            100,022      cache-misses                                                          
+     3.534923311          3,346,611      branch-misses                                                         
+     3.534923311             27,802      LLC-loads-misses                                                      
+     3.534923311                 70 C    msr/cpu_thermal_margin/          #   11.558 /sec                      
+     3.534923311           6,056.27 msec cpu-clock                        #   12.113 CPUs utilized             
+     3.534923311        539,672,751      cycles                           #    0.089 GHz                       
+     3.534923311          5,085,920      cstate_core/c3-residency/        #  839.778 K/sec                     
+     3.534923311        575,173,856      cstate_core/c6-residency/        #   94.972 M/sec                     
+     3.534923311      6,608,850,048      cstate_core/c7-residency/        #    1.091 G/sec                     
+     4.039592256            129,985      cache-misses                                                          
+     4.039592256          3,387,181      branch-misses                                                         
+     4.039592256             30,881      LLC-loads-misses                                                      
+     4.039592256                 70 C    msr/cpu_thermal_margin/          #   11.566 /sec                      
+     4.039592256           6,052.35 msec cpu-clock                        #   12.105 CPUs utilized             
+     4.039592256        544,078,841      cycles                           #    0.090 GHz                       
+     4.039592256          5,954,464      cstate_core/c3-residency/        #  983.827 K/sec                     
+     4.039592256      1,239,975,392      cstate_core/c6-residency/        #  204.875 M/sec                     
+     4.039592256      5,881,315,808      cstate_core/c7-residency/        #  971.741 M/sec                     
+     4.544616005             98,962      cache-misses                                                          
+     4.544616005          3,389,012      branch-misses                                                         
+     4.544616005             28,496      LLC-loads-misses                                                      
+     4.544616005                 72 C    msr/cpu_thermal_margin/          #   11.864 /sec                      
+     4.544616005           6,068.99 msec cpu-clock                        #   12.138 CPUs utilized             
+     4.544616005        547,193,365      cycles                           #    0.090 GHz                       
+     4.544616005          6,983,776      cstate_core/c3-residency/        #    1.151 M/sec                     
+     4.544616005      1,771,043,680      cstate_core/c6-residency/        #  291.819 M/sec                     
+     4.544616005      5,360,833,856      cstate_core/c7-residency/        #  883.316 M/sec                     
+     5.050602831            101,831      cache-misses                                                          
+     5.050602831          3,428,443      branch-misses                                                         
+     5.050602831             28,508      LLC-loads-misses                                                      
+     5.050602831                 71 C    msr/cpu_thermal_margin/          #   11.692 /sec                      
+     5.050602831           6,072.28 msec cpu-clock                        #   12.145 CPUs utilized             
+     5.050602831        547,802,423      cycles                           #    0.090 GHz                       
+     5.050602831          8,656,416      cstate_core/c3-residency/        #    1.426 M/sec                     
+     5.050602831      1,546,088,704      cstate_core/c6-residency/        #  254.614 M/sec                     
+     5.050602831      5,603,082,336      cstate_core/c7-residency/        #  922.732 M/sec                     
+     5.556540233            105,825      cache-misses                                                          
+     5.556540233          3,405,596      branch-misses                                                         
+     5.556540233             29,217      LLC-loads-misses                                                      
+     5.556540233                 72 C    msr/cpu_thermal_margin/          #   11.893 /sec                      
+     5.556540233           6,054.11 msec cpu-clock                        #   12.108 CPUs utilized             
+     5.556540233        545,862,526      cycles                           #    0.090 GHz                       
+     5.556540233          7,806,880      cstate_core/c3-residency/        #    1.290 M/sec                     
+     5.556540233      1,562,510,624      cstate_core/c6-residency/        #  258.091 M/sec                     
+     5.556540233      5,593,561,600      cstate_core/c7-residency/        #  923.928 M/sec                     
+     6.060519083            136,722      cache-misses                                                          
+     6.060519083          3,342,976      branch-misses                                                         
+     6.060519083             29,758      LLC-loads-misses                                                      
+     6.060519083                 71 C    msr/cpu_thermal_margin/          #   11.736 /sec                      
+     6.060519083           6,050.01 msec cpu-clock                        #   12.100 CPUs utilized             
+     6.060519083        535,242,645      cycles                           #    0.088 GHz                       
+     6.060519083          5,494,912      cstate_core/c3-residency/        #  908.248 K/sec                     
+     6.060519083        595,241,728      cstate_core/c6-residency/        #   98.387 M/sec                     
+     6.060519083      6,684,118,944      cstate_core/c7-residency/        #    1.105 G/sec                     
+     6.565254865             99,466      cache-misses                                                          
+     6.565254865          3,299,469      branch-misses                                                         
+     6.565254865             27,590      LLC-loads-misses                                                      
+     6.565254865                 69 C    msr/cpu_thermal_margin/          #   11.388 /sec                      
+     6.565254865           6,059.08 msec cpu-clock                        #   12.118 CPUs utilized             
+     6.565254865        534,306,827      cycles                           #    0.088 GHz                       
+     6.565254865          5,030,528      cstate_core/c3-residency/        #  830.246 K/sec                     
+     6.565254865        499,564,768      cstate_core/c6-residency/        #   82.449 M/sec                     
+     6.565254865      6,855,882,208      cstate_core/c7-residency/        #    1.132 G/sec                     
+     7.070247402             93,222      cache-misses                                                          
+     7.070247402          3,289,885      branch-misses                                                         
+     7.070247402             26,191      LLC-loads-misses                                                      
+     7.070247402                 68 C    msr/cpu_thermal_margin/          #   11.207 /sec                      
+     7.070247402           6,067.85 msec cpu-clock                        #   12.136 CPUs utilized             
+     7.070247402        532,694,306      cycles                           #    0.088 GHz                       
+     7.070247402          8,345,472      cstate_core/c3-residency/        #    1.375 M/sec                     
+     7.070247402        450,998,144      cstate_core/c6-residency/        #   74.326 M/sec                     
+     7.070247402      6,925,411,776      cstate_core/c7-residency/        #    1.141 G/sec                     
+     7.576297716            103,370      cache-misses                                                          
+     7.576297716          3,308,389      branch-misses                                                         
+     7.576297716             28,501      LLC-loads-misses                                                      
+     7.576297716                 69 C    msr/cpu_thermal_margin/          #   11.376 /sec                      
+     7.576297716           6,065.45 msec cpu-clock                        #   12.131 CPUs utilized             
+     7.576297716        536,343,521      cycles                           #    0.088 GHz                       
+     7.576297716          7,164,384      cstate_core/c3-residency/        #    1.181 M/sec                     
+     7.576297716        511,364,736      cstate_core/c6-residency/        #   84.308 M/sec                     
+     7.576297716      6,849,480,320      cstate_core/c7-residency/        #    1.129 G/sec                     
+     8.081338667            117,225      cache-misses                                                          
+     8.081338667          3,527,855      branch-misses                                                         
+     8.081338667             28,172      LLC-loads-misses                                                      
+     8.081338667                 71 C    msr/cpu_thermal_margin/          #   11.725 /sec                      
+     8.081338667           6,055.26 msec cpu-clock                        #   12.111 CPUs utilized             
+     8.081338667        542,296,855      cycles                           #    0.090 GHz                       
+     8.081338667          7,641,600      cstate_core/c3-residency/        #    1.262 M/sec                     
+     8.081338667        716,555,392      cstate_core/c6-residency/        #  118.336 M/sec                     
+     8.081338667      6,478,574,880      cstate_core/c7-residency/        #    1.070 G/sec                     
+     8.586798441            106,334      cache-misses                                                          
+     8.586798441          3,158,594      branch-misses                                                         
+     8.586798441             28,208      LLC-loads-misses                                                      
+     8.586798441                 68 C    msr/cpu_thermal_margin/          #   11.221 /sec                      
+     8.586798441           6,060.01 msec cpu-clock                        #   12.120 CPUs utilized             
+     8.586798441        534,453,353      cycles                           #    0.088 GHz                       
+     8.586798441          1,640,928      cstate_core/c3-residency/        #  270.780 K/sec                     
+     8.586798441      1,287,290,208      cstate_core/c6-residency/        #  212.424 M/sec                     
+     8.586798441      6,078,412,288      cstate_core/c7-residency/        #    1.003 G/sec                     
+     9.090776986             95,296      cache-misses                                                          
+     9.090776986          3,487,970      branch-misses                                                         
+     9.090776986             27,081      LLC-loads-misses                                                      
+     9.090776986                 72 C    msr/cpu_thermal_margin/          #   11.849 /sec                      
+     9.090776986           6,076.38 msec cpu-clock                        #   12.153 CPUs utilized             
+     9.090776986        541,298,591      cycles                           #    0.089 GHz                       
+     9.090776986         14,120,480      cstate_core/c3-residency/        #    2.324 M/sec                     
+     9.090776986      1,673,919,040      cstate_core/c6-residency/        #  275.480 M/sec                     
+     9.090776986      5,492,176,000      cstate_core/c7-residency/        #  903.856 M/sec                     
+     9.596688913            117,862      cache-misses                                                          
+     9.596688913          3,442,453      branch-misses                                                         
+     9.596688913             27,768      LLC-loads-misses                                                      
+     9.596688913                 68 C    msr/cpu_thermal_margin/          #   11.263 /sec                      
+     9.596688913           6,037.64 msec cpu-clock                        #   12.075 CPUs utilized             
+     9.596688913        538,295,675      cycles                           #    0.089 GHz                       
+     9.596688913         17,660,864      cstate_core/c3-residency/        #    2.925 M/sec                     
+     9.596688913      1,568,581,024      cstate_core/c6-residency/        #  259.800 M/sec                     
+     9.596688913      5,597,132,256      cstate_core/c7-residency/        #  927.039 M/sec                     
+    10.101495253             96,111      cache-misses                                                          
+    10.101495253          3,316,721      branch-misses                                                         
+    10.101495253             27,277      LLC-loads-misses                                                      
+    10.101495253                 70 C    msr/cpu_thermal_margin/          #   11.552 /sec                      
+    10.101495253           6,059.79 msec cpu-clock                        #   12.120 CPUs utilized             
+    10.101495253        536,314,498      cycles                           #    0.089 GHz                       
+    10.101495253          6,418,176      cstate_core/c3-residency/        #    1.059 M/sec                     
+    10.101495253      1,498,502,560      cstate_core/c6-residency/        #  247.286 M/sec                     
+    10.101495253      5,829,082,336      cstate_core/c7-residency/        #  961.927 M/sec                     
+    10.607487975            106,044      cache-misses                                                          
+    10.607487975          3,324,165      branch-misses                                                         
+    10.607487975             29,077      LLC-loads-misses                                                      
+    10.607487975                 69 C    msr/cpu_thermal_margin/          #   11.338 /sec                      
+    10.607487975           6,085.88 msec cpu-clock                        #   12.172 CPUs utilized             
+    10.607487975        539,025,324      cycles                           #    0.089 GHz                       
+    10.607487975          3,666,304      cstate_core/c3-residency/        #  602.428 K/sec                     
+    10.607487975      1,656,328,160      cstate_core/c6-residency/        #  272.159 M/sec                     
+    10.607487975      5,662,170,240      cstate_core/c7-residency/        #  930.378 M/sec                     
+    11.112319174            103,490      cache-misses                                                          
+    11.112319174          3,417,154      branch-misses                                                         
+    11.112319174             28,970      LLC-loads-misses                                                      
+    11.112319174                 68 C    msr/cpu_thermal_margin/          #   11.222 /sec                      
+    11.112319174           6,059.34 msec cpu-clock                        #   12.119 CPUs utilized             
+    11.112319174        547,984,952      cycles                           #    0.090 GHz                       
+    11.112319174          4,734,560      cstate_core/c3-residency/        #  781.365 K/sec                     
+    11.112319174      1,768,622,560      cstate_core/c6-residency/        #  291.884 M/sec                     
+    11.112319174      5,342,776,000      cstate_core/c7-residency/        #  881.742 M/sec                     
+    11.617323268            120,100      cache-misses                                                          
+    11.617323268          3,365,998      branch-misses                                                         
+    11.617323268             28,082      LLC-loads-misses                                                      
+    11.617323268                 71 C    msr/cpu_thermal_margin/          #   11.725 /sec                      
+    11.617323268           6,055.25 msec cpu-clock                        #   12.111 CPUs utilized             
+    11.617323268        534,564,071      cycles                           #    0.088 GHz                       
+    11.617323268          9,015,008      cstate_core/c3-residency/        #    1.489 M/sec                     
+    11.617323268        857,830,368      cstate_core/c6-residency/        #  141.667 M/sec                     
+    11.617323268      6,413,072,480      cstate_core/c7-residency/        #    1.059 G/sec                     
+    12.120867791             94,434      cache-misses                                                          
+    12.120867791          3,376,950      branch-misses                                                         
+    12.120867791             27,240      LLC-loads-misses                                                      
+    12.120867791                 68 C    msr/cpu_thermal_margin/          #   11.244 /sec                      
+    12.120867791           6,047.52 msec cpu-clock                        #   12.095 CPUs utilized             
+    12.120867791        535,193,175      cycles                           #    0.088 GHz                       
+    12.120867791          3,198,656      cstate_core/c3-residency/        #  528.920 K/sec                     
+    12.120867791        693,662,368      cstate_core/c6-residency/        #  114.702 M/sec                     
+    12.120867791      6,593,928,768      cstate_core/c7-residency/        #    1.090 G/sec                     
+    12.624814230             97,593      cache-misses                                                          
+    12.624814230          3,464,804      branch-misses                                                         
+    12.624814230             27,860      LLC-loads-misses                                                      
+    12.624814230                 68 C    msr/cpu_thermal_margin/          #   11.243 /sec                      
+    12.624814230           6,048.32 msec cpu-clock                        #   12.097 CPUs utilized             
+    12.624814230        537,032,895      cycles                           #    0.089 GHz                       
+    12.624814230          3,803,616      cstate_core/c3-residency/        #  628.871 K/sec                     
+    12.624814230        614,924,928      cstate_core/c6-residency/        #  101.669 M/sec                     
+    12.624814230      6,703,674,624      cstate_core/c7-residency/        #    1.108 G/sec                     
+    13.128839624             97,483      cache-misses                                                          
+    13.128839624          3,393,828      branch-misses                                                         
+    13.128839624             27,833      LLC-loads-misses                                                      
+    13.128839624                 70 C    msr/cpu_thermal_margin/          #   11.573 /sec                      
+    13.128839624           6,048.42 msec cpu-clock                        #   12.097 CPUs utilized             
+    13.128839624        537,346,437      cycles                           #    0.089 GHz                       
+    13.128839624          7,265,376      cstate_core/c3-residency/        #    1.201 M/sec                     
+    13.128839624        660,139,872      cstate_core/c6-residency/        #  109.142 M/sec                     
+    13.128839624      6,637,295,840      cstate_core/c7-residency/        #    1.097 G/sec                     
+#           time             counts unit events
+    13.632769240            110,656      cache-misses                                                          
+    13.632769240          3,430,359      branch-misses                                                         
+    13.632769240             28,515      LLC-loads-misses                                                      
+    13.632769240                 69 C    msr/cpu_thermal_margin/          #   11.442 /sec                      
+    13.632769240           6,030.59 msec cpu-clock                        #   12.061 CPUs utilized             
+    13.632769240        536,608,721      cycles                           #    0.089 GHz                       
+    13.632769240          6,938,048      cstate_core/c3-residency/        #    1.150 M/sec                     
+    13.632769240        659,191,040      cstate_core/c6-residency/        #  109.308 M/sec                     
+    13.632769240      6,606,035,488      cstate_core/c7-residency/        #    1.095 G/sec                     
+    14.136484541            100,220      cache-misses                                                          
+    14.136484541          3,438,908      branch-misses                                                         
+    14.136484541             29,192      LLC-loads-misses                                                      
+    14.136484541                 72 C    msr/cpu_thermal_margin/          #   11.906 /sec                      
+    14.136484541           6,047.27 msec cpu-clock                        #   12.095 CPUs utilized             
+    14.136484541        545,308,818      cycles                           #    0.090 GHz                       
+    14.136484541          4,317,280      cstate_core/c3-residency/        #  713.922 K/sec                     
+    14.136484541      1,275,044,704      cstate_core/c6-residency/        #  210.846 M/sec                     
+    14.136484541      5,986,924,416      cstate_core/c7-residency/        #  990.021 M/sec                     
+    14.642468244             99,847      cache-misses                                                          
+    14.642468244          3,396,819      branch-misses                                                         
+    14.642468244             29,150      LLC-loads-misses                                                      
+    14.642468244                 70 C    msr/cpu_thermal_margin/          #   11.532 /sec                      
+    14.642468244           6,070.14 msec cpu-clock                        #   12.140 CPUs utilized             
+    14.642468244        543,757,400      cycles                           #    0.090 GHz                       
+    14.642468244          6,942,784      cstate_core/c3-residency/        #    1.144 M/sec                     
+    14.642468244      1,561,986,720      cstate_core/c6-residency/        #  257.323 M/sec                     
+    14.642468244      5,740,598,464      cstate_core/c7-residency/        #  945.710 M/sec                     
+    15.146472588             98,012      cache-misses                                                          
+    15.146472588          3,560,990      branch-misses                                                         
+    15.146472588             28,795      LLC-loads-misses                                                      
+    15.146472588                 69 C    msr/cpu_thermal_margin/          #   11.405 /sec                      
+    15.146472588           6,049.88 msec cpu-clock                        #   12.100 CPUs utilized             
+    15.146472588        544,164,468      cycles                           #    0.090 GHz                       
+    15.146472588          2,943,776      cstate_core/c3-residency/        #  486.584 K/sec                     
+    15.146472588      1,570,864,736      cstate_core/c6-residency/        #  259.652 M/sec                     
+    15.146472588      5,712,470,784      cstate_core/c7-residency/        #  944.228 M/sec                     
+    15.652474440            115,183      cache-misses                                                          
+    15.652474440          3,419,295      branch-misses                                                         
+    15.652474440             30,071      LLC-loads-misses                                                      
+    15.652474440                 72 C    msr/cpu_thermal_margin/          #   11.857 /sec                      
+    15.652474440           6,072.55 msec cpu-clock                        #   12.145 CPUs utilized             
+    15.652474440        546,597,888      cycles                           #    0.090 GHz                       
+    15.652474440          8,489,184      cstate_core/c3-residency/        #    1.398 M/sec                     
+    15.652474440      1,461,402,464      cstate_core/c6-residency/        #  240.657 M/sec                     
+    15.652474440      5,819,311,424      cstate_core/c7-residency/        #  958.298 M/sec                     
+    16.158481394             98,459      cache-misses                                                          
+    16.158481394          3,481,599      branch-misses                                                         
+    16.158481394             28,966      LLC-loads-misses                                                      
+    16.158481394                 69 C    msr/cpu_thermal_margin/          #   11.368 /sec                      
+    16.158481394           6,069.50 msec cpu-clock                        #   12.139 CPUs utilized             
+    16.158481394        541,754,833      cycles                           #    0.089 GHz                       
+    16.158481394          4,586,912      cstate_core/c3-residency/        #  755.731 K/sec                     
+    16.158481394      1,456,647,296      cstate_core/c6-residency/        #  239.994 M/sec                     
+    16.158481394      5,854,926,656      cstate_core/c7-residency/        #  964.647 M/sec                     
+    16.660785918             99,044      cache-misses                                                          
+    16.660785918          3,284,099      branch-misses                                                         
+    16.660785918             28,691      LLC-loads-misses                                                      
+    16.660785918                 68 C    msr/cpu_thermal_margin/          #   11.278 /sec                      
+    16.660785918           6,029.49 msec cpu-clock                        #   12.059 CPUs utilized             
+    16.660785918        541,345,464      cycles                           #    0.090 GHz                       
+    16.660785918          7,789,856      cstate_core/c3-residency/        #    1.292 M/sec                     
+    16.660785918      1,521,777,664      cstate_core/c6-residency/        #  252.389 M/sec                     
+    16.660785918      5,801,954,624      cstate_core/c7-residency/        #  962.262 M/sec                     
+    17.165497035            112,357      cache-misses                                                          
+    17.165497035          3,406,637      branch-misses                                                         
+    17.165497035             28,457      LLC-loads-misses                                                      
+    17.165497035                 70 C    msr/cpu_thermal_margin/          #   11.533 /sec                      
+    17.165497035           6,069.79 msec cpu-clock                        #   12.140 CPUs utilized             
+    17.165497035        537,227,633      cycles                           #    0.089 GHz                       
+    17.165497035          4,071,968      cstate_core/c3-residency/        #  670.858 K/sec                     
+    17.165497035      1,661,405,504      cstate_core/c6-residency/        #  273.717 M/sec                     
+    17.165497035      5,622,991,968      cstate_core/c7-residency/        #  926.389 M/sec                     
+    17.669084970             94,093      cache-misses                                                          
+    17.669084970          3,214,720      branch-misses                                                         
+    17.669084970             26,728      LLC-loads-misses                                                      
+    17.669084970                 70 C    msr/cpu_thermal_margin/          #   11.552 /sec                      
+    17.669084970           6,059.40 msec cpu-clock                        #   12.119 CPUs utilized             
+    17.669084970        529,100,224      cycles                           #    0.087 GHz                       
+    17.669084970          5,331,360      cstate_core/c3-residency/        #  879.850 K/sec                     
+    17.669084970        554,955,488      cstate_core/c6-residency/        #   91.586 M/sec                     
+    17.669084970      6,882,984,352      cstate_core/c7-residency/        #    1.136 G/sec                     
+    18.173983896            102,258      cache-misses                                                          
+    18.173983896          3,319,029      branch-misses                                                         
+    18.173983896             28,386      LLC-loads-misses                                                      
+    18.173983896                 73 C    msr/cpu_thermal_margin/          #   12.087 /sec                      
+    18.173983896           6,039.67 msec cpu-clock                        #   12.079 CPUs utilized             
+    18.173983896        537,201,541      cycles                           #    0.089 GHz                       
+    18.173983896          5,893,760      cstate_core/c3-residency/        #  975.841 K/sec                     
+    18.173983896        613,735,008      cstate_core/c6-residency/        #  101.617 M/sec                     
+    18.173983896      6,704,095,360      cstate_core/c7-residency/        #    1.110 G/sec                     
+    18.678159406             97,130      cache-misses                                                          
+    18.678159406          3,125,220      branch-misses                                                         
+    18.678159406             26,715      LLC-loads-misses                                                      
+    18.678159406                 71 C    msr/cpu_thermal_margin/          #   11.757 /sec                      
+    18.678159406           6,039.09 msec cpu-clock                        #   12.078 CPUs utilized             
+    18.678159406        523,807,491      cycles                           #    0.087 GHz                       
+    18.678159406         10,173,472      cstate_core/c3-residency/        #    1.685 M/sec                     
+    18.678159406        690,530,208      cstate_core/c6-residency/        #  114.343 M/sec                     
+    18.678159406      6,791,376,256      cstate_core/c7-residency/        #    1.125 G/sec                     
+    19.180516702            106,183      cache-misses                                                          
+    19.180516702          3,170,729      branch-misses                                                         
+    19.180516702             27,853      LLC-loads-misses                                                      
+    19.180516702                 73 C    msr/cpu_thermal_margin/          #   12.103 /sec                      
+    19.180516702           6,031.78 msec cpu-clock                        #   12.064 CPUs utilized             
+    19.180516702        529,486,151      cycles                           #    0.088 GHz                       
+    19.180516702          8,426,112      cstate_core/c3-residency/        #    1.397 M/sec                     
+    19.180516702        757,864,832      cstate_core/c6-residency/        #  125.645 M/sec                     
+    19.180516702      6,696,087,712      cstate_core/c7-residency/        #    1.110 G/sec                     
+    19.686481134             99,071      cache-misses                                                          
+    19.686481134          3,289,523      branch-misses                                                         
+    19.686481134             28,797      LLC-loads-misses                                                      
+    19.686481134                 71 C    msr/cpu_thermal_margin/          #   11.696 /sec                      
+    19.686481134           6,070.47 msec cpu-clock                        #   12.141 CPUs utilized             
+    19.686481134        540,177,629      cycles                           #    0.089 GHz                       
+    19.686481134          4,353,344      cstate_core/c3-residency/        #  717.135 K/sec                     
+    19.686481134      1,532,801,984      cstate_core/c6-residency/        #  252.501 M/sec                     
+    19.686481134      5,868,459,808      cstate_core/c7-residency/        #  966.723 M/sec                     
+    20.190472918             97,859      cache-misses                                                          
+    20.190472918          3,355,758      branch-misses                                                         
+    20.190472918             28,290      LLC-loads-misses                                                      
+    20.190472918                 73 C    msr/cpu_thermal_margin/          #   12.068 /sec                      
+    20.190472918           6,049.28 msec cpu-clock                        #   12.099 CPUs utilized             
+    20.190472918        543,153,328      cycles                           #    0.090 GHz                       
+    20.190472918          6,584,224      cstate_core/c3-residency/        #    1.088 M/sec                     
+    20.190472918      1,694,577,152      cstate_core/c6-residency/        #  280.129 M/sec                     
+    20.190472918      5,591,631,168      cstate_core/c7-residency/        #  924.347 M/sec                     
+    20.695463911             98,924      cache-misses                                                          
+    20.695463911          3,517,857      branch-misses                                                         
+    20.695463911             28,102      LLC-loads-misses                                                      
+    20.695463911                 70 C    msr/cpu_thermal_margin/          #   11.548 /sec                      
+    20.695463911           6,061.55 msec cpu-clock                        #   12.123 CPUs utilized             
+    20.695463911        543,894,330      cycles                           #    0.090 GHz                       
+    20.695463911          3,228,160      cstate_core/c3-residency/        #  532.564 K/sec                     
+    20.695463911      1,610,905,216      cstate_core/c6-residency/        #  265.758 M/sec                     
+    20.695463911      5,608,558,112      cstate_core/c7-residency/        #  925.268 M/sec                     
+    21.201510135            110,319      cache-misses                                                          
+    21.201510135          3,346,623      branch-misses                                                         
+    21.201510135             28,968      LLC-loads-misses                                                      
+    21.201510135                 68 C    msr/cpu_thermal_margin/          #   11.198 /sec                      
+    21.201510135           6,072.58 msec cpu-clock                        #   12.145 CPUs utilized             
+    21.201510135        541,175,953      cycles                           #    0.089 GHz                       
+    21.201510135          9,779,008      cstate_core/c3-residency/        #    1.610 M/sec                     
+    21.201510135        844,594,048      cstate_core/c6-residency/        #  139.083 M/sec                     
+    21.201510135      6,466,878,208      cstate_core/c7-residency/        #    1.065 G/sec                     
+    21.707478710             94,328      cache-misses                                                          
+    21.707478710          3,325,353      branch-misses                                                         
+    21.707478710             27,399      LLC-loads-misses                                                      
+    21.707478710                 69 C    msr/cpu_thermal_margin/          #   11.363 /sec                      
+    21.707478710           6,072.18 msec cpu-clock                        #   12.144 CPUs utilized             
+    21.707478710        538,443,868      cycles                           #    0.089 GHz                       
+    21.707478710          7,505,632      cstate_core/c3-residency/        #    1.236 M/sec                     
+    21.707478710        634,512,064      cstate_core/c6-residency/        #  104.495 M/sec                     
+    21.707478710      6,706,809,888      cstate_core/c7-residency/        #    1.105 G/sec                     
+    22.213464864             99,532      cache-misses                                                          
+    22.213464864          3,465,906      branch-misses                                                         
+    22.213464864             28,489      LLC-loads-misses                                                      
+    22.213464864                 69 C    msr/cpu_thermal_margin/          #   11.366 /sec                      
+    22.213464864           6,070.74 msec cpu-clock                        #   12.141 CPUs utilized             
+    22.213464864        538,118,515      cycles                           #    0.089 GHz                       
+    22.213464864          5,176,640      cstate_core/c3-residency/        #  852.719 K/sec                     
+    22.213464864      1,062,057,888      cstate_core/c6-residency/        #  174.947 M/sec                     
+    22.213464864      6,321,236,544      cstate_core/c7-residency/        #    1.041 G/sec                     
+    22.718461230             98,954      cache-misses                                                          
+    22.718461230          3,429,585      branch-misses                                                         
+    22.718461230             28,852      LLC-loads-misses                                                      
+    22.718461230                 69 C    msr/cpu_thermal_margin/          #   11.385 /sec                      
+    22.718461230           6,060.62 msec cpu-clock                        #   12.121 CPUs utilized             
+    22.718461230        539,376,795      cycles                           #    0.089 GHz                       
+    22.718461230          4,935,456      cstate_core/c3-residency/        #  814.348 K/sec                     
+    22.718461230      1,671,549,504      cstate_core/c6-residency/        #  275.805 M/sec                     
+    22.718461230      5,747,651,168      cstate_core/c7-residency/        #  948.360 M/sec                     
+    23.223501204            120,805      cache-misses                                                          
+    23.223501204          3,347,237      branch-misses                                                         
+    23.223501204             30,287      LLC-loads-misses                                                      
+    23.223501204                 70 C    msr/cpu_thermal_margin/          #   11.537 /sec                      
+    23.223501204           6,067.54 msec cpu-clock                        #   12.135 CPUs utilized             
+    23.223501204        540,459,742      cycles                           #    0.089 GHz                       
+    23.223501204          2,694,624      cstate_core/c3-residency/        #  444.105 K/sec                     
+    23.223501204      1,676,500,896      cstate_core/c6-residency/        #  276.307 M/sec                     
+    23.223501204      5,712,121,440      cstate_core/c7-residency/        #  941.424 M/sec                     
+    23.728746747             98,322      cache-misses                                                          
+    23.728746747          3,359,057      branch-misses                                                         
+    23.728746747             28,503      LLC-loads-misses                                                      
+    23.728746747                 70 C    msr/cpu_thermal_margin/          #   11.541 /sec                      
+    23.728746747           6,065.55 msec cpu-clock                        #   12.131 CPUs utilized             
+    23.728746747        539,894,690      cycles                           #    0.089 GHz                       
+    23.728746747          3,850,912      cstate_core/c3-residency/        #  634.883 K/sec                     
+    23.728746747      1,494,773,856      cstate_core/c6-residency/        #  246.437 M/sec                     
+    23.728746747      5,934,468,960      cstate_core/c7-residency/        #  978.390 M/sec                     
+    24.234726721             99,678      cache-misses                                                          
+    24.234726721          3,225,610      branch-misses                                                         
+    24.234726721             29,058      LLC-loads-misses                                                      
+    24.234726721                 68 C    msr/cpu_thermal_margin/          #   11.205 /sec                      
+    24.234726721           6,068.91 msec cpu-clock                        #   12.138 CPUs utilized             
+    24.234726721        539,645,082      cycles                           #    0.089 GHz                       
+    24.234726721          4,069,984      cstate_core/c3-residency/        #  670.628 K/sec                     
+    24.234726721      1,685,610,048      cstate_core/c6-residency/        #  277.745 M/sec                     
+    24.234726721      5,729,531,104      cstate_core/c7-residency/        #  944.078 M/sec                     
+    24.739766659            106,749      cache-misses                                                          
+    24.739766659          3,263,469      branch-misses                                                         
+    24.739766659             29,157      LLC-loads-misses                                                      
+    24.739766659                 67 C    msr/cpu_thermal_margin/          #   11.064 /sec                      
+    24.739766659           6,055.89 msec cpu-clock                        #   12.112 CPUs utilized             
+    24.739766659        540,063,153      cycles                           #    0.089 GHz                       
+    24.739766659          4,505,760      cstate_core/c3-residency/        #  744.030 K/sec                     
+    24.739766659      1,615,431,520      cstate_core/c6-residency/        #  266.754 M/sec                     
+    24.739766659      5,796,639,392      cstate_core/c7-residency/        #  957.191 M/sec                     
+    25.245559368             97,829      cache-misses                                                          
+    25.245559368          3,507,898      branch-misses                                                         
+    25.245559368             28,455      LLC-loads-misses                                                      
+    25.245559368                 69 C    msr/cpu_thermal_margin/          #   11.371 /sec                      
+    25.245559368           6,068.26 msec cpu-clock                        #   12.137 CPUs utilized             
+    25.245559368        543,622,802      cycles                           #    0.090 GHz                       
+    25.245559368          5,288,608      cstate_core/c3-residency/        #  871.520 K/sec                     
+    25.245559368      1,723,791,904      cstate_core/c6-residency/        #  284.067 M/sec                     
+    25.245559368      5,585,468,608      cstate_core/c7-residency/        #  920.440 M/sec                     
+    25.749464129             96,035      cache-misses                                                          
+    25.749464129          3,500,246      branch-misses                                                         
+    25.749464129             28,174      LLC-loads-misses                                                      
+    25.749464129                 71 C    msr/cpu_thermal_margin/          #   11.737 /sec                      
+    25.749464129           6,049.03 msec cpu-clock                        #   12.098 CPUs utilized             
+    25.749464129        543,704,752      cycles                           #    0.090 GHz                       
+    25.749464129          7,917,216      cstate_core/c3-residency/        #    1.309 M/sec                     
+    25.749464129      1,607,205,888      cstate_core/c6-residency/        #  265.696 M/sec                     
+    25.749464129      5,673,591,264      cstate_core/c7-residency/        #  937.933 M/sec                     
+    26.255458122             97,206      cache-misses                                                          
+    26.255458122          3,379,424      branch-misses                                                         
+    26.255458122             28,671      LLC-loads-misses                                                      
+    26.255458122                 68 C    msr/cpu_thermal_margin/          #   11.202 /sec                      
+    26.255458122           6,070.26 msec cpu-clock                        #   12.141 CPUs utilized             
+    26.255458122        542,788,162      cycles                           #    0.089 GHz                       
+    26.255458122          7,298,720      cstate_core/c3-residency/        #    1.202 M/sec                     
+    26.255458122      1,701,545,216      cstate_core/c6-residency/        #  280.308 M/sec                     
+    26.255458122      5,612,236,064      cstate_core/c7-residency/        #  924.546 M/sec                     
+#           time             counts unit events
+    26.759469587            108,756      cache-misses                                                          
+    26.759469587          3,285,218      branch-misses                                                         
+    26.759469587             29,860      LLC-loads-misses                                                      
+    26.759469587                 70 C    msr/cpu_thermal_margin/          #   11.563 /sec                      
+    26.759469587           6,053.56 msec cpu-clock                        #   12.107 CPUs utilized             
+    26.759469587        539,554,461      cycles                           #    0.089 GHz                       
+    26.759469587          7,344,896      cstate_core/c3-residency/        #    1.213 M/sec                     
+    26.759469587      1,606,821,824      cstate_core/c6-residency/        #  265.434 M/sec                     
+    26.759469587      5,773,522,528      cstate_core/c7-residency/        #  953.740 M/sec                     
+    27.263787791             98,642      cache-misses                                                          
+    27.263787791          3,476,398      branch-misses                                                         
+    27.263787791             28,441      LLC-loads-misses                                                      
+    27.263787791                 71 C    msr/cpu_thermal_margin/          #   11.728 /sec                      
+    27.263787791           6,053.94 msec cpu-clock                        #   12.108 CPUs utilized             
+    27.263787791        541,115,336      cycles                           #    0.089 GHz                       
+    27.263787791          5,209,600      cstate_core/c3-residency/        #  860.530 K/sec                     
+    27.263787791      1,367,291,712      cstate_core/c6-residency/        #  225.851 M/sec                     
+    27.263787791      6,002,021,536      cstate_core/c7-residency/        #  991.423 M/sec                     
+    27.768761668             98,574      cache-misses                                                          
+    27.768761668          3,318,744      branch-misses                                                         
+    27.768761668             28,808      LLC-loads-misses                                                      
+    27.768761668                 69 C    msr/cpu_thermal_margin/          #   11.397 /sec                      
+    27.768761668           6,054.47 msec cpu-clock                        #   12.109 CPUs utilized             
+    27.768761668        538,311,428      cycles                           #    0.089 GHz                       
+    27.768761668          5,952,448      cstate_core/c3-residency/        #  983.150 K/sec                     
+    27.768761668      1,434,506,400      cstate_core/c6-residency/        #  236.933 M/sec                     
+    27.768761668      5,971,414,080      cstate_core/c7-residency/        #  986.282 M/sec                     
+    28.271738717            100,665      cache-misses                                                          
+    28.271738717          3,471,373      branch-misses                                                         
+    28.271738717             29,346      LLC-loads-misses                                                      
+    28.271738717                 73 C    msr/cpu_thermal_margin/          #   12.082 /sec                      
+    28.271738717           6,042.18 msec cpu-clock                        #   12.084 CPUs utilized             
+    28.271738717        544,643,551      cycles                           #    0.090 GHz                       
+    28.271738717          7,984,160      cstate_core/c3-residency/        #    1.321 M/sec                     
+    28.271738717      1,890,650,368      cstate_core/c6-residency/        #  312.909 M/sec                     
+    28.271738717      5,258,539,840      cstate_core/c7-residency/        #  870.305 M/sec                     
+    28.776750343            118,814      cache-misses                                                          
+    28.776750343          3,448,552      branch-misses                                                         
+    28.776750343             30,280      LLC-loads-misses                                                      
+    28.776750343                 68 C    msr/cpu_thermal_margin/          #   11.233 /sec                      
+    28.776750343           6,053.37 msec cpu-clock                        #   12.107 CPUs utilized             
+    28.776750343        545,836,392      cycles                           #    0.090 GHz                       
+    28.776750343          6,196,800      cstate_core/c3-residency/        #    1.024 M/sec                     
+    28.776750343      1,811,227,040      cstate_core/c6-residency/        #  299.210 M/sec                     
+    28.776750343      5,341,357,120      cstate_core/c7-residency/        #  882.377 M/sec                     
+    29.280511115            102,013      cache-misses                                                          
+    29.280511115          3,358,397      branch-misses                                                         
+    29.280511115             29,587      LLC-loads-misses                                                      
+    29.280511115                 67 C    msr/cpu_thermal_margin/          #   11.079 /sec                      
+    29.280511115           6,047.39 msec cpu-clock                        #   12.095 CPUs utilized             
+    29.280511115        546,535,578      cycles                           #    0.090 GHz                       
+    29.280511115          5,127,616      cstate_core/c3-residency/        #  847.906 K/sec                     
+    29.280511115      1,800,012,224      cstate_core/c6-residency/        #  297.651 M/sec                     
+    29.280511115      5,354,006,368      cstate_core/c7-residency/        #  885.342 M/sec                     
+    29.786487162             99,640      cache-misses                                                          
+    29.786487162          3,491,192      branch-misses                                                         
+    29.786487162             28,883      LLC-loads-misses                                                      
+    29.786487162                 68 C    msr/cpu_thermal_margin/          #   11.204 /sec                      
+    29.786487162           6,069.25 msec cpu-clock                        #   12.139 CPUs utilized             
+    29.786487162        541,863,779      cycles                           #    0.089 GHz                       
+    29.786487162          5,140,800      cstate_core/c3-residency/        #  847.024 K/sec                     
+    29.786487162      1,645,079,360      cstate_core/c6-residency/        #  271.051 M/sec                     
+    29.786487162      5,557,758,176      cstate_core/c7-residency/        #  915.724 M/sec                     
+    30.289492369            105,193      cache-misses                                                          
+    30.289492369          3,526,506      branch-misses                                                         
+    30.289492369             29,856      LLC-loads-misses                                                      
+    30.289492369                 69 C    msr/cpu_thermal_margin/          #   11.399 /sec                      
+    30.289492369           6,053.10 msec cpu-clock                        #   12.106 CPUs utilized             
+    30.289492369        543,666,256      cycles                           #    0.090 GHz                       
+    30.289492369          4,697,088      cstate_core/c3-residency/        #  775.980 K/sec                     
+    30.289492369      1,778,255,360      cstate_core/c6-residency/        #  293.776 M/sec                     
+    30.289492369      5,375,368,992      cstate_core/c7-residency/        #  888.035 M/sec                     
+    30.794234167            122,182      cache-misses                                                          
+    30.794234167          3,434,333      branch-misses                                                         
+    30.794234167             29,636      LLC-loads-misses                                                      
+    30.794234167                 69 C    msr/cpu_thermal_margin/          #   11.423 /sec                      
+    30.794234167           6,040.32 msec cpu-clock                        #   12.081 CPUs utilized             
+    30.794234167        537,836,878      cycles                           #    0.089 GHz                       
+    30.794234167          6,879,744      cstate_core/c3-residency/        #    1.139 M/sec                     
+    30.794234167        982,918,048      cstate_core/c6-residency/        #  162.726 M/sec                     
+    30.794234167      6,281,581,536      cstate_core/c7-residency/        #    1.040 G/sec                     
+    31.296646851             87,499      cache-misses                                                          
+    31.296646851          3,448,546      branch-misses                                                         
+    31.296646851             24,441      LLC-loads-misses                                                      
+    31.296646851                 68 C    msr/cpu_thermal_margin/          #   11.234 /sec                      
+    31.296646851           6,053.29 msec cpu-clock                        #   12.107 CPUs utilized             
+    31.296646851        531,303,955      cycles                           #    0.088 GHz                       
+    31.296646851          4,408,448      cstate_core/c3-residency/        #  728.273 K/sec                     
+    31.296646851        579,828,064      cstate_core/c6-residency/        #   95.787 M/sec                     
+    31.296646851      6,724,139,904      cstate_core/c7-residency/        #    1.111 G/sec                     
+    31.801027751             96,989      cache-misses                                                          
+    31.801027751          3,383,386      branch-misses                                                         
+    31.801027751             27,941      LLC-loads-misses                                                      
+    31.801027751                 70 C    msr/cpu_thermal_margin/          #   11.528 /sec                      
+    31.801027751           6,072.35 msec cpu-clock                        #   12.145 CPUs utilized             
+    31.801027751        543,094,747      cycles                           #    0.089 GHz                       
+    31.801027751          4,110,848      cstate_core/c3-residency/        #  676.978 K/sec                     
+    31.801027751        676,718,464      cstate_core/c6-residency/        #  111.443 M/sec                     
+    31.801027751      6,547,693,056      cstate_core/c7-residency/        #    1.078 G/sec                     
+    32.306813167            103,959      cache-misses                                                          
+    32.306813167          3,480,246      branch-misses                                                         
+    32.306813167             27,858      LLC-loads-misses                                                      
+    32.306813167                 72 C    msr/cpu_thermal_margin/          #   11.948 /sec                      
+    32.306813167           6,026.19 msec cpu-clock                        #   12.052 CPUs utilized             
+    32.306813167        535,033,691      cycles                           #    0.089 GHz                       
+    32.306813167         19,361,696      cstate_core/c3-residency/        #    3.213 M/sec                     
+    32.306813167      1,452,809,152      cstate_core/c6-residency/        #  241.082 M/sec                     
+    32.306813167      5,802,994,848      cstate_core/c7-residency/        #  962.962 M/sec                     
+    32.809496341            107,245      cache-misses                                                          
+    32.809496341          3,350,107      branch-misses                                                         
+    32.809496341             29,520      LLC-loads-misses                                                      
+    32.809496341                 69 C    msr/cpu_thermal_margin/          #   11.435 /sec                      
+    32.809496341           6,034.08 msec cpu-clock                        #   12.068 CPUs utilized             
+    32.809496341        544,540,747      cycles                           #    0.090 GHz                       
+    32.809496341          5,283,712      cstate_core/c3-residency/        #  875.645 K/sec                     
+    32.809496341      1,823,723,808      cstate_core/c6-residency/        #  302.237 M/sec                     
+    32.809496341      5,316,040,288      cstate_core/c7-residency/        #  881.003 M/sec                     
+    33.313511525            103,633      cache-misses                                                          
+    33.313511525          3,533,078      branch-misses                                                         
+    33.313511525             29,179      LLC-loads-misses                                                      
+    33.313511525                 68 C    msr/cpu_thermal_margin/          #   11.240 /sec                      
+    33.313511525           6,049.83 msec cpu-clock                        #   12.100 CPUs utilized             
+    33.313511525        545,400,796      cycles                           #    0.090 GHz                       
+    33.313511525         30,844,736      cstate_core/c3-residency/        #    5.098 M/sec                     
+    33.313511525      1,813,860,896      cstate_core/c6-residency/        #  299.820 M/sec                     
+    33.313511525      5,341,457,984      cstate_core/c7-residency/        #  882.910 M/sec                     
+    33.819469860             94,848      cache-misses                                                          
+    33.819469860          3,356,297      branch-misses                                                         
+    33.819469860             27,613      LLC-loads-misses                                                      
+    33.819469860                 67 C    msr/cpu_thermal_margin/          #   11.038 /sec                      
+    33.819469860           6,069.89 msec cpu-clock                        #   12.140 CPUs utilized             
+    33.819469860        542,431,259      cycles                           #    0.089 GHz                       
+    33.819469860          5,141,856      cstate_core/c3-residency/        #  847.109 K/sec                     
+    33.819469860      1,606,875,168      cstate_core/c6-residency/        #  264.729 M/sec                     
+    33.819469860      5,559,717,856      cstate_core/c7-residency/        #  915.951 M/sec                     
+    34.322469541            112,241      cache-misses                                                          
+    34.322469541          3,488,409      branch-misses                                                         
+    34.322469541             29,717      LLC-loads-misses                                                      
+    34.322469541                 68 C    msr/cpu_thermal_margin/          #   11.261 /sec                      
+    34.322469541           6,038.74 msec cpu-clock                        #   12.077 CPUs utilized             
+    34.322469541        544,483,461      cycles                           #    0.090 GHz                       
+    34.322469541         10,160,352      cstate_core/c3-residency/        #    1.683 M/sec                     
+    34.322469541      1,750,563,712      cstate_core/c6-residency/        #  289.889 M/sec                     
+    34.322469541      5,398,782,592      cstate_core/c7-residency/        #  894.024 M/sec                     
+    34.828485301             99,982      cache-misses                                                          
+    34.828485301          3,309,517      branch-misses                                                         
+    34.828485301             29,212      LLC-loads-misses                                                      
+    34.828485301                 70 C    msr/cpu_thermal_margin/          #   11.529 /sec                      
+    34.828485301           6,071.71 msec cpu-clock                        #   12.143 CPUs utilized             
+    34.828485301        538,912,605      cycles                           #    0.089 GHz                       
+    34.828485301          9,869,664      cstate_core/c3-residency/        #    1.626 M/sec                     
+    34.828485301      1,883,291,104      cstate_core/c6-residency/        #  310.175 M/sec                     
+    34.828485301      5,390,543,424      cstate_core/c7-residency/        #  887.814 M/sec                     
+    35.333477122            102,752      cache-misses                                                          
+    35.333477122          3,569,195      branch-misses                                                         
+    35.333477122             29,457      LLC-loads-misses                                                      
+    35.333477122                 71 C    msr/cpu_thermal_margin/          #   11.716 /sec                      
+    35.333477122           6,059.92 msec cpu-clock                        #   12.120 CPUs utilized             
+    35.333477122        545,553,516      cycles                           #    0.090 GHz                       
+    35.333477122          2,866,816      cstate_core/c3-residency/        #  473.078 K/sec                     
+    35.333477122      1,888,403,712      cstate_core/c6-residency/        #  311.622 M/sec                     
+    35.333477122      5,285,937,184      cstate_core/c7-residency/        #  872.279 M/sec                     
+    35.838474191            102,855      cache-misses                                                          
+    35.838474191          3,370,949      branch-misses                                                         
+    35.838474191             29,491      LLC-loads-misses                                                      
+    35.838474191                 69 C    msr/cpu_thermal_margin/          #   11.385 /sec                      
+    35.838474191           6,060.77 msec cpu-clock                        #   12.122 CPUs utilized             
+    35.838474191        545,491,287      cycles                           #    0.090 GHz                       
+    35.838474191          4,908,256      cstate_core/c3-residency/        #  809.840 K/sec                     
+    35.838474191      1,656,744,000      cstate_core/c6-residency/        #  273.355 M/sec                     
+    35.838474191      5,524,448,672      cstate_core/c7-residency/        #  911.509 M/sec                     
+    36.343489054            108,134      cache-misses                                                          
+    36.343489054          3,415,039      branch-misses                                                         
+    36.343489054             28,770      LLC-loads-misses                                                      
+    36.343489054                 70 C    msr/cpu_thermal_margin/          #   11.551 /sec                      
+    36.343489054           6,060.32 msec cpu-clock                        #   12.121 CPUs utilized             
+    36.343489054        538,771,318      cycles                           #    0.089 GHz                       
+    36.343489054          9,898,880      cstate_core/c3-residency/        #    1.633 M/sec                     
+    36.343489054      1,232,598,944      cstate_core/c6-residency/        #  203.388 M/sec                     
+    36.343489054      6,010,083,264      cstate_core/c7-residency/        #  991.710 M/sec                     
+    36.846015560             95,740      cache-misses                                                          
+    36.846015560          3,505,748      branch-misses                                                         
+    36.846015560             27,213      LLC-loads-misses                                                      
+    36.846015560                 71 C    msr/cpu_thermal_margin/          #   11.740 /sec                      
+    36.846015560           6,047.87 msec cpu-clock                        #   12.096 CPUs utilized             
+    36.846015560        535,324,449      cycles                           #    0.089 GHz                       
+    36.846015560          9,751,680      cstate_core/c3-residency/        #    1.612 M/sec                     
+    36.846015560        602,037,824      cstate_core/c6-residency/        #   99.545 M/sec                     
+    36.846015560      6,701,042,912      cstate_core/c7-residency/        #    1.108 G/sec                     
+    37.350051937             95,446      cache-misses                                                          
+    37.350051937          3,457,316      branch-misses                                                         
+    37.350051937             27,361      LLC-loads-misses                                                      
+    37.350051937                 69 C    msr/cpu_thermal_margin/          #   11.408 /sec                      
+    37.350051937           6,048.50 msec cpu-clock                        #   12.097 CPUs utilized             
+    37.350051937        536,626,964      cycles                           #    0.089 GHz                       
+    37.350051937          5,484,832      cstate_core/c3-residency/        #  906.809 K/sec                     
+    37.350051937        671,659,680      cstate_core/c6-residency/        #  111.046 M/sec                     
+    37.350051937      6,604,261,344      cstate_core/c7-residency/        #    1.092 G/sec                     
+    37.853799438             94,152      cache-misses                                                          
+    37.853799438          3,377,858      branch-misses                                                         
+    37.853799438             27,200      LLC-loads-misses                                                      
+    37.853799438                 72 C    msr/cpu_thermal_margin/          #   11.880 /sec                      
+    37.853799438           6,060.45 msec cpu-clock                        #   12.121 CPUs utilized             
+    37.853799438        542,047,194      cycles                           #    0.089 GHz                       
+    37.853799438          7,620,352      cstate_core/c3-residency/        #    1.257 M/sec                     
+    37.853799438      1,787,294,912      cstate_core/c6-residency/        #  294.911 M/sec                     
+    37.853799438      5,491,196,832      cstate_core/c7-residency/        #  906.070 M/sec                     
+    38.358800683            105,060      cache-misses                                                          
+    38.358800683          3,469,946      branch-misses                                                         
+    38.358800683             28,785      LLC-loads-misses                                                      
+    38.358800683                 68 C    msr/cpu_thermal_margin/          #   11.279 /sec                      
+    38.358800683           6,028.81 msec cpu-clock                        #   12.058 CPUs utilized             
+    38.358800683        544,556,924      cycles                           #    0.090 GHz                       
+    38.358800683          2,790,976      cstate_core/c3-residency/        #  462.940 K/sec                     
+    38.358800683      1,684,749,504      cstate_core/c6-residency/        #  279.450 M/sec                     
+    38.358800683      5,451,802,080      cstate_core/c7-residency/        #  904.291 M/sec                     
+    38.864511382            105,367      cache-misses                                                          
+    38.864511382          3,591,472      branch-misses                                                         
+    38.864511382             28,654      LLC-loads-misses                                                      
+    38.864511382                 67 C    msr/cpu_thermal_margin/          #   11.038 /sec                      
+    38.864511382           6,070.20 msec cpu-clock                        #   12.140 CPUs utilized             
+    38.864511382        545,254,494      cycles                           #    0.090 GHz                       
+    38.864511382          4,606,176      cstate_core/c3-residency/        #  758.818 K/sec                     
+    38.864511382        914,001,440      cstate_core/c6-residency/        #  150.572 M/sec                     
+    38.864511382      6,273,832,736      cstate_core/c7-residency/        #    1.034 G/sec                     
+    39.370469835             98,395      cache-misses                                                          
+    39.370469835          3,434,899      branch-misses                                                         
+    39.370469835             28,506      LLC-loads-misses                                                      
+    39.370469835                 70 C    msr/cpu_thermal_margin/          #   11.535 /sec                      
+    39.370469835           6,068.32 msec cpu-clock                        #   12.137 CPUs utilized             
+    39.370469835        544,058,202      cycles                           #    0.090 GHz                       
+    39.370469835          6,497,344      cstate_core/c3-residency/        #    1.071 M/sec                     
+    39.370469835      1,647,409,216      cstate_core/c6-residency/        #  271.477 M/sec                     
+    39.370469835      5,503,841,376      cstate_core/c7-residency/        #  906.979 M/sec                     
+#           time             counts unit events
+    39.873479166             96,140      cache-misses                                                          
+    39.873479166          3,438,997      branch-misses                                                         
+    39.873479166             28,013      LLC-loads-misses                                                      
+    39.873479166                 68 C    msr/cpu_thermal_margin/          #   11.266 /sec                      
+    39.873479166           6,035.87 msec cpu-clock                        #   12.072 CPUs utilized             
+    39.873479166        541,471,956      cycles                           #    0.090 GHz                       
+    39.873479166          5,723,232      cstate_core/c3-residency/        #  948.204 K/sec                     
+    39.873479166      1,587,085,152      cstate_core/c6-residency/        #  262.942 M/sec                     
+    39.873479166      5,523,882,304      cstate_core/c7-residency/        #  915.177 M/sec                     
+    40.375810685            116,097      cache-misses                                                          
+    40.375810685          3,457,686      branch-misses                                                         
+    40.375810685             29,491      LLC-loads-misses                                                      
+    40.375810685                 67 C    msr/cpu_thermal_margin/          #   11.100 /sec                      
+    40.375810685           6,035.94 msec cpu-clock                        #   12.072 CPUs utilized             
+    40.375810685        546,347,214      cycles                           #    0.091 GHz                       
+    40.375810685          5,069,568      cstate_core/c3-residency/        #  839.898 K/sec                     
+    40.375810685      1,856,619,968      cstate_core/c6-residency/        #  307.594 M/sec                     
+    40.375810685      5,242,876,320      cstate_core/c7-residency/        #  868.610 M/sec                     
+    40.881614198             96,027      cache-misses                                                          
+    40.881614198          3,539,233      branch-misses                                                         
+    40.881614198             27,668      LLC-loads-misses                                                      
+    40.881614198                 69 C    msr/cpu_thermal_margin/          #   11.368 /sec                      
+    40.881614198           6,069.84 msec cpu-clock                        #   12.140 CPUs utilized             
+    40.881614198        544,695,636      cycles                           #    0.090 GHz                       
+    40.881614198          7,698,944      cstate_core/c3-residency/        #    1.268 M/sec                     
+    40.881614198        660,581,248      cstate_core/c6-residency/        #  108.830 M/sec                     
+    40.881614198      6,523,847,424      cstate_core/c7-residency/        #    1.075 G/sec                     
+    41.387611391             98,619      cache-misses                                                          
+    41.387611391          3,378,729      branch-misses                                                         
+    41.387611391             29,003      LLC-loads-misses                                                      
+    41.387611391                 68 C    msr/cpu_thermal_margin/          #   11.197 /sec                      
+    41.387611391           6,072.97 msec cpu-clock                        #   12.146 CPUs utilized             
+    41.387611391        546,780,074      cycles                           #    0.090 GHz                       
+    41.387611391          6,504,416      cstate_core/c3-residency/        #    1.071 M/sec                     
+    41.387611391      1,704,347,040      cstate_core/c6-residency/        #  280.645 M/sec                     
+    41.387611391      5,454,182,560      cstate_core/c7-residency/        #  898.108 M/sec                     
+    41.893632953            108,596      cache-misses                                                          
+    41.893632953          3,341,538      branch-misses                                                         
+    41.893632953             28,489      LLC-loads-misses                                                      
+    41.893632953                 69 C    msr/cpu_thermal_margin/          #   11.369 /sec                      
+    41.893632953           6,068.90 msec cpu-clock                        #   12.138 CPUs utilized             
+    41.893632953        543,075,889      cycles                           #    0.089 GHz                       
+    41.893632953          7,427,168      cstate_core/c3-residency/        #    1.224 M/sec                     
+    41.893632953      1,694,310,048      cstate_core/c6-residency/        #  279.179 M/sec                     
+    41.893632953      5,489,295,968      cstate_core/c7-residency/        #  904.496 M/sec                     
+    42.397632864             96,818      cache-misses                                                          
+    42.397632864          3,571,670      branch-misses                                                         
+    42.397632864             28,122      LLC-loads-misses                                                      
+    42.397632864                 68 C    msr/cpu_thermal_margin/          #   11.236 /sec                      
+    42.397632864           6,051.87 msec cpu-clock                        #   12.104 CPUs utilized             
+    42.397632864        544,519,008      cycles                           #    0.090 GHz                       
+    42.397632864          5,090,752      cstate_core/c3-residency/        #  841.186 K/sec                     
+    42.397632864      1,660,071,296      cstate_core/c6-residency/        #  274.307 M/sec                     
+    42.397632864      5,494,720,608      cstate_core/c7-residency/        #  907.937 M/sec                     
+    42.903625611             97,109      cache-misses                                                          
+    42.903625611          3,563,222      branch-misses                                                         
+    42.903625611             28,476      LLC-loads-misses                                                      
+    42.903625611                 72 C    msr/cpu_thermal_margin/          #   11.857 /sec                      
+    42.903625611           6,072.28 msec cpu-clock                        #   12.145 CPUs utilized             
+    42.903625611        542,869,752      cycles                           #    0.089 GHz                       
+    42.903625611          7,957,376      cstate_core/c3-residency/        #    1.310 M/sec                     
+    42.903625611        820,091,232      cstate_core/c6-residency/        #  135.055 M/sec                     
+    42.903625611      6,385,689,280      cstate_core/c7-residency/        #    1.052 G/sec                     
+    43.409615608            101,058      cache-misses                                                          
+    43.409615608          3,356,905      branch-misses                                                         
+    43.409615608             27,989      LLC-loads-misses                                                      
+    43.409615608                 69 C    msr/cpu_thermal_margin/          #   11.366 /sec                      
+    43.409615608           6,070.52 msec cpu-clock                        #   12.141 CPUs utilized             
+    43.409615608        540,750,033      cycles                           #    0.089 GHz                       
+    43.409615608          8,484,576      cstate_core/c3-residency/        #    1.398 M/sec                     
+    43.409615608      1,579,766,368      cstate_core/c6-residency/        #  260.236 M/sec                     
+    43.409615608      5,700,379,488      cstate_core/c7-residency/        #  939.027 M/sec                     
+    43.914630007            116,896      cache-misses                                                          
+    43.914630007          3,468,612      branch-misses                                                         
+    43.914630007             30,094      LLC-loads-misses                                                      
+    43.914630007                 70 C    msr/cpu_thermal_margin/          #   11.558 /sec                      
+    43.914630007           6,056.41 msec cpu-clock                        #   12.113 CPUs utilized             
+    43.914630007        545,892,087      cycles                           #    0.090 GHz                       
+    43.914630007          6,318,816      cstate_core/c3-residency/        #    1.043 M/sec                     
+    43.914630007      1,681,660,576      cstate_core/c6-residency/        #  277.666 M/sec                     
+    43.914630007      5,467,807,008      cstate_core/c7-residency/        #  902.814 M/sec                     
+    44.419503731            102,576      cache-misses                                                          
+    44.419503731          3,554,362      branch-misses                                                         
+    44.419503731             29,259      LLC-loads-misses                                                      
+    44.419503731                 68 C    msr/cpu_thermal_margin/          #   11.220 /sec                      
+    44.419503731           6,060.54 msec cpu-clock                        #   12.121 CPUs utilized             
+    44.419503731        546,558,828      cycles                           #    0.090 GHz                       
+    44.419503731          6,048,928      cstate_core/c3-residency/        #  998.084 K/sec                     
+    44.419503731      1,959,777,824      cstate_core/c6-residency/        #  323.367 M/sec                     
+    44.419503731      5,220,137,152      cstate_core/c7-residency/        #  861.332 M/sec                     
+    44.925471176            101,501      cache-misses                                                          
+    44.925471176          3,580,596      branch-misses                                                         
+    44.925471176             29,716      LLC-loads-misses                                                      
+    44.925471176                 66 C    msr/cpu_thermal_margin/          #   10.872 /sec                      
+    44.925471176           6,070.83 msec cpu-clock                        #   12.142 CPUs utilized             
+    44.925471176        547,160,554      cycles                           #    0.090 GHz                       
+    44.925471176          5,452,480      cstate_core/c3-residency/        #  898.145 K/sec                     
+    44.925471176      1,970,047,680      cstate_core/c6-residency/        #  324.511 M/sec                     
+    44.925471176      5,220,270,016      cstate_core/c7-residency/        #  859.895 M/sec                     
+    45.430462635             96,328      cache-misses                                                          
+    45.430462635          3,391,416      branch-misses                                                         
+    45.430462635             27,426      LLC-loads-misses                                                      
+    45.430462635                 68 C    msr/cpu_thermal_margin/          #   11.218 /sec                      
+    45.430462635           6,061.47 msec cpu-clock                        #   12.123 CPUs utilized             
+    45.430462635        539,341,940      cycles                           #    0.089 GHz                       
+    45.430462635          2,391,232      cstate_core/c3-residency/        #  394.497 K/sec                     
+    45.430462635      1,610,121,760      cstate_core/c6-residency/        #  265.632 M/sec                     
+    45.430462635      5,680,078,720      cstate_core/c7-residency/        #  937.080 M/sec                     
+    45.936480739            106,964      cache-misses                                                          
+    45.936480739          3,339,428      branch-misses                                                         
+    45.936480739             29,198      LLC-loads-misses                                                      
+    45.936480739                 71 C    msr/cpu_thermal_margin/          #   11.687 /sec                      
+    45.936480739           6,075.29 msec cpu-clock                        #   12.151 CPUs utilized             
+    45.936480739        539,622,989      cycles                           #    0.089 GHz                       
+    45.936480739         31,497,344      cstate_core/c3-residency/        #    5.184 M/sec                     
+    45.936480739      1,674,593,952      cstate_core/c6-residency/        #  275.640 M/sec                     
+    45.936480739      5,575,088,544      cstate_core/c7-residency/        #  917.666 M/sec                     
+    46.441621618             98,922      cache-misses                                                          
+    46.441621618          3,496,279      branch-misses                                                         
+    46.441621618             28,461      LLC-loads-misses                                                      
+    46.441621618                 69 C    msr/cpu_thermal_margin/          #   11.387 /sec                      
+    46.441621618           6,059.81 msec cpu-clock                        #   12.120 CPUs utilized             
+    46.441621618        541,493,878      cycles                           #    0.089 GHz                       
+    46.441621618          6,921,504      cstate_core/c3-residency/        #    1.142 M/sec                     
+    46.441621618      1,761,281,216      cstate_core/c6-residency/        #  290.650 M/sec                     
+    46.441621618      5,470,397,024      cstate_core/c7-residency/        #  902.735 M/sec                     
+    46.945604910             99,687      cache-misses                                                          
+    46.945604910          3,566,448      branch-misses                                                         
+    46.945604910             29,044      LLC-loads-misses                                                      
+    46.945604910                 68 C    msr/cpu_thermal_margin/          #   11.236 /sec                      
+    46.945604910           6,052.21 msec cpu-clock                        #   12.104 CPUs utilized             
+    46.945604910        545,570,527      cycles                           #    0.090 GHz                       
+    46.945604910          3,275,232      cstate_core/c3-residency/        #  541.163 K/sec                     
+    46.945604910      1,824,397,376      cstate_core/c6-residency/        #  301.443 M/sec                     
+    46.945604910      5,338,675,872      cstate_core/c7-residency/        #  882.103 M/sec                     
+    47.451620007            111,572      cache-misses                                                          
+    47.451620007          3,436,132      branch-misses                                                         
+    47.451620007             29,726      LLC-loads-misses                                                      
+    47.451620007                 68 C    msr/cpu_thermal_margin/          #   11.212 /sec                      
+    47.451620007           6,064.94 msec cpu-clock                        #   12.130 CPUs utilized             
+    47.451620007        543,832,724      cycles                           #    0.090 GHz                       
+    47.451620007          7,166,400      cstate_core/c3-residency/        #    1.182 M/sec                     
+    47.451620007      1,930,653,824      cstate_core/c6-residency/        #  318.330 M/sec                     
+    47.451620007      5,252,617,760      cstate_core/c7-residency/        #  866.062 M/sec                     
+    47.954891792            100,776      cache-misses                                                          
+    47.954891792          3,286,780      branch-misses                                                         
+    47.954891792             28,547      LLC-loads-misses                                                      
+    47.954891792                 71 C    msr/cpu_thermal_margin/          #   11.756 /sec                      
+    47.954891792           6,039.37 msec cpu-clock                        #   12.079 CPUs utilized             
+    47.954891792        535,936,245      cycles                           #    0.089 GHz                       
+    47.954891792          5,796,288      cstate_core/c3-residency/        #  959.751 K/sec                     
+    47.954891792        773,699,200      cstate_core/c6-residency/        #  128.109 M/sec                     
+    47.954891792      6,512,533,920      cstate_core/c7-residency/        #    1.078 G/sec                     
+    48.457249777            100,390      cache-misses                                                          
+    48.457249777          3,291,200      branch-misses                                                         
+    48.457249777             27,651      LLC-loads-misses                                                      
+    48.457249777                 72 C    msr/cpu_thermal_margin/          #   11.887 /sec                      
+    48.457249777           6,056.84 msec cpu-clock                        #   12.114 CPUs utilized             
+    48.457249777        539,903,463      cycles                           #    0.089 GHz                       
+    48.457249777          8,254,912      cstate_core/c3-residency/        #    1.363 M/sec                     
+    48.457249777      1,324,282,016      cstate_core/c6-residency/        #  218.642 M/sec                     
+    48.457249777      6,071,076,288      cstate_core/c7-residency/        #    1.002 G/sec                     
+    48.961937466             96,464      cache-misses                                                          
+    48.961937466          3,364,322      branch-misses                                                         
+    48.961937466             28,149      LLC-loads-misses                                                      
+    48.961937466                 69 C    msr/cpu_thermal_margin/          #   11.446 /sec                      
+    48.961937466           6,028.11 msec cpu-clock                        #   12.056 CPUs utilized             
+    48.961937466        538,205,111      cycles                           #    0.089 GHz                       
+    48.961937466          7,994,304      cstate_core/c3-residency/        #    1.326 M/sec                     
+    48.961937466      1,724,073,536      cstate_core/c6-residency/        #  286.006 M/sec                     
+    48.961937466      5,628,142,432      cstate_core/c7-residency/        #  933.649 M/sec                     
+    49.464269735            106,170      cache-misses                                                          
+    49.464269735          3,413,484      branch-misses                                                         
+    49.464269735             28,675      LLC-loads-misses                                                      
+    49.464269735                 73 C    msr/cpu_thermal_margin/          #   12.099 /sec                      
+    49.464269735           6,033.57 msec cpu-clock                        #   12.067 CPUs utilized             
+    49.464269735        540,089,374      cycles                           #    0.090 GHz                       
+    49.464269735          7,582,240      cstate_core/c3-residency/        #    1.257 M/sec                     
+    49.464269735      1,622,327,104      cstate_core/c6-residency/        #  268.883 M/sec                     
+    49.464269735      5,701,328,736      cstate_core/c7-residency/        #  944.934 M/sec                     
+    49.968692187            105,034      cache-misses                                                          
+    49.968692187          3,363,876      branch-misses                                                         
+    49.968692187             29,239      LLC-loads-misses                                                      
+    49.968692187                 70 C    msr/cpu_thermal_margin/          #   11.559 /sec                      
+    49.968692187           6,056.09 msec cpu-clock                        #   12.112 CPUs utilized             
+    49.968692187        545,737,807      cycles                           #    0.090 GHz                       
+    49.968692187          9,185,312      cstate_core/c3-residency/        #    1.517 M/sec                     
+    49.968692187      1,781,693,504      cstate_core/c6-residency/        #  294.198 M/sec                     
+    49.968692187      5,380,880,896      cstate_core/c7-residency/        #  888.507 M/sec                     
+    50.474622281            101,341      cache-misses                                                          
+    50.474622281          3,365,578      branch-misses                                                         
+    50.474622281             29,111      LLC-loads-misses                                                      
+    50.474622281                 67 C    msr/cpu_thermal_margin/          #   11.038 /sec                      
+    50.474622281           6,069.75 msec cpu-clock                        #   12.139 CPUs utilized             
+    50.474622281        545,280,743      cycles                           #    0.090 GHz                       
+    50.474622281          9,452,672      cstate_core/c3-residency/        #    1.557 M/sec                     
+    50.474622281      1,723,595,456      cstate_core/c6-residency/        #  283.965 M/sec                     
+    50.474622281      5,476,296,768      cstate_core/c7-residency/        #  902.228 M/sec                     
+    50.979632987            100,632      cache-misses                                                          
+    50.979632987          3,365,215      branch-misses                                                         
+    50.979632987             29,188      LLC-loads-misses                                                      
+    50.979632987                 73 C    msr/cpu_thermal_margin/          #   12.045 /sec                      
+    50.979632987           6,060.58 msec cpu-clock                        #   12.121 CPUs utilized             
+    50.979632987        544,021,820      cycles                           #    0.090 GHz                       
+    50.979632987          5,854,912      cstate_core/c3-residency/        #  966.064 K/sec                     
+    50.979632987      1,796,710,592      cstate_core/c6-residency/        #  296.458 M/sec                     
+    50.979632987      5,403,530,848      cstate_core/c7-residency/        #  891.586 M/sec                     
+    51.484641913            110,867      cache-misses                                                          
+    51.484641913          3,382,039      branch-misses                                                         
+    51.484641913             28,875      LLC-loads-misses                                                      
+    51.484641913                 68 C    msr/cpu_thermal_margin/          #   11.228 /sec                      
+    51.484641913           6,056.05 msec cpu-clock                        #   12.112 CPUs utilized             
+    51.484641913        539,653,949      cycles                           #    0.089 GHz                       
+    51.484641913          4,134,688      cstate_core/c3-residency/        #  682.737 K/sec                     
+    51.484641913      1,806,909,632      cstate_core/c6-residency/        #  298.364 M/sec                     
+    51.484641913      5,457,047,968      cstate_core/c7-residency/        #  901.090 M/sec                     
+    51.989502315            101,362      cache-misses                                                          
+    51.989502315          3,272,448      branch-misses                                                         
+    51.989502315             28,736      LLC-loads-misses                                                      
+    51.989502315                 69 C    msr/cpu_thermal_margin/          #   11.390 /sec                      
+    51.989502315           6,057.87 msec cpu-clock                        #   12.116 CPUs utilized             
+    51.989502315        539,989,593      cycles                           #    0.089 GHz                       
+    51.989502315          7,945,472      cstate_core/c3-residency/        #    1.312 M/sec                     
+    51.989502315      1,489,076,704      cstate_core/c6-residency/        #  245.809 M/sec                     
+    51.989502315      5,766,450,016      cstate_core/c7-residency/        #  951.894 M/sec                     
+    52.492497533            100,887      cache-misses                                                          
+    52.492497533          3,379,698      branch-misses                                                         
+    52.492497533             27,513      LLC-loads-misses                                                      
+    52.492497533                 68 C    msr/cpu_thermal_margin/          #   11.260 /sec                      
+    52.492497533           6,039.22 msec cpu-clock                        #   12.078 CPUs utilized             
+    52.492497533        538,741,284      cycles                           #    0.089 GHz                       
+    52.492497533          1,646,272      cstate_core/c3-residency/        #  272.597 K/sec                     
+    52.492497533      1,772,751,360      cstate_core/c6-residency/        #  293.540 M/sec                     
+    52.492497533      5,478,143,104      cstate_core/c7-residency/        #  907.094 M/sec                     
+#           time             counts unit events
+    52.998469684             93,062      cache-misses                                                          
+    52.998469684          3,444,970      branch-misses                                                         
+    52.998469684             27,018      LLC-loads-misses                                                      
+    52.998469684                 70 C    msr/cpu_thermal_margin/          #   11.528 /sec                      
+    52.998469684           6,071.94 msec cpu-clock                        #   12.144 CPUs utilized             
+    52.998469684        540,094,989      cycles                           #    0.089 GHz                       
+    52.998469684         10,193,856      cstate_core/c3-residency/        #    1.679 M/sec                     
+    52.998469684      1,725,482,208      cstate_core/c6-residency/        #  284.173 M/sec                     
+    52.998469684      5,564,175,936      cstate_core/c7-residency/        #  916.375 M/sec                     
+    53.504495343            110,571      cache-misses                                                          
+    53.504495343          3,375,431      branch-misses                                                         
+    53.504495343             29,006      LLC-loads-misses                                                      
+    53.504495343                 71 C    msr/cpu_thermal_margin/          #   11.672 /sec                      
+    53.504495343           6,083.15 msec cpu-clock                        #   12.166 CPUs utilized             
+    53.504495343        539,677,781      cycles                           #    0.089 GHz                       
+    53.504495343          8,815,424      cstate_core/c3-residency/        #    1.449 M/sec                     
+    53.504495343      1,374,079,488      cstate_core/c6-residency/        #  225.883 M/sec                     
+    53.504495343      5,924,686,752      cstate_core/c7-residency/        #  973.951 M/sec                     
+    54.007798784             98,282      cache-misses                                                          
+    54.007798784          3,498,997      branch-misses                                                         
+    54.007798784             28,197      LLC-loads-misses                                                      
+    54.007798784                 69 C    msr/cpu_thermal_margin/          #   11.452 /sec                      
+    54.007798784           6,025.36 msec cpu-clock                        #   12.051 CPUs utilized             
+    54.007798784        540,428,994      cycles                           #    0.090 GHz                       
+    54.007798784          6,906,816      cstate_core/c3-residency/        #    1.146 M/sec                     
+    54.007798784        988,207,040      cstate_core/c6-residency/        #  164.008 M/sec                     
+    54.007798784      6,155,245,632      cstate_core/c7-residency/        #    1.022 G/sec                     
+    54.510082478             99,774      cache-misses                                                          
+    54.510082478          3,555,424      branch-misses                                                         
+    54.510082478             27,987      LLC-loads-misses                                                      
+    54.510082478                 68 C    msr/cpu_thermal_margin/          #   11.200 /sec                      
+    54.510082478           6,071.18 msec cpu-clock                        #   12.142 CPUs utilized             
+    54.510082478        543,041,873      cycles                           #    0.089 GHz                       
+    54.510082478          5,766,784      cstate_core/c3-residency/        #  949.862 K/sec                     
+    54.510082478        922,627,168      cstate_core/c6-residency/        #  151.968 M/sec                     
+    54.510082478      6,319,405,376      cstate_core/c7-residency/        #    1.041 G/sec                     
+    55.016025120             97,505      cache-misses                                                          
+    55.016025120          3,364,849      branch-misses                                                         
+    55.016025120             28,348      LLC-loads-misses                                                      
+    55.016025120                 70 C    msr/cpu_thermal_margin/          #   11.528 /sec                      
+    55.016025120           6,072.02 msec cpu-clock                        #   12.144 CPUs utilized             
+    55.016025120        545,487,126      cycles                           #    0.090 GHz                       
+    55.016025120          9,199,520      cstate_core/c3-residency/        #    1.515 M/sec                     
+    55.016025120      1,235,362,016      cstate_core/c6-residency/        #  203.452 M/sec                     
+    55.016025120      6,023,509,568      cstate_core/c7-residency/        #  992.011 M/sec                     
+    55.522025371            113,449      cache-misses                                                          
+    55.522025371          3,403,044      branch-misses                                                         
+    55.522025371             28,869      LLC-loads-misses                                                      
+    55.522025371                 72 C    msr/cpu_thermal_margin/          #   11.903 /sec                      
+    55.522025371           6,048.90 msec cpu-clock                        #   12.098 CPUs utilized             
+    55.522025371        542,864,038      cycles                           #    0.090 GHz                       
+    55.522025371          3,470,656      cstate_core/c3-residency/        #  573.766 K/sec                     
+    55.522025371      1,001,545,568      cstate_core/c6-residency/        #  165.575 M/sec                     
+    55.522025371      6,211,373,728      cstate_core/c7-residency/        #    1.027 G/sec                     
+    56.026044767             98,363      cache-misses                                                          
+    56.026044767          3,395,816      branch-misses                                                         
+    56.026044767             28,412      LLC-loads-misses                                                      
+    56.026044767                 69 C    msr/cpu_thermal_margin/          #   11.386 /sec                      
+    56.026044767           6,060.23 msec cpu-clock                        #   12.120 CPUs utilized             
+    56.026044767        545,217,000      cycles                           #    0.090 GHz                       
+    56.026044767          7,152,192      cstate_core/c3-residency/        #    1.180 M/sec                     
+    56.026044767      1,056,261,152      cstate_core/c6-residency/        #  174.294 M/sec                     
+    56.026044767      6,129,680,992      cstate_core/c7-residency/        #    1.011 G/sec                     
+    56.531023313             96,051      cache-misses                                                          
+    56.531023313          3,357,138      branch-misses                                                         
+    56.531023313             27,741      LLC-loads-misses                                                      
+    56.531023313                 68 C    msr/cpu_thermal_margin/          #   11.220 /sec                      
+    56.531023313           6,060.63 msec cpu-clock                        #   12.121 CPUs utilized             
+    56.531023313        541,147,556      cycles                           #    0.089 GHz                       
+    56.531023313          5,435,328      cstate_core/c3-residency/        #  896.826 K/sec                     
+    56.531023313      1,087,954,656      cstate_core/c6-residency/        #  179.512 M/sec                     
+    56.531023313      6,127,621,792      cstate_core/c7-residency/        #    1.011 G/sec                     
+    57.035791115            104,933      cache-misses                                                          
+    57.035791115          3,366,146      branch-misses                                                         
+    57.035791115             27,925      LLC-loads-misses                                                      
+    57.035791115                 69 C    msr/cpu_thermal_margin/          #   11.445 /sec                      
+    57.035791115           6,028.92 msec cpu-clock                        #   12.058 CPUs utilized             
+    57.035791115        539,893,082      cycles                           #    0.090 GHz                       
+    57.035791115          5,372,000      cstate_core/c3-residency/        #  891.038 K/sec                     
+    57.035791115        879,332,032      cstate_core/c6-residency/        #  145.852 M/sec                     
+    57.035791115      6,275,489,888      cstate_core/c7-residency/        #    1.041 G/sec                     
+    57.541509157            100,090      cache-misses                                                          
+    57.541509157          3,559,728      branch-misses                                                         
+    57.541509157             28,557      LLC-loads-misses                                                      
+    57.541509157                 69 C    msr/cpu_thermal_margin/          #   11.368 /sec                      
+    57.541509157           6,069.62 msec cpu-clock                        #   12.139 CPUs utilized             
+    57.541509157        545,376,638      cycles                           #    0.090 GHz                       
+    57.541509157          3,600,288      cstate_core/c3-residency/        #  593.165 K/sec                     
+    57.541509157      1,718,455,008      cstate_core/c6-residency/        #  283.124 M/sec                     
+    57.541509157      5,487,318,432      cstate_core/c7-residency/        #  904.062 M/sec                     
+    58.047485289            100,901      cache-misses                                                          
+    58.047485289          3,416,065      branch-misses                                                         
+    58.047485289             29,202      LLC-loads-misses                                                      
+    58.047485289                 66 C    msr/cpu_thermal_margin/          #   10.873 /sec                      
+    58.047485289           6,069.91 msec cpu-clock                        #   12.140 CPUs utilized             
+    58.047485289        542,938,612      cycles                           #    0.089 GHz                       
+    58.047485289          6,382,048      cstate_core/c3-residency/        #    1.051 M/sec                     
+    58.047485289      1,687,801,920      cstate_core/c6-residency/        #  278.061 M/sec                     
+    58.047485289      5,514,257,376      cstate_core/c7-residency/        #  908.458 M/sec                     
+    58.551466412            105,970      cache-misses                                                          
+    58.551466412          3,523,955      branch-misses                                                         
+    58.551466412             29,248      LLC-loads-misses                                                      
+    58.551466412                 70 C    msr/cpu_thermal_margin/          #   11.574 /sec                      
+    58.551466412           6,048.13 msec cpu-clock                        #   12.096 CPUs utilized             
+    58.551466412        545,439,444      cycles                           #    0.090 GHz                       
+    58.551466412          6,851,328      cstate_core/c3-residency/        #    1.133 M/sec                     
+    58.551466412      1,777,041,408      cstate_core/c6-residency/        #  293.817 M/sec                     
+    58.551466412      5,363,472,768      cstate_core/c7-residency/        #  886.799 M/sec                     
+    59.055461263            108,375      cache-misses                                                          
+    59.055461263          3,362,067      branch-misses                                                         
+    59.055461263             28,946      LLC-loads-misses                                                      
+    59.055461263                 68 C    msr/cpu_thermal_margin/          #   11.245 /sec                      
+    59.055461263           6,047.27 msec cpu-clock                        #   12.095 CPUs utilized             
+    59.055461263        540,520,873      cycles                           #    0.089 GHz                       
+    59.055461263         10,198,368      cstate_core/c3-residency/        #    1.686 M/sec                     
+    59.055461263      1,688,723,744      cstate_core/c6-residency/        #  279.254 M/sec                     
+    59.055461263      5,500,480,672      cstate_core/c7-residency/        #  909.580 M/sec                     
+    59.557912695            100,136      cache-misses                                                          
+    59.557912695          3,552,943      branch-misses                                                         
+    59.557912695             28,313      LLC-loads-misses                                                      
+    59.557912695                 68 C    msr/cpu_thermal_margin/          #   11.278 /sec                      
+    59.557912695           6,029.60 msec cpu-clock                        #   12.059 CPUs utilized             
+    59.557912695        542,280,469      cycles                           #    0.090 GHz                       
+    59.557912695          5,360,704      cstate_core/c3-residency/        #  889.064 K/sec                     
+    59.557912695      1,579,168,608      cstate_core/c6-residency/        #  261.903 M/sec                     
+    59.557912695      5,662,711,616      cstate_core/c7-residency/        #  939.152 M/sec                     
+    60.060359548             95,970      cache-misses                                                          
+    60.060359548          3,380,117      branch-misses                                                         
+    60.060359548             27,770      LLC-loads-misses                                                      
+    60.060359548                 71 C    msr/cpu_thermal_margin/          #   11.746 /sec                      
+    60.060359548           6,044.67 msec cpu-clock                        #   12.089 CPUs utilized             
+    60.060359548        543,283,217      cycles                           #    0.090 GHz                       
+    60.060359548          9,450,592      cstate_core/c3-residency/        #    1.563 M/sec                     
+    60.060359548      1,714,869,888      cstate_core/c6-residency/        #  283.700 M/sec                     
+    60.060359548      5,551,300,032      cstate_core/c7-residency/        #  918.379 M/sec                     
+    60.563983900             97,085      cache-misses                                                          
+    60.563983900          3,406,817      branch-misses                                                         
+    60.563983900             27,423      LLC-loads-misses                                                      
+    60.563983900                 68 C    msr/cpu_thermal_margin/          #   11.280 /sec                      
+    60.563983900           6,028.11 msec cpu-clock                        #   12.056 CPUs utilized             
+    60.563983900        539,551,993      cycles                           #    0.090 GHz                       
+    60.563983900          7,554,336      cstate_core/c3-residency/        #    1.253 M/sec                     
+    60.563983900      1,601,363,776      cstate_core/c6-residency/        #  265.649 M/sec                     
+    60.563983900      5,657,889,568      cstate_core/c7-residency/        #  938.584 M/sec                     
+    61.066332890            111,545      cache-misses                                                          
+    61.066332890          3,482,408      branch-misses                                                         
+    61.066332890             30,288      LLC-loads-misses                                                      
+    61.066332890                 67 C    msr/cpu_thermal_margin/          #   11.110 /sec                      
+    61.066332890           6,030.41 msec cpu-clock                        #   12.061 CPUs utilized             
+    61.066332890        546,312,990      cycles                           #    0.091 GHz                       
+    61.066332890          5,936,288      cstate_core/c3-residency/        #  984.393 K/sec                     
+    61.066332890      1,867,401,696      cstate_core/c6-residency/        #  309.664 M/sec                     
+    61.066332890      5,248,151,616      cstate_core/c7-residency/        #  870.282 M/sec                     
+    61.570471674            103,881      cache-misses                                                          
+    61.570471674          3,448,729      branch-misses                                                         
+    61.570471674             28,246      LLC-loads-misses                                                      
+    61.570471674                 69 C    msr/cpu_thermal_margin/          #   11.388 /sec                      
+    61.570471674           6,059.15 msec cpu-clock                        #   12.118 CPUs utilized             
+    61.570471674        543,641,243      cycles                           #    0.090 GHz                       
+    61.570471674          4,051,072      cstate_core/c3-residency/        #  668.587 K/sec                     
+    61.570471674      1,670,548,320      cstate_core/c6-residency/        #  275.706 M/sec                     
+    61.570471674      5,478,584,704      cstate_core/c7-residency/        #  904.183 M/sec                     
+    62.074305449             97,062      cache-misses                                                          
+    62.074305449          3,454,151      branch-misses                                                         
+    62.074305449             27,853      LLC-loads-misses                                                      
+    62.074305449                 66 C    msr/cpu_thermal_margin/          #   10.901 /sec                      
+    62.074305449           6,054.68 msec cpu-clock                        #   12.109 CPUs utilized             
+    62.074305449        545,162,521      cycles                           #    0.090 GHz                       
+    62.074305449          8,708,480      cstate_core/c3-residency/        #    1.438 M/sec                     
+    62.074305449      1,604,486,240      cstate_core/c6-residency/        #  265.000 M/sec                     
+    62.074305449      5,550,086,400      cstate_core/c7-residency/        #  916.661 M/sec                     
+    62.579255089            100,771      cache-misses                                                          
+    62.579255089          3,411,919      branch-misses                                                         
+    62.579255089             29,054      LLC-loads-misses                                                      
+    62.579255089                 66 C    msr/cpu_thermal_margin/          #   10.904 /sec                      
+    62.579255089           6,053.07 msec cpu-clock                        #   12.106 CPUs utilized             
+    62.579255089        546,294,587      cycles                           #    0.090 GHz                       
+    62.579255089          3,416,416      cstate_core/c3-residency/        #  564.411 K/sec                     
+    62.579255089      1,606,684,416      cstate_core/c6-residency/        #  265.433 M/sec                     
+    62.579255089      5,554,244,992      cstate_core/c7-residency/        #  917.592 M/sec                     
+    63.083319677            112,101      cache-misses                                                          
+    63.083319677          3,406,478      branch-misses                                                         
+    63.083319677             29,504      LLC-loads-misses                                                      
+    63.083319677                 70 C    msr/cpu_thermal_margin/          #   11.542 /sec                      
+    63.083319677           6,064.71 msec cpu-clock                        #   12.129 CPUs utilized             
+    63.083319677        544,152,141      cycles                           #    0.090 GHz                       
+    63.083319677          9,749,888      cstate_core/c3-residency/        #    1.608 M/sec                     
+    63.083319677      1,645,908,896      cstate_core/c6-residency/        #  271.391 M/sec                     
+    63.083319677      5,677,754,464      cstate_core/c7-residency/        #  936.195 M/sec                     
+    63.587992013             99,504      cache-misses                                                          
+    63.587992013          3,383,600      branch-misses                                                         
+    63.587992013             28,333      LLC-loads-misses                                                      
+    63.587992013                 72 C    msr/cpu_thermal_margin/          #   11.856 /sec                      
+    63.587992013           6,072.74 msec cpu-clock                        #   12.145 CPUs utilized             
+    63.587992013        547,033,842      cycles                           #    0.090 GHz                       
+    63.587992013          7,168,064      cstate_core/c3-residency/        #    1.180 M/sec                     
+    63.587992013      1,539,010,304      cstate_core/c6-residency/        #  253.430 M/sec                     
+    63.587992013      5,786,679,648      cstate_core/c7-residency/        #  952.895 M/sec                     
+    64.094053891             96,747      cache-misses                                                          
+    64.094053891          3,355,439      branch-misses                                                         
+    64.094053891             28,254      LLC-loads-misses                                                      
+    64.094053891                 71 C    msr/cpu_thermal_margin/          #   11.717 /sec                      
+    64.094053891           6,059.83 msec cpu-clock                        #   12.120 CPUs utilized             
+    64.094053891        544,704,045      cycles                           #    0.090 GHz                       
+    64.094053891          6,013,472      cstate_core/c3-residency/        #  992.350 K/sec                     
+    64.094053891      1,751,964,544      cstate_core/c6-residency/        #  289.111 M/sec                     
+    64.094053891      5,412,314,720      cstate_core/c7-residency/        #  893.146 M/sec                     
+    64.598918909            107,958      cache-misses                                                          
+    64.598918909          3,393,951      branch-misses                                                         
+    64.598918909             28,944      LLC-loads-misses                                                      
+    64.598918909                 69 C    msr/cpu_thermal_margin/          #   11.393 /sec                      
+    64.598918909           6,056.19 msec cpu-clock                        #   12.112 CPUs utilized             
+    64.598918909        546,401,184      cycles                           #    0.090 GHz                       
+    64.598918909          5,535,584      cstate_core/c3-residency/        #  914.037 K/sec                     
+    64.598918909      1,811,526,848      cstate_core/c6-residency/        #  299.120 M/sec                     
+    64.598918909      5,315,577,792      cstate_core/c7-residency/        #  877.709 M/sec                     
+    65.105226783            101,038      cache-misses                                                          
+    65.105226783          3,445,596      branch-misses                                                         
+    65.105226783             28,368      LLC-loads-misses                                                      
+    65.105226783                 69 C    msr/cpu_thermal_margin/          #   11.385 /sec                      
+    65.105226783           6,060.48 msec cpu-clock                        #   12.121 CPUs utilized             
+    65.105226783        542,787,348      cycles                           #    0.090 GHz                       
+    65.105226783          6,700,544      cstate_core/c3-residency/        #    1.106 M/sec                     
+    65.105226783        545,479,360      cstate_core/c6-residency/        #   90.006 M/sec                     
+    65.105226783      6,654,897,728      cstate_core/c7-residency/        #    1.098 G/sec                     
+    65.609298364             95,308      cache-misses                                                          
+    65.609298364          3,392,913      branch-misses                                                         
+    65.609298364             27,466      LLC-loads-misses                                                      
+    65.609298364                 66 C    msr/cpu_thermal_margin/          #   10.887 /sec                      
+    65.609298364           6,062.33 msec cpu-clock                        #   12.125 CPUs utilized             
+    65.609298364        542,705,326      cycles                           #    0.090 GHz                       
+    65.609298364          5,080,928      cstate_core/c3-residency/        #  838.115 K/sec                     
+    65.609298364        612,169,984      cstate_core/c6-residency/        #  100.979 M/sec                     
+    65.609298364      6,579,391,776      cstate_core/c7-residency/        #    1.085 G/sec                     
+#           time             counts unit events
+    66.115283907            118,571      cache-misses                                                          
+    66.115283907          3,374,163      branch-misses                                                         
+    66.115283907             31,541      LLC-loads-misses                                                      
+    66.115283907                 71 C    msr/cpu_thermal_margin/          #   11.693 /sec                      
+    66.115283907           6,071.93 msec cpu-clock                        #   12.144 CPUs utilized             
+    66.115283907        546,338,074      cycles                           #    0.090 GHz                       
+    66.115283907          6,133,024      cstate_core/c3-residency/        #    1.010 M/sec                     
+    66.115283907        732,312,576      cstate_core/c6-residency/        #  120.606 M/sec                     
+    66.115283907      6,486,924,288      cstate_core/c7-residency/        #    1.068 G/sec                     
+    66.621229023            128,132      cache-misses                                                          
+    66.621229023          3,366,461      branch-misses                                                         
+    66.621229023             30,697      LLC-loads-misses                                                      
+    66.621229023                 67 C    msr/cpu_thermal_margin/          #   11.068 /sec                      
+    66.621229023           6,053.45 msec cpu-clock                        #   12.107 CPUs utilized             
+    66.621229023        541,765,683      cycles                           #    0.089 GHz                       
+    66.621229023          7,257,888      cstate_core/c3-residency/        #    1.199 M/sec                     
+    66.621229023      1,129,653,728      cstate_core/c6-residency/        #  186.613 M/sec                     
+    66.621229023      6,110,828,416      cstate_core/c7-residency/        #    1.009 G/sec                     
+    67.124993523            106,559      cache-misses                                                          
+    67.124993523          3,452,815      branch-misses                                                         
+    67.124993523             29,490      LLC-loads-misses                                                      
+    67.124993523                 65 C    msr/cpu_thermal_margin/          #   10.749 /sec                      
+    67.124993523           6,046.81 msec cpu-clock                        #   12.094 CPUs utilized             
+    67.124993523        544,434,527      cycles                           #    0.090 GHz                       
+    67.124993523          6,465,568      cstate_core/c3-residency/        #    1.069 M/sec                     
+    67.124993523      1,826,682,144      cstate_core/c6-residency/        #  302.090 M/sec                     
+    67.124993523      5,359,113,952      cstate_core/c7-residency/        #  886.271 M/sec                     
+    67.629011806            103,543      cache-misses                                                          
+    67.629011806          3,417,619      branch-misses                                                         
+    67.629011806             29,417      LLC-loads-misses                                                      
+    67.629011806                 70 C    msr/cpu_thermal_margin/          #   11.563 /sec                      
+    67.629011806           6,053.55 msec cpu-clock                        #   12.107 CPUs utilized             
+    67.629011806        545,482,893      cycles                           #    0.090 GHz                       
+    67.629011806          7,154,624      cstate_core/c3-residency/        #    1.182 M/sec                     
+    67.629011806      1,585,290,016      cstate_core/c6-residency/        #  261.878 M/sec                     
+    67.629011806      5,603,177,696      cstate_core/c7-residency/        #  925.602 M/sec                     
+    68.134000920            101,419      cache-misses                                                          
+    68.134000920          3,484,537      branch-misses                                                         
+    68.134000920             29,422      LLC-loads-misses                                                      
+    68.134000920                 69 C    msr/cpu_thermal_margin/          #   11.405 /sec                      
+    68.134000920           6,050.23 msec cpu-clock                        #   12.100 CPUs utilized             
+    68.134000920        544,143,349      cycles                           #    0.090 GHz                       
+    68.134000920          7,944,384      cstate_core/c3-residency/        #    1.313 M/sec                     
+    68.134000920      1,753,264,896      cstate_core/c6-residency/        #  289.785 M/sec                     
+    68.134000920      5,444,520,384      cstate_core/c7-residency/        #  899.886 M/sec                     
+    68.636794820            125,598      cache-misses                                                          
+    68.636794820          3,380,097      branch-misses                                                         
+    68.636794820             30,048      LLC-loads-misses                                                      
+    68.636794820                 67 C    msr/cpu_thermal_margin/          #   11.105 /sec                      
+    68.636794820           6,033.32 msec cpu-clock                        #   12.067 CPUs utilized             
+    68.636794820        543,660,307      cycles                           #    0.090 GHz                       
+    68.636794820          7,305,792      cstate_core/c3-residency/        #    1.211 M/sec                     
+    68.636794820      1,768,710,176      cstate_core/c6-residency/        #  293.157 M/sec                     
+    68.636794820      5,380,098,528      cstate_core/c7-residency/        #  891.731 M/sec                     
+    69.142495965             99,181      cache-misses                                                          
+    69.142495965          3,484,850      branch-misses                                                         
+    69.142495965             28,433      LLC-loads-misses                                                      
+    69.142495965                 67 C    msr/cpu_thermal_margin/          #   11.041 /sec                      
+    69.142495965           6,068.24 msec cpu-clock                        #   12.136 CPUs utilized             
+    69.142495965        546,114,824      cycles                           #    0.090 GHz                       
+    69.142495965         10,218,016      cstate_core/c3-residency/        #    1.684 M/sec                     
+    69.142495965      1,783,081,152      cstate_core/c6-residency/        #  293.838 M/sec                     
+    69.142495965      5,380,957,088      cstate_core/c7-residency/        #  886.742 M/sec                     
+    69.647495289             95,010      cache-misses                                                          
+    69.647495289          3,389,837      branch-misses                                                         
+    69.647495289             27,509      LLC-loads-misses                                                      
+    69.647495289                 68 C    msr/cpu_thermal_margin/          #   11.221 /sec                      
+    69.647495289           6,060.26 msec cpu-clock                        #   12.121 CPUs utilized             
+    69.647495289        542,649,984      cycles                           #    0.090 GHz                       
+    69.647495289          5,327,008      cstate_core/c3-residency/        #  879.007 K/sec                     
+    69.647495289        584,554,304      cstate_core/c6-residency/        #   96.457 M/sec                     
+    69.647495289      6,587,695,360      cstate_core/c7-residency/        #    1.087 G/sec                     
+    70.152478823             93,689      cache-misses                                                          
+    70.152478823          3,377,332      branch-misses                                                         
+    70.152478823             26,905      LLC-loads-misses                                                      
+    70.152478823                 70 C    msr/cpu_thermal_margin/          #   11.551 /sec                      
+    70.152478823           6,060.24 msec cpu-clock                        #   12.120 CPUs utilized             
+    70.152478823        540,736,316      cycles                           #    0.089 GHz                       
+    70.152478823          8,387,488      cstate_core/c3-residency/        #    1.384 M/sec                     
+    70.152478823        573,131,776      cstate_core/c6-residency/        #   94.572 M/sec                     
+    70.152478823      6,610,616,864      cstate_core/c7-residency/        #    1.091 G/sec                     
+    70.657484803            123,272      cache-misses                                                          
+    70.657484803          3,466,939      branch-misses                                                         
+    70.657484803             30,067      LLC-loads-misses                                                      
+    70.657484803                 68 C    msr/cpu_thermal_margin/          #   11.202 /sec                      
+    70.657484803           6,070.57 msec cpu-clock                        #   12.141 CPUs utilized             
+    70.657484803        542,525,421      cycles                           #    0.089 GHz                       
+    70.657484803         11,807,296      cstate_core/c3-residency/        #    1.945 M/sec                     
+    70.657484803        657,009,760      cstate_core/c6-residency/        #  108.229 M/sec                     
+    70.657484803      6,623,223,744      cstate_core/c7-residency/        #    1.091 G/sec                     
+    71.162854881             99,996      cache-misses                                                          
+    71.162854881          3,416,117      branch-misses                                                         
+    71.162854881             28,896      LLC-loads-misses                                                      
+    71.162854881                 67 C    msr/cpu_thermal_margin/          #   11.042 /sec                      
+    71.162854881           6,067.53 msec cpu-clock                        #   12.135 CPUs utilized             
+    71.162854881        545,535,060      cycles                           #    0.090 GHz                       
+    71.162854881         10,048,512      cstate_core/c3-residency/        #    1.656 M/sec                     
+    71.162854881        609,504,608      cstate_core/c6-residency/        #  100.454 M/sec                     
+    71.162854881      6,658,952,416      cstate_core/c7-residency/        #    1.097 G/sec                     
+    71.668863062            103,315      cache-misses                                                          
+    71.668863062          3,512,038      branch-misses                                                         
+    71.668863062             29,395      LLC-loads-misses                                                      
+    71.668863062                 71 C    msr/cpu_thermal_margin/          #   11.692 /sec                      
+    71.668863062           6,072.49 msec cpu-clock                        #   12.145 CPUs utilized             
+    71.668863062        546,297,719      cycles                           #    0.090 GHz                       
+    71.668863062          7,935,232      cstate_core/c3-residency/        #    1.307 M/sec                     
+    71.668863062        657,129,824      cstate_core/c6-residency/        #  108.214 M/sec                     
+    71.668863062      6,612,942,784      cstate_core/c7-residency/        #    1.089 G/sec                     
+    72.174797279            114,789      cache-misses                                                          
+    72.174797279          3,412,995      branch-misses                                                         
+    72.174797279             30,174      LLC-loads-misses                                                      
+    72.174797279                 68 C    msr/cpu_thermal_margin/          #   11.222 /sec                      
+    72.174797279           6,059.60 msec cpu-clock                        #   12.119 CPUs utilized             
+    72.174797279        544,464,056      cycles                           #    0.090 GHz                       
+    72.174797279          7,725,760      cstate_core/c3-residency/        #    1.275 M/sec                     
+    72.174797279        632,387,968      cstate_core/c6-residency/        #  104.361 M/sec                     
+    72.174797279      6,642,656,704      cstate_core/c7-residency/        #    1.096 G/sec                     
+    72.680505271             95,641      cache-misses                                                          
+    72.680505271          3,495,586      branch-misses                                                         
+    72.680505271             27,675      LLC-loads-misses                                                      
+    72.680505271                 67 C    msr/cpu_thermal_margin/          #   11.041 /sec                      
+    72.680505271           6,068.02 msec cpu-clock                        #   12.136 CPUs utilized             
+    72.680505271        541,822,288      cycles                           #    0.089 GHz                       
+    72.680505271          7,836,064      cstate_core/c3-residency/        #    1.291 M/sec                     
+    72.680505271        608,240,896      cstate_core/c6-residency/        #  100.237 M/sec                     
+    72.680505271      6,701,533,696      cstate_core/c7-residency/        #    1.104 G/sec                     
+    73.185479136             94,205      cache-misses                                                          
+    73.185479136          3,543,120      branch-misses                                                         
+    73.185479136             27,493      LLC-loads-misses                                                      
+    73.185479136                 69 C    msr/cpu_thermal_margin/          #   11.384 /sec                      
+    73.185479136           6,061.14 msec cpu-clock                        #   12.122 CPUs utilized             
+    73.185479136        541,633,239      cycles                           #    0.089 GHz                       
+    73.185479136          4,929,120      cstate_core/c3-residency/        #  813.234 K/sec                     
+    73.185479136        567,217,856      cstate_core/c6-residency/        #   93.583 M/sec                     
+    73.185479136      6,736,757,440      cstate_core/c7-residency/        #    1.111 G/sec                     
+    73.691455117             99,134      cache-misses                                                          
+    73.691455117          3,516,346      branch-misses                                                         
+    73.691455117             27,962      LLC-loads-misses                                                      
+    73.691455117                 67 C    msr/cpu_thermal_margin/          #   11.021 /sec                      
+    73.691455117           6,079.11 msec cpu-clock                        #   12.158 CPUs utilized             
+    73.691455117        540,735,910      cycles                           #    0.089 GHz                       
+    73.691455117          3,878,816      cstate_core/c3-residency/        #  638.056 K/sec                     
+    73.691455117        559,073,632      cstate_core/c6-residency/        #   91.966 M/sec                     
+    73.691455117      6,758,653,824      cstate_core/c7-residency/        #    1.112 G/sec                     
+    74.195265625            109,760      cache-misses                                                          
+    74.195265625          3,386,301      branch-misses                                                         
+    74.195265625             29,514      LLC-loads-misses                                                      
+    74.195265625                 69 C    msr/cpu_thermal_margin/          #   11.406 /sec                      
+    74.195265625           6,049.20 msec cpu-clock                        #   12.098 CPUs utilized             
+    74.195265625        542,674,768      cycles                           #    0.090 GHz                       
+    74.195265625          6,073,056      cstate_core/c3-residency/        #    1.004 M/sec                     
+    74.195265625        603,740,672      cstate_core/c6-residency/        #   99.805 M/sec                     
+    74.195265625      6,658,752,160      cstate_core/c7-residency/        #    1.101 G/sec                     
+    74.700833524            102,492      cache-misses                                                          
+    74.700833524          3,466,103      branch-misses                                                         
+    74.700833524             29,362      LLC-loads-misses                                                      
+    74.700833524                 69 C    msr/cpu_thermal_margin/          #   11.386 /sec                      
+    74.700833524           6,060.29 msec cpu-clock                        #   12.121 CPUs utilized             
+    74.700833524        543,679,437      cycles                           #    0.090 GHz                       
+    74.700833524          9,048,032      cstate_core/c3-residency/        #    1.493 M/sec                     
+    74.700833524        598,973,504      cstate_core/c6-residency/        #   98.836 M/sec                     
+    74.700833524      6,683,570,176      cstate_core/c7-residency/        #    1.103 G/sec                     
+    75.204861843             97,608      cache-misses                                                          
+    75.204861843          3,574,618      branch-misses                                                         
+    75.204861843             28,312      LLC-loads-misses                                                      
+    75.204861843                 68 C    msr/cpu_thermal_margin/          #   11.242 /sec                      
+    75.204861843           6,048.98 msec cpu-clock                        #   12.098 CPUs utilized             
+    75.204861843        542,830,222      cycles                           #    0.090 GHz                       
+    75.204861843          5,147,968      cstate_core/c3-residency/        #  851.048 K/sec                     
+    75.204861843        543,493,312      cstate_core/c6-residency/        #   89.849 M/sec                     
+    75.204861843      6,719,688,512      cstate_core/c7-residency/        #    1.111 G/sec                     
+    75.708847385            100,133      cache-misses                                                          
+    75.708847385          3,483,207      branch-misses                                                         
+    75.708847385             28,930      LLC-loads-misses                                                      
+    75.708847385                 72 C    msr/cpu_thermal_margin/          #   11.897 /sec                      
+    75.708847385           6,052.04 msec cpu-clock                        #   12.104 CPUs utilized             
+    75.708847385        543,084,797      cycles                           #    0.090 GHz                       
+    75.708847385          5,409,472      cstate_core/c3-residency/        #  893.826 K/sec                     
+    75.708847385      1,524,824,192      cstate_core/c6-residency/        #  251.952 M/sec                     
+    75.708847385      5,684,174,496      cstate_core/c7-residency/        #  939.216 M/sec                     
+    76.213793777            112,843      cache-misses                                                          
+    76.213793777          3,392,923      branch-misses                                                         
+    76.213793777             30,045      LLC-loads-misses                                                      
+    76.213793777                 69 C    msr/cpu_thermal_margin/          #   11.391 /sec                      
+    76.213793777           6,057.44 msec cpu-clock                        #   12.115 CPUs utilized             
+    76.213793777        541,485,365      cycles                           #    0.089 GHz                       
+    76.213793777          6,272,544      cstate_core/c3-residency/        #    1.036 M/sec                     
+    76.213793777      1,770,400,544      cstate_core/c6-residency/        #  292.269 M/sec                     
+    76.213793777      5,442,863,936      cstate_core/c7-residency/        #  898.542 M/sec                     
+    76.717306284            104,554      cache-misses                                                          
+    76.717306284          3,389,821      branch-misses                                                         
+    76.717306284             29,350      LLC-loads-misses                                                      
+    76.717306284                 70 C    msr/cpu_thermal_margin/          #   11.579 /sec                      
+    76.717306284           6,045.60 msec cpu-clock                        #   12.091 CPUs utilized             
+    76.717306284        544,639,953      cycles                           #    0.090 GHz                       
+    76.717306284          5,158,400      cstate_core/c3-residency/        #  853.249 K/sec                     
+    76.717306284      1,842,074,496      cstate_core/c6-residency/        #  304.697 M/sec                     
+    76.717306284      5,352,692,192      cstate_core/c7-residency/        #  885.386 M/sec                     
+    77.221236265            104,117      cache-misses                                                          
+    77.221236265          3,542,512      branch-misses                                                         
+    77.221236265             30,051      LLC-loads-misses                                                      
+    77.221236265                 68 C    msr/cpu_thermal_margin/          #   11.231 /sec                      
+    77.221236265           6,054.85 msec cpu-clock                        #   12.110 CPUs utilized             
+    77.221236265        546,827,228      cycles                           #    0.090 GHz                       
+    77.221236265          8,592,128      cstate_core/c3-residency/        #    1.419 M/sec                     
+    77.221236265      1,780,697,024      cstate_core/c6-residency/        #  294.094 M/sec                     
+    77.221236265      5,409,587,424      cstate_core/c7-residency/        #  893.430 M/sec                     
+    77.726179274             99,548      cache-misses                                                          
+    77.726179274          3,372,844      branch-misses                                                         
+    77.726179274             29,122      LLC-loads-misses                                                      
+    77.726179274                 72 C    msr/cpu_thermal_margin/          #   11.881 /sec                      
+    77.726179274           6,060.13 msec cpu-clock                        #   12.120 CPUs utilized             
+    77.726179274        544,152,521      cycles                           #    0.090 GHz                       
+    77.726179274          8,901,824      cstate_core/c3-residency/        #    1.469 M/sec                     
+    77.726179274      1,694,391,840      cstate_core/c6-residency/        #  279.597 M/sec                     
+    77.726179274      5,521,044,928      cstate_core/c7-residency/        #  911.044 M/sec                     
+    78.231223571            118,728      cache-misses                                                          
+    78.231223571          3,383,143      branch-misses                                                         
+    78.231223571             30,926      LLC-loads-misses                                                      
+    78.231223571                 72 C    msr/cpu_thermal_margin/          #   11.917 /sec                      
+    78.231223571           6,041.81 msec cpu-clock                        #   12.084 CPUs utilized             
+    78.231223571        542,311,968      cycles                           #    0.090 GHz                       
+    78.231223571          9,071,072      cstate_core/c3-residency/        #    1.501 M/sec                     
+    78.231223571      1,807,188,288      cstate_core/c6-residency/        #  299.114 M/sec                     
+    78.231223571      5,389,976,416      cstate_core/c7-residency/        #  892.113 M/sec                     
+    78.733625300            110,334      cache-misses                                                          
+    78.733625300          3,410,841      branch-misses                                                         
+    78.733625300             29,645      LLC-loads-misses                                                      
+    78.733625300                 67 C    msr/cpu_thermal_margin/          #   11.113 /sec                      
+    78.733625300           6,028.77 msec cpu-clock                        #   12.058 CPUs utilized             
+    78.733625300        543,815,796      cycles                           #    0.090 GHz                       
+    78.733625300          6,371,936      cstate_core/c3-residency/        #    1.057 M/sec                     
+    78.733625300      1,643,256,096      cstate_core/c6-residency/        #  272.569 M/sec                     
+    78.733625300      5,526,319,008      cstate_core/c7-residency/        #  916.658 M/sec                     
+#           time             counts unit events
+    79.235963083            102,535      cache-misses                                                          
+    79.235963083          3,378,669      branch-misses                                                         
+    79.235963083             29,348      LLC-loads-misses                                                      
+    79.235963083                 68 C    msr/cpu_thermal_margin/          #   11.219 /sec                      
+    79.235963083           6,060.96 msec cpu-clock                        #   12.122 CPUs utilized             
+    79.235963083        545,689,005      cycles                           #    0.090 GHz                       
+    79.235963083          8,292,384      cstate_core/c3-residency/        #    1.368 M/sec                     
+    79.235963083      1,669,069,536      cstate_core/c6-residency/        #  275.380 M/sec                     
+    79.235963083      5,533,005,536      cstate_core/c7-residency/        #  912.893 M/sec                     
+    79.740801658            113,564      cache-misses                                                          
+    79.740801658          3,384,593      branch-misses                                                         
+    79.740801658             28,363      LLC-loads-misses                                                      
+    79.740801658                 68 C    msr/cpu_thermal_margin/          #   11.279 /sec                      
+    79.740801658           6,029.03 msec cpu-clock                        #   12.058 CPUs utilized             
+    79.740801658        540,779,947      cycles                           #    0.090 GHz                       
+    79.740801658          3,459,872      cstate_core/c3-residency/        #  573.869 K/sec                     
+    79.740801658        877,795,360      cstate_core/c6-residency/        #  145.595 M/sec                     
+    79.740801658      6,303,871,264      cstate_core/c7-residency/        #    1.046 G/sec                     
+    80.246501092             96,913      cache-misses                                                          
+    80.246501092          3,390,518      branch-misses                                                         
+    80.246501092             27,790      LLC-loads-misses                                                      
+    80.246501092                 69 C    msr/cpu_thermal_margin/          #   11.369 /sec                      
+    80.246501092           6,069.28 msec cpu-clock                        #   12.139 CPUs utilized             
+    80.246501092        543,543,166      cycles                           #    0.090 GHz                       
+    80.246501092          9,525,184      cstate_core/c3-residency/        #    1.569 M/sec                     
+    80.246501092        605,340,416      cstate_core/c6-residency/        #   99.738 M/sec                     
+    80.246501092      6,575,582,880      cstate_core/c7-residency/        #    1.083 G/sec                     
+    80.752511775             97,561      cache-misses                                                          
+    80.752511775          3,497,582      branch-misses                                                         
+    80.752511775             28,206      LLC-loads-misses                                                      
+    80.752511775                 66 C    msr/cpu_thermal_margin/          #   10.872 /sec                      
+    80.752511775           6,070.56 msec cpu-clock                        #   12.141 CPUs utilized             
+    80.752511775        540,038,130      cycles                           #    0.089 GHz                       
+    80.752511775          3,959,424      cstate_core/c3-residency/        #  652.234 K/sec                     
+    80.752511775        572,905,088      cstate_core/c6-residency/        #   94.374 M/sec                     
+    80.752511775      6,742,276,064      cstate_core/c7-residency/        #    1.111 G/sec                     
+    81.256465198             97,532      cache-misses                                                          
+    81.256465198          3,389,299      branch-misses                                                         
+    81.256465198             28,526      LLC-loads-misses                                                      
+    81.256465198                 73 C    msr/cpu_thermal_margin/          #   12.073 /sec                      
+    81.256465198           6,046.64 msec cpu-clock                        #   12.093 CPUs utilized             
+    81.256465198        541,549,945      cycles                           #    0.090 GHz                       
+    81.256465198          7,059,744      cstate_core/c3-residency/        #    1.168 M/sec                     
+    81.256465198        634,239,584      cstate_core/c6-residency/        #  104.891 M/sec                     
+    81.256465198      6,630,417,344      cstate_core/c7-residency/        #    1.097 G/sec                     
+    81.759486887            110,078      cache-misses                                                          
+    81.759486887          3,380,985      branch-misses                                                         
+    81.759486887             29,163      LLC-loads-misses                                                      
+    81.759486887                 71 C    msr/cpu_thermal_margin/          #   11.761 /sec                      
+    81.759486887           6,036.85 msec cpu-clock                        #   12.074 CPUs utilized             
+    81.759486887        540,770,489      cycles                           #    0.090 GHz                       
+    81.759486887          5,750,592      cstate_core/c3-residency/        #  952.582 K/sec                     
+    81.759486887      1,797,217,600      cstate_core/c6-residency/        #  297.708 M/sec                     
+    81.759486887      5,412,832,800      cstate_core/c7-residency/        #  896.633 M/sec                     
+    82.261881084            101,920      cache-misses                                                          
+    82.261881084          3,494,543      branch-misses                                                         
+    82.261881084             29,666      LLC-loads-misses                                                      
+    82.261881084                 73 C    msr/cpu_thermal_margin/          #   12.066 /sec                      
+    82.261881084           6,050.08 msec cpu-clock                        #   12.100 CPUs utilized             
+    82.261881084        543,767,811      cycles                           #    0.090 GHz                       
+    82.261881084          5,875,040      cstate_core/c3-residency/        #  971.069 K/sec                     
+    82.261881084      1,686,649,632      cstate_core/c6-residency/        #  278.782 M/sec                     
+    82.261881084      5,517,990,720      cstate_core/c7-residency/        #  912.053 M/sec                     
+    82.766043725            103,182      cache-misses                                                          
+    82.766043725          3,509,377      branch-misses                                                         
+    82.766043725             29,553      LLC-loads-misses                                                      
+    82.766043725                 70 C    msr/cpu_thermal_margin/          #   11.527 /sec                      
+    82.766043725           6,072.49 msec cpu-clock                        #   12.145 CPUs utilized             
+    82.766043725        545,253,016      cycles                           #    0.090 GHz                       
+    82.766043725          5,330,336      cstate_core/c3-residency/        #  877.784 K/sec                     
+    82.766043725      1,733,934,496      cstate_core/c6-residency/        #  285.539 M/sec                     
+    82.766043725      5,487,177,408      cstate_core/c7-residency/        #  903.612 M/sec                     
+    83.272062165             94,368      cache-misses                                                          
+    83.272062165          3,327,899      branch-misses                                                         
+    83.272062165             26,393      LLC-loads-misses                                                      
+    83.272062165                 71 C    msr/cpu_thermal_margin/          #   11.740 /sec                      
+    83.272062165           6,047.55 msec cpu-clock                        #   12.095 CPUs utilized             
+    83.272062165        536,730,024      cycles                           #    0.089 GHz                       
+    83.272062165          2,880,704      cstate_core/c3-residency/        #  476.342 K/sec                     
+    83.272062165        519,380,160      cstate_core/c6-residency/        #   85.883 M/sec                     
+    83.272062165      6,697,395,136      cstate_core/c7-residency/        #    1.107 G/sec                     
+    83.775813111            106,697      cache-misses                                                          
+    83.775813111          3,513,102      branch-misses                                                         
+    83.775813111             28,685      LLC-loads-misses                                                      
+    83.775813111                 71 C    msr/cpu_thermal_margin/          #   11.779 /sec                      
+    83.775813111           6,027.86 msec cpu-clock                        #   12.056 CPUs utilized             
+    83.775813111        542,404,770      cycles                           #    0.090 GHz                       
+    83.775813111          6,263,968      cstate_core/c3-residency/        #    1.039 M/sec                     
+    83.775813111      1,232,102,336      cstate_core/c6-residency/        #  204.401 M/sec                     
+    83.775813111      5,912,729,024      cstate_core/c7-residency/        #  980.901 M/sec                     
+    84.279485932             97,381      cache-misses                                                          
+    84.279485932          3,428,743      branch-misses                                                         
+    84.279485932             28,245      LLC-loads-misses                                                      
+    84.279485932                 67 C    msr/cpu_thermal_margin/          #   11.080 /sec                      
+    84.279485932           6,046.89 msec cpu-clock                        #   12.094 CPUs utilized             
+    84.279485932        545,728,094      cycles                           #    0.090 GHz                       
+    84.279485932          6,073,536      cstate_core/c3-residency/        #    1.004 M/sec                     
+    84.279485932      1,751,152,384      cstate_core/c6-residency/        #  289.595 M/sec                     
+    84.279485932      5,396,870,656      cstate_core/c7-residency/        #  892.503 M/sec                     
+    84.785494599            100,837      cache-misses                                                          
+    84.785494599          3,379,589      branch-misses                                                         
+    84.785494599             29,308      LLC-loads-misses                                                      
+    84.785494599                 69 C    msr/cpu_thermal_margin/          #   11.367 /sec                      
+    84.785494599           6,070.29 msec cpu-clock                        #   12.141 CPUs utilized             
+    84.785494599        543,826,444      cycles                           #    0.090 GHz                       
+    84.785494599          4,813,120      cstate_core/c3-residency/        #  792.898 K/sec                     
+    84.785494599      1,692,595,424      cstate_core/c6-residency/        #  278.833 M/sec                     
+    84.785494599      5,544,873,440      cstate_core/c7-residency/        #  913.445 M/sec                     
+    85.289461288            101,741      cache-misses                                                          
+    85.289461288          3,329,837      branch-misses                                                         
+    85.289461288             29,506      LLC-loads-misses                                                      
+    85.289461288                 69 C    msr/cpu_thermal_margin/          #   11.407 /sec                      
+    85.289461288           6,048.91 msec cpu-clock                        #   12.098 CPUs utilized             
+    85.289461288        543,966,928      cycles                           #    0.090 GHz                       
+    85.289461288          5,123,584      cstate_core/c3-residency/        #  847.025 K/sec                     
+    85.289461288      1,535,244,064      cstate_core/c6-residency/        #  253.805 M/sec                     
+    85.289461288      5,649,183,424      cstate_core/c7-residency/        #  933.917 M/sec                     
+    85.315784582             10,598      cache-misses                                                          
+    85.315784582            168,894      branch-misses                                                         
+    85.315784582              1,971      LLC-loads-misses                                                      
+    85.315784582                 74 C    msr/cpu_thermal_margin/          #  235.467 /sec                      
+    85.315784582             314.27 msec cpu-clock                        #    0.629 CPUs utilized             
+    85.315784582         25,977,217      cycles                           #    0.083 GHz                       
+    85.315784582            122,400      cstate_core/c3-residency/        #  389.475 K/sec                     
+    85.315784582         79,943,648      cstate_core/c6-residency/        #  254.380 M/sec                     
+    85.315784582        293,803,552      cstate_core/c7-residency/        #  934.879 M/sec                     

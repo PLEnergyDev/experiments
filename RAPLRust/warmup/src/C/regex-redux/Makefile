@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 CC=gcc
 
-OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=ivybridge -fopenmp
+OPT_FLAGS=-pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp
 LIB_FLAGS=-lpcre -L$(RAPL_DIR)/target/release -lrapl_lib -Wl,-rpath=$(RAPL_DIR)/target/release
 
 CFLAGS=$(OPT_FLAGS) $(LIB_FLAGS)

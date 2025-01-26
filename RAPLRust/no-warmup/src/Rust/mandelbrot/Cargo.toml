@@ -14,4 +14,4 @@ generic-array = "1.1.0"
 opt-level = 3
 lto = true
 codegen-units = 1
-target-cpu = "ivybridge"
+target-cpu = "native"
