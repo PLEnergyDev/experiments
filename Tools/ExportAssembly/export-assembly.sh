@@ -13,7 +13,7 @@
 # - https://github.com/openjdk/jdk/tree/master/src/utils/hsdis
 # - https://chriswhocodes.com/hsdis/
 # - https://github.com/AdoptOpenJDK/jitwatch
-# For Microsoft .NET the DOTNET_JitDisasm environment variable is used:
+# For .NET the DOTNET_JitDisasm and DOTNET_JitDisasmDiffable environment variables are used:
 # - https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/jit/viewing-jit-dumps.md
 # - https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-build
 # - https://learn.microsoft.com/en-us/dotnet/core/deploying/
@@ -180,7 +180,7 @@ dotnet_scd_jit_dll() {
     jit_disasm="$2"
   fi
 
-  DOTNET_JitDisasm="$jit_disasm" "dotnet" "$1" "${@:4}"
+  DOTNET_JitDisasm="$jit_disasm" DOTNET_JitDisasmDiffable=1 "dotnet" "$1" "${@:4}"
 }
 
 openjdk_java() {
