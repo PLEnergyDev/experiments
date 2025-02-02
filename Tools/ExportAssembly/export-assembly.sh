@@ -26,7 +26,7 @@ set -e
 
 ## Helper Functions.
 usage() {
-  echo "usage: bash export-assembly.sh input-file [-foh]"
+  echo "usage: bash export-assembly.sh input-file [-fo-h]"
   exit 1
 }
 
@@ -37,6 +37,7 @@ usage: bash export-assembly.sh input-file [optional-arguments]
 OPTIONAL ARGUMENTS:
 -f subroutine-pattern
 -o objdump-command
+--
 -h
 
 SUBROUTINE PATTERN:
@@ -66,6 +67,12 @@ error() {
 error_if_no_argument() {
   if [[ ! $1 -le $2 ]] then
     error "missing argument for the flag $3"
+  fi
+}
+
+error_if_arguments() {
+  if [[ ! -z $1 ]] then
+    error "program arguments are only supported by C# and Java"
   fi
 }
 
@@ -114,30 +121,35 @@ cat_and_clean() {
 
 ## Type Functions.
 clang_c() {
-  gcc "$1" -g -O3 -march=native -o "$1.bin"
+  error_if_arguments "$4"
+  clang "$1" -g -O3 -march=native -o "$1.bin"
   objdump_with_command "$1.bin" "$2" "$3"
   cat_and_clean "$1"
 }
 
 clang_cpp() {
+  error_if_arguments "$4"
   clang++ "$1" -g -O3 -march=native -o "$1.bin"
   objdump_with_command "$1.bin" "$2" "$3"
   cat_and_clean "$1"
 }
 
 rustc_rs() {
+  error_if_arguments "$4"
   rustc "$1" -g -C opt-level=3 -C target-cpu=native -o "$1.bin"
   objdump_with_command "$1.bin" "$2" "$3"
   cat_and_clean "$1"
 }
 
 zig_zig() {
+  error_if_arguments "$4"
   zig build-exe "$1" -fno-strip -O ReleaseFast -mcpu native -femit-bin="$1.bin"
   objdump_with_command "$1.bin" "$2" "$3"
   cat_and_clean "$1"
 }
 
 elf() {
+  error_if_arguments "$4"
   objdump_with_command "$1" "$2" "$3"
   cat_and_clean "$1"
 }
@@ -153,7 +165,7 @@ dotnet_scd_jit_cs() {
   dotnet new console > /dev/null
   cp "$current_working_directory/$1" "Program.cs"
   dotnet build -c Release > /dev/null
-  dotnet_scd_jit_dll "bin/Release/"*"/$execute_file.dll" "$2" "$3"
+  dotnet_scd_jit_dll "bin/Release/"*"/$execute_file.dll" "$2" "$3" "${@:4}"
   popd > /dev/null
 
   rm -rf "$temporary_directory"
@@ -168,14 +180,14 @@ dotnet_scd_jit_dll() {
     jit_disasm="$2"
   fi
 
-  DOTNET_JitDisasm="$jit_disasm" "dotnet" "$1"
+  DOTNET_JitDisasm="$jit_disasm" "dotnet" "$1" "${@:4}"
 }
 
 openjdk_java() {
   error_if_objdump "$3"
   javac "$1"
   class_file="$(grep class "$1" | cut -d' ' -f2).class"
-  openjdk_class "$class_file" "$2" "$3"
+  openjdk_class "$class_file" "$2" "$3" "${@:4}"
   rm "$class.class"
 }
 
@@ -189,9 +201,9 @@ openjdk_class() {
   class=${1%.class}
 
   if [[ -z "$2" ]] then
-    LD_LIBRARY_PATH=. java -XX:+UnlockDiagnosticVMOptions -XX:+PrintAssembly "$class"
+    LD_LIBRARY_PATH=. java -XX:+UnlockDiagnosticVMOptions -XX:+PrintAssembly "$class" "${@:4}"
   else
-    LD_LIBRARY_PATH=. java -XX:CompileCommand=print,"$2" "$class"
+    LD_LIBRARY_PATH=. java -XX:CompileCommand=print,"$2" "$class" "${@:4}"
   fi
 }
 
@@ -208,7 +220,8 @@ if [[ ! -f "$1" ]] then
   error "the file \"$1\" does not exist."
 fi
 
-suffix="${1##*.}"
+input_file="$1"
+input_file_suffix="${1##*.}"
 subroutine_pattern=
 objdump_command=
 
@@ -223,6 +236,9 @@ do
     let argument_index+=1
     error_if_no_argument $argument_index $# "-o"
     objdump_command="${!argument_index}"
+  elif [[ ${!argument_index} == "--" ]] then
+    let argument_index+=1 # Skip --.
+    break
   elif [[ ${!argument_index} == "-h" ]] then
     help
   else
@@ -231,35 +247,38 @@ do
   let argument_index+=1
 done
 
-case $suffix in
+let argument_index-=1
+shift $argument_index
+
+case $input_file_suffix in
   "c")
-    clang_c "$1" "$subroutine_pattern" "$objdump_command"
+    clang_c "$input_file" "$subroutine_pattern" "$objdump_command" "$@"
     ;;
   "cpp")
-    clang_cpp "$1" "$subroutine_pattern" "$objdump_command"
+    clang_cpp "$input_file" "$subroutine_pattern" "$objdump_command" "$@"
     ;;
   "rs")
-    rustc_rs "$1" "$subroutine_pattern" "$objdump_command"
+    rustc_rs "$input_file" "$subroutine_pattern" "$objdump_command" "$@"
     ;;
   "zig")
-    zig_zig "$1" "$subroutine_pattern" "$objdump_command"
+    zig_zig "$input_file" "$subroutine_pattern" "$objdump_command" "$@"
     ;;
   "cs")
-    dotnet_scd_jit_cs "$1" "$subroutine_pattern" "$objdump_command"
+    dotnet_scd_jit_cs "$input_file" "$subroutine_pattern" "$objdump_command" "$@"
     ;;
   "dll")
-    dotnet_scd_jit_dll "$1" "$subroutine_pattern" "$objdump_command"
+    dotnet_scd_jit_dll "$input_file" "$subroutine_pattern" "$objdump_command" "$@"
     ;;
   "java")
-    openjdk_java "$1" "$subroutine_pattern" "$objdump_command"
+    openjdk_java "$input_file" "$subroutine_pattern" "$objdump_command" "$@"
     ;;
   "class")
-    openjdk_class "$1" "$subroutine_pattern" "$objdump_command"
+    openjdk_class "$input_file" "$subroutine_pattern" "$objdump_command" "$@"
     ;;
   *)
-    if file "$1" | grep -q ": ELF"; then
-      elf "$1" "$subroutine_pattern" "$objdump_command"
+    if file "$input_file" | grep -q ": ELF"; then
+      elf "$input_file" "$subroutine_pattern" "$objdump_command" "$@"
     else
-      error "\"$1\" is not an ELF file or supported source code"
+      error "\"$input_file\" is not an ELF file or supported source code"
     fi
 esac
