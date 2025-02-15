@@ -40,7 +40,7 @@ AVERAGED_COLUMNS = [
     "Ratio (J/ms)",
 ]
 NORMALIZED_COLUMNS = ["Energy (J)", "Time (ms)"]
-RESULTS_DIR = "results_prod_20-01-2025"
+RESULTS_DIR = "results_lab_21-01-2025"
 
 
 def compile(benchmark):
@@ -310,7 +310,8 @@ def violins(benchmark):
 
             # Filter the DataFrame for the current benchmark
             if os.path.basename(benchmark) == "warmup":
-                bench_df = lang_df[lang_df["Algorithm"] == bench][15:]
+                # bench_df = lang_df[lang_df["Algorithm"] == bench][15:]
+                bench_df = lang_df[lang_df["Algorithm"] == bench]
             else:
                 bench_df = lang_df[lang_df["Algorithm"] == bench]
 
@@ -397,7 +398,7 @@ def interactive_caches(benchmark, step=1):
             }
             metric_keys = {
                 "cache-misses": "Cache Misses",
-                "branch-misses": "Banch Misses",
+                "branch-misses": "Branch Misses",
                 "LLC-loads-misses": "LLC Load Misses",
                 "msr/cpu_thermal_margin/": "Cpu Thermal Margin",
                 "cstate_core/c3-residency/": "C3 Residency",
