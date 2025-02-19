@@ -22,22 +22,23 @@ error_msg() {
 }
 
 usage() {
-    printf "Usage: sudo -E bash $0 <base_dir> [-c <configs>] [-l <languages>] [-b <benchmarks>] [--lab] [-n <count>] [-f <freq_ms>]\n\n"
+    printf "Usage: sudo -E bash $0 base_dir [-c CONFIGS] [-l LANGUAGES] [-b BENCHMARKS] [--lab] [-n <count>] [-f <freq_ms>]\n\n"
 }
 
 help() {
     usage
     cat << HELP
-Arguments:
-    <base_dir>              The base path for all benchmarks.
-Options:
-    -c, --config <list>     Allowed values: 'no-warmup', 'warmup' (or both).
-    -l, --language <list>   Comma-separated list of languages. If omitted, all languages found in the base directory are used.
-    -b, --benchmark <list>  Comma-separated list of benchmarks. If omitted, all benchmarks found in the language directories are used.
-    --lab                   Optional: Specifies whether the benchmarks should run in lab mode. Defaults to production.
-    -n, --count <number>    Optional: Number of times benchmarks should run. Default: 45.
-    -f, --freq-ms <ms>      Optional: Frequency in milliseconds for perf measurement. Default: 500.
-    -h, --help              Print this help message.
+positional arguments:
+  base_dir                    The base path for all benchmarks.
+
+options:
+  -c, --configs CONFIGS       Comma-separeted list of configs. Allowed values: 'no-warmup', 'warmup' (or both).
+  -l, --languages LANGUAGES   Comma-separated list of languages. If omitted, all languages found in the base directory are used.
+  -b, --benchmarks BENCHMARKS Comma-separated list of benchmarks. If omitted, all benchmarks found in the language directories are used.
+  --lab                       Optional: Specifies whether the benchmarks should run in lab mode. Defaults to production.
+  -n, --count COUNT           Optional: Number of times benchmarks should run. Default: 45.
+  -f, --freq-ms FREQ_MS       Optional: Frequency in milliseconds for perf measurement. Default: 500.
+  -h, --help                  Print this help message.
 HELP
     exit 0
 }
@@ -137,15 +138,15 @@ eval set -- "$OPTIONS"
 
 while true; do
   case "$1" in
-    -c|--config)
+    -c|--configs)
       IFS=',' read -r -a CONFIGS <<< "$2"
       shift 2
       ;;
-    -l|--language)
+    -l|--languages)
       IFS=',' read -r -a LANGUAGES <<< "$2"
       shift 2
       ;;
-    -b|--benchmark)
+    -b|--benchmarks)
       IFS=',' read -r -a BENCHMARKS <<< "$2"
       shift 2
       ;;

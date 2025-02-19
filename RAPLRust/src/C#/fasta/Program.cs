@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 
 class Fasta
 {
-    const string pathToLib = "../../rapl-interface/target/release/librapl_lib.so";
+    const string pathToLib = "../../../lib/rapl-interface/target/release/librapl_lib.so";
 
     // DLL imports
     [DllImport(pathToLib)]

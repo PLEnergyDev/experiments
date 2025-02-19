@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 
 public class Program
 {
-    const string pathToLib = "../../rapl-interface/target/release/librapl_lib.so";
+    const string pathToLib = "../../../lib/rapl-interface/target/release/librapl_lib.so";
 
     [DllImport(pathToLib)]
     static extern int start_rapl();
