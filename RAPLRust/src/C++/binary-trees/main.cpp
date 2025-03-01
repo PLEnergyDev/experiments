@@ -12,11 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <apr_pools.h>
-
-extern "C" {
-    void start_rapl();
-    void stop_rapl();
-}
+#include <rapl-interface.h>
 
 using namespace std;
 

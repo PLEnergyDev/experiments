@@ -1,42 +1,49 @@
 SHELL := /bin/bash
 
-CC=gcc
+CC=g++
 
-RAPL_DIR=../../../lib/rapl-interface
-RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
-
-RAPL_FLAGS=-L$(RAPL_DIR)/target/release -lrapl_lib -Wl,-rpath=$(RAPL_DIR)/target/release
+RAPL_LIB=/usr/local/lib
+RAPL_FLAGS=-lrapl_interface -Wl,-rpath=$(RAPL_LIB)
 CFLAGS=$(OPT_FLAGS) $(LIB_FLAGS) $(RAPL_FLAGS)
 
 TARGET=main
 SRC=$(TARGET).c
 
 COUNT?=45
-CACHE_MEASURE_FREQ_MS?=500
+FREQ?=500
+CONFIG?=no-warmup
 
-MODE?=no-warmup
+all: $(TARGET)
 
-$(RAPL):
-	@echo "Building rapl-interface with cargo in release mode..."
-	@cd $(RAPL_DIR) && cargo build --release
-
-all: $(RAPL) $(TARGET)
-
-$(TARGET): $(SRC) $(RAPL)
+$(TARGET): $(SRC)
 	$(CC) $(SRC) -o $(TARGET) $(CFLAGS)
 
-run: $(TARGET) $(RAPL)
-	./$(TARGET) 1 $(INPUT)
+run: $(TARGET)
+	./$(TARGET) $(INPUT)
 
-mem: $(TARGET) $(RAPL)
-	time -v ./$(TARGET) 1 $(INPUT)
+mem: $(TARGET)
+	time -v ./$(TARGET) $(INPUT)
 
-valgrind: $(TARGET) $(RAPL)
-	valgrind --tool=massif --stacks=yes ./$(TARGET) 1 $(INPUT)
+measure: measure_$(CONFIG)
+
+measure_no-warmup: $(TARGET)
+	perf stat --all-cpus -I $(FREQ) \
+		--append --output perf.txt \
+		-e cache-misses,branch-misses,LLC-loads-misses,msr/cpu_thermal_margin/,cpu-clock,cycles \
+		-e cstate_core/c3-residency/,cstate_core/c6-residency/,cstate_core/c7-residency/ \
+		bash -c 'for i in $$(seq 1 $(COUNT)); do ./$(TARGET) $(INPUT); done'
+
+measure_warmup: $(TARGET)
+	perf stat --all-cpus -I $(FREQ) \
+		--append --output perf.txt \
+		-e cache-misses,branch-misses,LLC-loads-misses,msr/cpu_thermal_margin/,cpu-clock,cycles \
+		-e cstate_core/c3-residency/,cstate_core/c6-residency/,cstate_core/c7-residency/ \
+		env RAPL_ITERATIONS=$(COUNT) ./$(TARGET) $(INPUT)
+
+valgrind: $(TARGET)
+	valgrind --tool=massif --stacks=yes ./$(TARGET) $(INPUT)
 
 clean:
 	rm -f $(TARGET)
 
-.PHONY: all clean run measure mem valgrind
-
-include ../$(MODE).mk
+.PHONY: all run mem measure measure_no-warmup measure_warmup clean valgrind

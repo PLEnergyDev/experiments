@@ -34,7 +34,7 @@ echo "[Ok] Transferred archive: $REMOTE_URL:$REMOTE_DIR"
 
 # Extract the archive on the remote server
 ssh -t $REMOTE_URL "
-    sudo bash -c '
+    bash -c '
         tar -xzf $ARCHIVE_NAME -C $REMOTE_DIR || { echo \"[ERROR] Failed to extract files\"; exit 1; }
         echo \"[Ok] Extracted files\"
 

@@ -129,7 +129,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Parse arguments
-OPTIONS=$(getopt -o c:l:b:s:n:f:h --long config:,language:,benchmark:,lab,count:,freq-ms:,help -- "$@")
+OPTIONS=$(getopt -o c:l:b:s:n:f:h --long configs:,languages:,benchmarks:,lab,count:,freq-ms:,help -- "$@")
 if [[ $? -ne 0 ]]; then
   exit 1
 fi
@@ -170,6 +170,9 @@ while true; do
     --)
       shift
       break
+      ;;
+    *)
+      error_msg "Unknown option: $1"
       ;;
   esac
 done
@@ -310,9 +313,6 @@ else
     echo "[INFO] Input for Regexredux already exists. Skipping..."
 fi 
 
-echo "[INFO] Sleeping for 60 seconds before starting the first measurement."
-sleep 10s
-
 # Change to the base directory
 cd "$BASE_DIR" || { error_msg "Failed to change directory to $BASE_DIR"; exit 1; }
 
@@ -329,6 +329,8 @@ for MODE in "${CONFIGS[@]}"; do
 
             pushd "$benchmark_dir" >/dev/null
             if [[ "$LAB_SETUP" == "lab" ]]; then
+                # echo "[INFO] Sleeping for 60 seconds before starting next measurement."
+                # sleep 60s
                 COMMAND="nice -n -20 make measure MODE=\"$MODE\" COUNT=\"$COUNT\" CACHE_MEASURE_FREQ_MS=\"$CACHE_MEASURE_FREQ_MS\""
             else
                 COMMAND="make measure MODE=\"$MODE\" COUNT=\"$COUNT\" CACHE_MEASURE_FREQ_MS=\"$CACHE_MEASURE_FREQ_MS\""
@@ -345,8 +347,6 @@ for MODE in "${CONFIGS[@]}"; do
                 else
                     echo "[WARNING] No measurement file generated for '$benchmark_dir'."
                 fi
-                echo "[INFO] Sleeping for 60 seconds before starting next measurement."
-                sleep 60s
             else
                 echo "[WARNING] Failed to measure benchmark in '$benchmark_dir'. Skipping..."
             fi

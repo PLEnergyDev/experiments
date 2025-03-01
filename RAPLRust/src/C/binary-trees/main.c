@@ -10,12 +10,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-
-void start_rapl();
-void stop_rapl();
+#include <apr_pools.h>
+#include <rapl-interface.h>
 
 typedef off_t off64_t;
-#include <apr_pools.h>
 
 typedef intptr_t intnative_t;
 
@@ -46,7 +44,7 @@ static inline intnative_t compute_Tree_Checksum(const tree_node * const root_Nod
 // Initialization phase
 void initialize(intnative_t * maximum_Tree_Depth, int argc, char ** argv) {
    const intnative_t minimum_Tree_Depth = 4;
-   *maximum_Tree_Depth = atoi(argv[2]);
+   *maximum_Tree_Depth = atoi(argv[1]);
    if (*maximum_Tree_Depth < minimum_Tree_Depth + 2)
       *maximum_Tree_Depth = minimum_Tree_Depth + 2;
    apr_initialize();
@@ -93,11 +91,11 @@ void cleanup() {
 }
 
 int main(int argc, char** argv) {
-    int iterations = atoi(argv[1]);
-    for (int i = 0; i < iterations; i++) {
+    int running = 1;
+    while (running) {
         intnative_t maximum_Tree_Depth;
         initialize(&maximum_Tree_Depth, argc, argv);
-        start_rapl();
+        running = start_rapl();
         run_benchmark(maximum_Tree_Depth);
         stop_rapl();
         cleanup();

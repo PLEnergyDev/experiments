@@ -2,14 +2,11 @@ using System.Runtime.InteropServices;
 
 public class Program
 {
-    const string pathToLib = "../../../lib/rapl-interface/target/release/librapl_lib.so";
+    [DllImport("librapl_interface", EntryPoint = "start_rapl")]
+    public static extern bool start_rapl();
 
-    // DLL imports
-    [DllImport(pathToLib)]
-    static extern int start_rapl();
-
-    [DllImport(pathToLib)]
-    static extern void stop_rapl();
+    [DllImport("librapl_interface", EntryPoint = "stop_rapl")]
+    public static extern void stop_rapl();
 
     public static void Main(string[] args)
     {

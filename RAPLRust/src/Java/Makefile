@@ -3,41 +3,49 @@ SHELL := /bin/bash
 JAVAC=javac
 JAVA=java
 
-CFLAGS=--enable-preview --release 21
-RFLAGS=--enable-preview --enable-native-access=ALL-UNNAMED
+CFLAGS=
+RFLAGS=-Djava.library.path=/usr/local/lib
 
 CLASS=program
 SRC=$(CLASS).java
 
-RAPL_DIR=../../../lib/rapl-interface
-RAPL=$(RAPL_DIR)/target/release/librapl_lib.so
-
 COUNT?=45
-CACHE_MEASURE_FREQ_MS?=500
+FREQ?=500
+CONFIG?=no-warmup
 
-MODE?=no-warmup
+all: $(CLASS)
 
-$(RAPL):
-	@echo "Building rapl-interface with cargo in release mode..."
-	@cd $(RAPL_DIR) && cargo build --release
-
-all: $(RAPL) $(CLASS)
-
-$(CLASS): $(SRC) $(RAPL)
+$(CLASS): $(SRC)
 	$(JAVAC) $(CFLAGS) $(SRC)
 
-run: $(CLASS) $(RAPL)
-	$(JAVA) $(RFLAGS) $(CLASS) 1 $(INPUT)
+run: $(CLASS)
+	$(JAVA) $(RFLAGS) $(CLASS) $(INPUT)
 
-mem: $(CLASS) $(RAPL)
-	time -v $(JAVA) $(RFLAGS) $(CLASS) 1 $(INPUT)
+mem: $(CLASS)
+	time -v $(JAVA) $(RFLAGS) $(CLASS) $(INPUT)
 
-valgrind: $(RAPL)
-	valgrind --tool=massif --stacks=yes $(JAVA) $(RFLAGS) $(CLASS) 1 $(INPUT)
+measure: measure_$(CONFIG)
+
+measure_no-warmup: $(CLASS)
+	export LD_LIBRARY_PATH=/usr/local/lib:$(LD_LIBRARY_PATH) && \
+	perf stat --all-cpus -I $(FREQ) \
+		--append --output perf.txt \
+		-e cache-misses,branch-misses,LLC-loads-misses,msr/cpu_thermal_margin/,cpu-clock,cycles \
+		-e cstate_core/c3-residency/,cstate_core/c6-residency/,cstate_core/c7-residency/ \
+		bash -c 'for i in $$(seq 1 $(COUNT)); do $(JAVA) $(RFLAGS) $(CLASS) $(INPUT); done'
+
+measure_warmup: $(CLASS)
+	export LD_LIBRARY_PATH=/usr/local/lib:$(LD_LIBRARY_PATH) && \
+	perf stat --all-cpus -I $(FREQ) \
+		--append --output perf.txt \
+		-e cache-misses,branch-misses,LLC-loads-misses,msr/cpu_thermal_margin/,cpu-clock,cycles \
+		-e cstate_core/c3-residency/,cstate_core/c6-residency/,cstate_core/c7-residency/ \
+		RAPL_ITERATIONS=$(COUNT) $(JAVA) $(RFLAGS) $(CLASS) $(INPUT)
+
+valgrind:
+	valgrind --tool=massif --stacks=yes $(JAVA) $(RFLAGS) $(CLASS) $(INPUT)
 
 clean:
 	rm -f *.class
 
-.PHONY: all clean run measure mem valgrind
-
-include ../$(MODE).mk
+.PHONY: all run mem measure measure_no-warmup measure_warmup clean valgrind
