@@ -182,8 +182,7 @@ handle_measure() {
                         info "Finished measuring for $lang $bench with $conf.\n"
                         results_dir="../../../results/$conf/$lang/$bench"
                         mkdir -p "$results_dir"
-                        mv "$measurement" "$results_dir/rapl.csv"
-                        mv "perf.txt" "$results_dir/perf.txt"
+                        mv "$measurement" "perf.txt" "$results_dir"
                         info "Sleeping for $MEASURE_SLEEP.\n"
                         sleep "$MEASURE_SLEEP"
                     else
