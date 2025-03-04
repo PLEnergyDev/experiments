@@ -2,134 +2,149 @@
 
 ## Overview
 
-The `energy` toolkit provides a simple interface for measuring energy consumption of programs as well as a script which automates the process of measuring a set of programs (benchmarks).
+The `energy` toolkit provides a simple interface for measuring energy consumption of programs across different languages and benchmarks.
 
 ## Features
 
+- Comprehensive performance and energy measurement
+- Support for multiple programming languages
+- Automated benchmark testing
+- Detailed metrics collection
+- Flexible configuration options
+
 ## Prerequisites
 
-Before using this script, ensure the following dependencies are installed:
-
+Ensure the following dependencies are installed:
 - `bash`
 - `perf`
 - `cpupower`
 - `modprobe`
-- `kmod` package
+- `kmod`
 - `linux-tools`
 
 ## Installation
 
-`make install` with root priviledges in the root dir of `energy`.
+Install with root privileges in the project root:
+```bash
+make install
+```
 
 ## Usage
 
-### Basic Command Structure
+### Command Structure
 
 ```bash
 energy {--version|--help} COMMAND [ARGS]
 ```
 
-### Commands
+### Available Commands
 
-- `measure`: Measure program performance
-- `report`: Compile raw measurements
-- `export`: Export program assembly
-- `help`: Display help for specific commands
+| Command | Description |
+|---------|-------------|
+| `measure` | Measure program performance |
+| `report` | Compile raw measurements |
+| `export` | Export program assembly |
+| `help` | Display help for specific commands |
 
-### Using the `rapl_interface` library
+### Directory Structure
 
-`energy` uses the `rapl_interface` library which will be available on your host after installation. `energy` makes the assumption that you have a `Makefile` wich contains a target called `measure` in your project. You will want to execute your program as usual within the `measure` target. For example:
+Supports two measurement modes:
+1. Single project with a `Makefile`
+2. Multi-language benchmark suite:
 
-```make
-measure: $(TARGET)
-    ./$(TARGET)
+```
+benchmark_set/
+├── <language_1>/
+│   ├── <benchmark_1>/
+│   │   ├── [Source files]  
+│   │   └── Makefile
+│   └── ...
+├── <language_2>/
+│   ├── <benchmark_2>/
+│   │   ├── [Source files]  
+│   │   └── Makefile
+│   └── ...
+└── ...
 ```
 
-#### C/C++ Programs
+## Language Integration
 
-```C
-// Compile with gcc/g++ -lrapl_interface -Wl,-rpath=/usr/local/lib
+### Rapl Interface Library Usage
+
+The toolkit uses the `rapl_interface` library to measure energy consumption.
+
+#### C/C++
+```c
 #include <rapl-interface.h>
-// ...
+
 while (start_rapl()) {
-    // Code to measure multiple times
+    // Measurement code
     stop_rapl();
 }
 ```
 
-#### C# Programs
-
-```C#
-using System.Runtime.InteropServices;
-
-[DllImport("librapl_interface", EntryPoint = "start_rapl")]
+#### C#
+```csharp
+[DllImport("librapl_interface")]
 public static extern bool start_rapl();
-
-[DllImport("librapl_interface", EntryPoint = "stop_rapl")]
+[DllImport("librapl_interface")]
 public static extern void stop_rapl();
-// ...
+
 while (start_rapl()) {
-    // Code to measure multiple times
+    // Measurement code
     stop_rapl();
 }
 ```
 
-#### Java Programs
-
+#### Java
 ```java
-// Set this env var before running the program LD_LIBRARY_PATH=/usr/local/lib
 static {
     System.loadLibrary("rapl_interface");
 }
-
 SymbolLookup lookup = SymbolLookup.loaderLookup();
-
 MethodHandle start_rapl = Linker.nativeLinker().downcallHandle(
-        lookup.find("start_rapl").get(),
-        FunctionDescriptor.of(ValueLayout.JAVA_INT)
+    lookup.find("start_rapl").get(),
+    FunctionDescriptor.of(ValueLayout.JAVA_INT)
+);
+MethodHandle stop_rapl = Linker.nativeLinker().downcallHandle(
+    lookup.find("stop_rapl").get(),
+    FunctionDescriptor.ofVoid()
 );
 
-MethodHandle stop_rapl = Linker.nativeLinker().downcallHandle(
-        lookup.find("stop_rapl").get(),
-        FunctionDescriptor.ofVoid()
-);
-// ...
-while ((int) start_rapl.invokeExact() > 0) {
-    // Code to measure multiple times
-    stop_rapl.invokeExact();
+while (start_rapl() > 0) {
+    // Measurement code
+    stop_rapl();
 }
 ```
 
-#### Rust Programs
-
+#### Rust
 ```rust
 #[link(name="rapl_interface")]
 extern "C" {
     fn start_rapl() -> i32;
     fn stop_rapl();
 }
-// ...
+
 while unsafe { start_rapl() } > 0 {
-    // Code to measure multiple times
+    // Measurement code
     unsafe { stop_rapl() };
 }
 ```
 
-## Measurement Details
+## Measurement Metrics
 
-The script measures:
+### Energy Metrics
+- Package Domain (CPU die energy)
+- DRAM energy
+- Core (CPU cores) energy
+- Uncore (integrated GPU, etc.) energy
 
+### Performance Metrics
 - Elapsed time
-- `rapl` metrics:
-    - Pkg Domain (Energy on CPU die)
-    - Dram energy (Energy on DRAM attached to the CPU)
-    - Core/PP0 energy (Energy of all CPU cores)
-    - Uncore/PP1 energy (Energy of other components close to the CPU, e.g. integrated GPU)
-- `perf` metrics:
-    - Cache misses
-    - Branch misses
-    - LLC load misses
-    - CPU thermal margin
-    - CPU clock
-    - Cycles
-    - C-state residencies
+- Cache misses
+- Branch misses
+- LLC load misses
+- CPU thermal margin
+- CPU clock
+- Cycles
+- C-state residencies
