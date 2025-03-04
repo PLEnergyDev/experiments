@@ -10,23 +10,20 @@ using System.Threading;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-public class MandelBrot
-{
+public class Program {
     [DllImport("librapl_interface", EntryPoint = "start_rapl")]
     public static extern bool start_rapl();
 
     [DllImport("librapl_interface", EntryPoint = "stop_rapl")]
     public static extern void stop_rapl();
 
-    private static int n = 200;
     private static byte[][] data;
     private static int lineCount;
     private static double[] Crb;
     private static double[] Cib;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static int getByte(int x, int y)
-    {
+    static int getByte(int x, int y) {
         int res = 0;
         for (int i = 0; i < 8; i += 2)
         {
@@ -56,22 +53,21 @@ public class MandelBrot
         return res ^ -1;
     }
 
-    public static void Main(String[] args)
-    {
-        int iterations = int.Parse(args[0]);
-        if (args.Length > 0) n = Int32.Parse(args[1]);
+    public static void Main(String[] args) {
+        int n = int.Parse(args[0]);
 
-        for (int i = 0; i < iterations; i++)
-        {
-            initialize();
-            start_rapl();
-            run_benchmark();
+        while (true) {
+            initialize(n);
+            if (!start_rapl()) {
+                break;
+            }
+            run_benchmark(n);
             stop_rapl();
             cleanup();
         }
     }
 
-    static void initialize()
+    static void initialize(int n)
     {
         lineCount = -1;
         int lineLen = (n - 1) / 8 + 1;
@@ -87,7 +83,7 @@ public class MandelBrot
         }
     }
 
-    static void run_benchmark()
+    static void run_benchmark(int n)
     {
         var threads = new Thread[Environment.ProcessorCount];
         int lineLen = (n - 1) / 8 + 1;
@@ -117,8 +113,7 @@ public class MandelBrot
         for (int y = 0; y < n; y++) s.Write(data[y], 0, data[y].Length);
     }
 
-    static void cleanup()
-    {
+    static void cleanup() {
         data = null;
         Crb = null;
         Cib = null;

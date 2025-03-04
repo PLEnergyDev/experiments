@@ -11,16 +11,16 @@ MEASURE_TURBO=
 MEASURE_ASLR=
 
 error() {
-    echo -e "Error: $1" >&2
+    echo -e "\nError: $1" >&2
     exit 1
 }
 
 warning() {
-    echo -e "Warning: $1"
+    echo -e "\nWarning: $1"
 }
 
 info() {
-    echo -e "Info: $1"
+    echo -e "\nInfo: $1"
 }
 
 set_measure_variables() {

@@ -7,31 +7,20 @@
 using System;
 using System.Runtime.InteropServices;
 
-class NBody
-{
+class Program {
     [DllImport("librapl_interface", EntryPoint = "start_rapl")]
     public static extern bool start_rapl();
 
     [DllImport("librapl_interface", EntryPoint = "stop_rapl")]
     public static extern void stop_rapl();
 
-    public static void Main(string[] args)
-    {
-        int iterations = int.Parse(args[0]);
-        int n = args.Length > 0 ? Int32.Parse(args[1]) : 10000;
+    public static void Main(string[] args) {
+        int n = int.Parse(args[0]);
 
-        for (int i = 0; i < iterations; i++)
-        {
-            initialize();
-            start_rapl();
+        while (start_rapl()) {
             run_benchmark(n);
             stop_rapl();
-            cleanup();
         }
-    }
-
-    static void initialize()
-    {
     }
 
     static void run_benchmark(int n)
@@ -40,10 +29,6 @@ class NBody
         Console.WriteLine("{0:f9}", bodies.Energy());
         for (int i = 0; i < n; i++) bodies.Advance(0.01);
         Console.WriteLine("{0:f9}", bodies.Energy());
-    }
-
-    static void cleanup()
-    {
     }
 }
 

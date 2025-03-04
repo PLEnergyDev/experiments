@@ -17,8 +17,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
-class Fasta
-{
+class Program {
     [DllImport("librapl_interface", EntryPoint = "start_rapl")]
     public static extern bool start_rapl();
 
@@ -44,27 +43,24 @@ class Fasta
       "AGGCGGAGGTTGCAGTGAGCCGAGATCGCGCCACTGCACTCC" +
       "AGCCTGGGCGACAGAGCGAGACTCCGTCTCAAAAA";
 
-    struct Frequency
-    {
+    struct Frequency {
         public readonly byte c;
         public double p;
 
-        public Frequency(char c, double p)
-        {
+        public Frequency(char c, double p) {
             this.c = (byte)c;
             this.p = (p * IM);
         }
     }
 
-    public static void Main(string[] args)
-    {
-        int iterations = int.Parse(args[0]);
-        int n = args.Length > 0 ? Int32.Parse(args[1]) : 1000;
+    public static void Main(string[] args) {
+        int n = int.Parse(args[0]);
 
-        for (int i = 0; i < iterations; i++)
-        {
+        while (true) {
             initialize();
-            start_rapl();
+            if (!start_rapl()) {
+                break;
+            }
             run_benchmark(n);
             stop_rapl();
             cleanup();

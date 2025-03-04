@@ -14,6 +14,7 @@ MEASURE_LANG=()
 MEASURE_BENCH=()
 MEASURE_PRIORITY=
 MEASURE_SLEEP=60
+MEASURE_STOP=false
 
 intro_measure() {
     clear; cat << HELP
@@ -23,6 +24,7 @@ OS Environment        | $MEASURE_SETUP
 Repetitions           | $MEASURE_COUNT
 Measurement Freq      | $MEASURE_FREQ ms
 Measurement Sleep     | $MEASURE_SLEEP s
+Stop After Fail       | $MEASURE_STOP
 
 ========== CPU Scaling & Performance ==========
 Scaling Driver        | $MEASURE_DRIVER ($MEASURE_DRIVER_STATUS)
@@ -36,7 +38,6 @@ ASLR                  | $MEASURE_ASLR
 Base Directory        | $MEASURE_DIR
 Language Directories  | ${MEASURE_LANG[*]}
 Benchmark Directories | ${MEASURE_BENCH[*]}
-
 HELP
 }
 
@@ -58,6 +59,7 @@ Options:
     --prod                   OS will enter the 'production' environment before measuring. Default production.
     --light                  OS will enter the 'lightweight' environment before measuring. Default production.
     -s, --sleep SECS         Number of seconds to sleep between each successful measurement. Default 60.
+    --stop                   Stop after a failed measurement.
     -c, --count COUNT        Number of measurement repetitions. Default 45.
     -f, --freq  MS           perf measurement frequency in milliseconds. Default 500.
 
@@ -78,6 +80,27 @@ ensure_measure_dependencies() {
     fi
 }
 
+build_measure_command() {
+    perf_command="perf stat --all-cpus -I $MEASURE_FREQ \
+        --append --output perf.txt \
+        -e cache-misses,branch-misses,LLC-loads-misses,msr/cpu_thermal_margin/,cpu-clock,cycles \
+        -e cstate_core/c3-residency/,cstate_core/c6-residency/,cstate_core/c7-residency/"
+
+    case "$1" in
+        no-warmup)
+            command="$MEASURE_PRIORITY $perf_command bash -c 'for i in \$(seq 1 $MEASURE_COUNT); do make measure; done'"
+            ;;
+        warmup)
+            command="$MEASURE_PRIORITY $perf_command env RAPL_ITERATIONS=$MEASURE_COUNT make measure"
+            ;;
+        *)
+            command=""
+            ;;
+    esac
+
+    echo "$command"
+}
+
 handle_measure() {
     if [[ ! -z "$1" ]]; then
         MEASURE_DIR="$1"
@@ -89,19 +112,17 @@ handle_measure() {
 
     ensure_measure_dependencies
 
-    echo "$MEASURE_SETUP"
-
     case "$MEASURE_SETUP" in
         production)
-            echo "Sourcing production environment"
+            info "Sourcing production environment.\n"
             source "$LIBDIR/production.sh"
             ;;
         lab)
-            echo "Sourcing lab environment"
+            info "Sourcing lab environment.\n"
             source "$LIBDIR/lab.sh"
             ;;
         lightweight)
-            echo "Sourcing lightweight environment"
+            info "Sourcing lightweight environment.\n"
             source "$LIBDIR/lightweight.sh"
             ;;
     esac
@@ -117,10 +138,13 @@ handle_measure() {
             for conf in "${MEASURE_CONF[@]}"; do
                 info "Measuring in current directory with $conf.\n"
 
-                command="$MEASURE_PRIORITY make measure CONFIG=\"$MEASURE_CONF\" COUNT=\"$MEASURE_COUNT\" FREQ=\"$MEASURE_FREQ\""
+                command=$(build_measure_command "$conf")
 
                 if ! eval "$command"; then
-                    warning "Failed to measure in current directory with $conf.\n"
+                    warning "Failed to measure in current directory with $conf."
+                    if $MEASURE_STOP; then
+                        exit 1
+                    fi
                 fi
             done
             exit 0
@@ -157,8 +181,8 @@ handle_measure() {
 
     intro_measure
 
-    info "Starting measurements in 10 seconds..."
-    sleep 10
+    info "Starting measurements in $MEASURE_SLEEP s."
+    sleep $MEASURE_SLEEP
 
     pushd "$MEASURE_DIR" >/dev/null
 
@@ -173,23 +197,29 @@ handle_measure() {
 
                 pushd "$bench_dir" >/dev/null
 
-                command="$MEASURE_PRIORITY make measure CONFIG=\"$MEASURE_CONF\" COUNT=\"$MEASURE_COUNT\" FREQ=\"$MEASURE_FREQ\""
+                command=$(build_measure_command "$conf")
 
-                info "Measuring $lang $bench with $conf."
+                info "Measuring $lang $bench with $conf.\n"
                 if eval "$command"; then
                     measurement=$(find . -maxdepth 1 -name '*.csv' -printf '%T+ %p\n' | sort -r | head -n 1 | cut -d' ' -f2-)
                     if [[ -f "$measurement" ]]; then
-                        info "Finished measuring for $lang $bench with $conf.\n"
+                        info "Finished measuring for $lang $bench with $conf."
                         results_dir="../../../results/$conf/$lang/$bench"
                         mkdir -p "$results_dir"
                         mv "$measurement" "perf.txt" "$results_dir"
-                        info "Sleeping for $MEASURE_SLEEP.\n"
+                        info "Sleeping for $MEASURE_SLEEP s."
                         sleep "$MEASURE_SLEEP"
                     else
                         warning "No measurement generated for $lang $bench with $conf."
+                        if $MEASURE_STOP; then
+                            exit 1
+                        fi
                     fi
                 else
                     warning "Failed to measure for $lang $bench with $conf."
+                    if $MEASURE_STOP; then
+                        exit 1
+                    fi
                 fi
 
                 popd >/dev/null
@@ -254,7 +284,7 @@ HELP
 }
 
 parse_commands() {
-    options=$(getopt -o vhnws:l:b:c:f: --long version,help,no-warmup,warmup,lang:,bench:,count:,freq:,sleep:,lab,prod,light -- "$@")
+    options=$(getopt -o vhnws:l:b:c:f: --long version,help,no-warmup,warmup,lang:,bench:,count:,freq:,sleep:,lab,prod,light,stop -- "$@")
     eval set -- "$options"
 
     while true; do
@@ -290,6 +320,10 @@ parse_commands() {
             -s|--sleep)
                 MEASURE_SLEEP="$2"
                 shift 2
+                ;;
+            --stop)
+                MEASURE_STOP=true
+                shift
                 ;;
             --lab)
                 MEASURE_SETUP="lab"

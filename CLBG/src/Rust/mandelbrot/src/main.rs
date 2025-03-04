@@ -15,8 +15,12 @@ use generic_array::typenum::consts::U8;
 use numeric_array::NumericArray as Arr;
 use rayon::prelude::*;
 use std::io::Write;
-use rapl_lib::ffi::start_rapl;
-use rapl_lib::ffi::stop_rapl;
+
+#[link(name="rapl_interface")]
+extern "C" {
+    fn start_rapl() -> i32;
+    fn stop_rapl();
+}
 
 type Vecf64 = Arr<f64, U8>;
 type Constf64 = numeric_array::NumericConstant<f64>;
@@ -70,26 +74,22 @@ fn run_benchmark(size: usize, inv: f64, xloc: &Vec<Vecf64>, rows: &mut Vec<u8>) 
         });
 }
 
-fn cleanup() {}
-
 fn main() {
-    let iterations = std::env::args().nth(1)
+    let size_input: usize = std::env::args().nth(1)
         .and_then(|n| n.parse().ok())
-        .unwrap_or(1);
-    let size_input = std::env::args()
-        .nth(2)
-        .and_then(|n| n.parse().ok())
-        .unwrap_or(200);
+        .unwrap();
     let size = size_input / VLEN * VLEN;
     println!("P4\n{} {}", size, size);
-    for _ in 0..iterations {
+
+    loop {
         let (inv, xloc, mut rows) = initialize(size);
-        start_rapl();
+        if unsafe { start_rapl() } == 0 {
+            break;
+        }
         run_benchmark(size, inv, &xloc, &mut rows);
         let stdout_unlocked = std::io::stdout();
         let mut stdout = stdout_unlocked.lock();
         let _ = stdout.write_all(&rows);
-        stop_rapl();
-        cleanup();
+        unsafe { stop_rapl() };
     }
 }

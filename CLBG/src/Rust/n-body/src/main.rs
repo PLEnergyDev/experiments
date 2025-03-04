@@ -4,8 +4,12 @@
 // contributed by Cristi Cobzarenco
 
 use std::ops::{Add, Sub, Mul};
-use rapl_lib::ffi::start_rapl;
-use rapl_lib::ffi::stop_rapl;
+
+#[link(name="rapl_interface")]
+extern "C" {
+    fn start_rapl() -> i32;
+    fn stop_rapl();
+}
 
 const PI: f64 = 3.141592653589793;
 const SOLAR_MASS: f64 = 4.0 * PI * PI;
@@ -207,27 +211,21 @@ fn run_benchmark(
     println!("{:.9}", energy(&bodies));
 }
 
-fn cleanup() {}
-
 fn main() {
-    let iterations: usize = std::env::args()
-        .nth(1)
-        .and_then(|n| n.parse().ok())
-        .unwrap_or(1);
-    let n: usize = std::env::args()
-        .nth(2)
+    let n: usize = std::env::args().nth(1)
         .and_then(|s| s.parse().ok())
-        .unwrap_or(1000);
+        .unwrap();
 
-    for _ in 0..iterations {
+    loop {
         let mut bodies = BODIES;
         let mut diff = [Vec3::zero(); N_PAIRS];
         let mut mag = [0.0f64; N_PAIRS];
         initialize(&mut bodies);
-        start_rapl();
+        if unsafe { start_rapl() } == 0 {
+            break;
+        }        
         run_benchmark(&mut bodies, &mut diff, &mut mag, n);
-        stop_rapl();
-        cleanup();
+        unsafe { stop_rapl() };
     }
 }
 

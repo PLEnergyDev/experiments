@@ -5,13 +5,10 @@
 //
 // Ported to C++ with minor changes by Dave Compton
 
+#include <cstdlib>
 #include <immintrin.h>
 #include <iostream>
-
-extern "C" {
-    void start_rapl();
-    void stop_rapl();
-}
+#include <rapl-interface.h>
 
 #ifdef __AVX__
 #define VEC_SIZE 4
@@ -147,25 +144,24 @@ void cleanup(int wid_ht, char *pixels, size_t dataLength, double *r0)
     delete[] r0;
 }
 
-int main(int argc, char **argv)
-{
-    auto wid_ht = 16000;
-    if (argc >= 2)
-    {
-        wid_ht = atoi(argv[2]);
-    }
+int main(int argc, char **argv) {
+    auto wid_ht = atoi(argv[1]);
     wid_ht = (wid_ht + 7) & ~7;
-    int iterations = atoi(argv[1]);
-    for (int i = 0; i < iterations; i++)
-    {
-        double *r0 = nullptr;
-        char *pixels = nullptr;
-        size_t dataLength = 0;
+
+
+    double *r0 = nullptr;
+    char *pixels = nullptr;
+    size_t dataLength = 0;
+
+    while (1) {
         initialize(wid_ht, r0, pixels, dataLength);
-        start_rapl();
+        if (start_rapl() == 0) {
+            break;
+        }
         run_benchmark(wid_ht, r0, pixels);
         stop_rapl();
         cleanup(wid_ht, pixels, dataLength, r0);
-    }
+    } 
+
     return 0;
 }

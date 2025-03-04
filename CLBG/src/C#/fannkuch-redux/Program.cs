@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
-class FannkuchRedux {
+class Program {
     [DllImport("librapl_interface", EntryPoint = "start_rapl")]
     public static extern bool start_rapl();
 
@@ -130,12 +130,13 @@ class FannkuchRedux {
     }
 
     static void Main(string[] args) {
-        int iterations = int.Parse(args[0]);
-        if (args.Length > 0) n = int.Parse(args[1]);
+        n = int.Parse(args[0]);
 
-        for (int i = 0; i < iterations; i++) {
+        while (true) {
             initialize();
-            start_rapl();
+            if (!start_rapl()) {
+                break;
+            }
             run_benchmark();
             stop_rapl();
             cleanup();
@@ -169,7 +170,7 @@ class FannkuchRedux {
         {
             tasks[i] = Task.Run(() =>
             {
-                new FannkuchRedux().Run();
+                new Program().Run();
             });
         }
         Task.WaitAll(tasks);

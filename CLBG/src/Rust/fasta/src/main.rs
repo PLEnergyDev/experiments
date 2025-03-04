@@ -12,8 +12,12 @@ use std::io;
 use std::io::{Write, BufWriter, ErrorKind};
 use std::sync::{Mutex, Arc};
 use std::thread;
-use rapl_lib::ffi::start_rapl;
-use rapl_lib::ffi::stop_rapl;
+
+#[link(name="rapl_interface")]
+extern "C" {
+    fn start_rapl() -> i32;
+    fn stop_rapl();
+}
 
 const LINE_LENGTH: usize = 60;
 const IM: u32 = 139968;
@@ -192,9 +196,6 @@ fn make_fasta(
     Ok(())
 }
 
-fn initialize() {
-}
-
 fn run_benchmark(n: usize) {
     let num_threads: u16 = num_cpus::get() as u16;
 
@@ -263,20 +264,17 @@ fn cleanup() {
 }
 
 fn main() {
-    let iterations = std::env::args().nth(1)
-        .and_then(|n| n.parse().ok())
-        .unwrap_or(1);
-    let n = std::env::args_os()
-        .nth(2)
+    let n = std::env::args_os().nth(1)
         .and_then(|s| s.into_string().ok())
         .and_then(|n| n.parse().ok())
-        .unwrap_or(1000);
+        .unwrap();
 
-    for _ in 0..iterations {
-        initialize();
-        start_rapl();
+    loop {
+        if unsafe { start_rapl() } == 0 {
+            break;
+        }
         run_benchmark(n);
-        stop_rapl();
+        unsafe { stop_rapl() };
         cleanup();
     }
 }

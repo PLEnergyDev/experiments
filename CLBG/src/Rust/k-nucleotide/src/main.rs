@@ -10,8 +10,12 @@ use std::sync::Arc;
 use std::collections::HashMap;
 use std::hash::BuildHasherDefault;
 use fnv::FnvHasher;
-use rapl_lib::ffi::start_rapl;
-use rapl_lib::ffi::stop_rapl;
+
+#[link(name="rapl_interface")]
+extern "C" {
+    fn start_rapl() -> i32;
+    fn stop_rapl();
+}
 
 const SEQ_LENS: [usize; 7] = [1, 2, 3, 4, 6, 12, 18];
 const LOOKUPS: [&'static str; 5] = ["GGT", "GGTA", "GGTATT", "GGTATTTTAATT", "GGTATTTTAATTTATAGT"];
@@ -106,8 +110,6 @@ fn report(table: &(usize, Table)) {
     println!("");
 }
 
-fn initialize() {}
-
 fn run_benchmark(input: Arc<Vec<u8>>) {
     let tables_handle: Vec<_> = SEQ_LENS
         .iter()
@@ -133,20 +135,16 @@ fn run_benchmark(input: Arc<Vec<u8>>) {
     }
 }
 
-fn cleanup() {}
-
 fn main() {
-    let iterations = std::env::args().nth(1)
-        .and_then(|n| n.parse().ok())
-        .unwrap_or(1);
     let stdin = std::io::stdin();
     let input: Vec<u8> = read_input(stdin.lock(), ">THREE");
     let input = Arc::new(input);
-    for _ in 0..iterations {
-        initialize();
-        start_rapl();
+
+    loop {
+        if unsafe { start_rapl() } == 0 {
+            break;
+        }
         run_benchmark(input.clone());
-        stop_rapl();
-        cleanup();
+        unsafe { stop_rapl() };
     }
 }

@@ -10,13 +10,9 @@
 #include <cassert>
 #include <iostream>
 #include <cstdio>
+#include <rapl-interface.h>
 
 using namespace std;
-
-extern "C" {
-    void start_rapl();
-    void stop_rapl();
-}
 
 const std::size_t BUFSIZE = 1024;
 const boost::regex::flag_type re_flags = boost::regex::perl;
@@ -96,12 +92,7 @@ void run_benchmark()
     cout << out.length() << endl;
 }
 
-void cleanup()
-{
-}
-
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     fseek(stdin, 0, SEEK_END);
     read_size = ftell(stdin);
     assert(read_size > 0);
@@ -110,15 +101,13 @@ int main(int argc, char *argv[])
     rewind(stdin);
     read_size = fread(&original_str[0], 1, read_size, stdin);
     assert(read_size);
-
-    int iterations = atoi(argv[1]);
-    for (int i = 0; i < iterations; ++i)
-    {
+    while (1) {
         initialize();
-        start_rapl();
+        if (start_rapl() == 0) {
+            break;
+        }
         run_benchmark();
         stop_rapl();
-        cleanup();
     }
 
     return 0;

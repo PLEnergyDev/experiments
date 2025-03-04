@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 
-class regexredux
+class Program
 {
     [DllImport("librapl_interface", EntryPoint = "start_rapl")]
     public static extern bool start_rapl();
@@ -21,18 +21,18 @@ class regexredux
     public static extern void stop_rapl();
 
     static string sequence;
-    static string originalSequence;  // Cached original sequence to ensure repeatability
+    static string originalSequence;
     static int initialLength;
     static int codeLength;
 
     public static void Main(string[] args)
     {
-        int iterations = int.Parse(args[0]);
-        initialize(); // Load the input once and cache it
-        for (int i = 0; i < iterations; i++)
-        {
-            prepareIteration();  // Reset sequence to the original state
-            start_rapl();
+        initialize();
+        while (true) {
+            prepareIteration();
+            if (!start_rapl()) {
+                break;
+            }
             run_benchmark();
             stop_rapl();
             cleanup();

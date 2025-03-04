@@ -11,42 +11,36 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 
-public class Program
-{
-    const string pathToLib = "../../../lib/rapl-interface/target/release/librapl_lib.so";
+public class Program {
+    [DllImport("librapl_interface", EntryPoint = "start_rapl")]
+    public static extern bool start_rapl();
 
-    [DllImport(pathToLib)]
-    static extern int start_rapl();
-
-    [DllImport(pathToLib)]
-    static extern void stop_rapl();
+    [DllImport("librapl_interface", EntryPoint = "stop_rapl")]
+    public static extern void stop_rapl();
 
     static byte[] buffer;
     static byte[] tonum = new byte[256];
     static char[] tochar = new char[4];
     static byte[] cachedThreeBuffer = null;
 
-    public static void Main(string[] args)
-    {
-        int iterations = int.Parse(args[0]);
-        for (int i = 0; i < iterations; i++)
-        {
+    public static void Main(string[] args) {
+        while (true) {
             initialize();
-            start_rapl();
+            if (!start_rapl()) {
+                break;
+            }
             run_benchmark();
             stop_rapl();
             cleanup();
         }
     }
 
-    static void initialize()
-    {
+    static void initialize() {
         PrepareLookups();
         buffer = GetBytesForThirdSequence();
     }
 
-    static void run_benchmark()
-    {
+    static void run_benchmark() {
         var fragmentLengths = new[] { 1, 2, 3, 4, 6, 12, 18 };
         var dicts =
             (from fragmentLength in fragmentLengths.AsParallel()
@@ -61,8 +55,7 @@ public class Program
         WriteCount(dicts[6], "GGTATTTTAATTTATAGT");
     }
 
-    static void cleanup()
-    {
+    static void cleanup() {
         buffer = null;
     }
 
@@ -173,8 +166,7 @@ public class Program
         return threebuffer;
     }
 
-    private static void PrepareLookups()
-    {
+    private static void PrepareLookups() {
         tonum['a'] = 0;
         tonum['c'] = 1;
         tonum['g'] = 2;
@@ -186,8 +178,7 @@ public class Program
     }
 }
 
-public class Wrapper
-{
+public class Wrapper {
     public int V;
     public Wrapper(int v) { V = v; }
 }

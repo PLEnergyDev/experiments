@@ -15,26 +15,21 @@ compiles with gcc fasta.cpp -std=c++11 -O2
 
 #include <algorithm>
 #include <array>
+#include <cstdlib>
 #include <vector>
 #include <thread>
 #include <mutex>
 #include <iostream>
 #include <numeric>
 #include <functional>
+#include <rapl-interface.h>
 
-extern "C" {
-    void start_rapl();
-    void stop_rapl();
-}
-
-struct IUB
-{
+struct IUB {
     float p;
     char c;
 };
 
-const std::string alu =
-{
+const std::string alu = {
     "GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGG"
     "GAGGCCGAGGCGGGCGGATCACCTGAGGTCAGGAGTTCGAGA"
     "CCAGCCTGGCCAACATGGTGAAACCCCGTCTCTACTAAAAAT"
@@ -295,17 +290,14 @@ void make(const char* desc, int n, generator_type generator, converter_type conv
     }
 }
 
-int n;
 
-void initialize()
-{
+void initialize() {
     make_cumulative(iub.begin(), iub.end());
     make_cumulative(homosapiens.begin(), homosapiens.end());
     last = 42;
 }
 
-void run_benchmark()
-{
+void run_benchmark(int n) {
     make("ONE Homo sapiens alu", n * 2,
         make_repeat_generator(alu.begin(), alu.end()),
         &convert_trivial);
@@ -317,26 +309,16 @@ void run_benchmark()
         &convert_homosapiens);
 }
 
-void cleanup()
-{
-}
+int main(int argc, char *argv[]) {
+    int n = atoi(argv[1]);
 
-int main(int argc, char *argv[])
-{
-    n = 1000;
-    if (argc < 3 || (n = std::atoi(argv[2])) <= 0) {
-        std::cerr << "usage: " << argv[0] << " length\n";
-        return 1;
-    }
-
-    int iterations = std::atoi(argv[1]);
-    for (int i = 0; i < iterations; ++i)
-    {
+    while (1) {
         initialize();
-        start_rapl();
-        run_benchmark();
-        stop_rapl();
-        cleanup();
+        if (start_rapl() == 0) {
+            break;
+        }
+        run_benchmark(n);
+        stop_rapl();        
     }
 
     return 0;

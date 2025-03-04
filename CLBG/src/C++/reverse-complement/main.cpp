@@ -7,15 +7,11 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <rapl-interface.h>
 
 #ifdef SIMD
 #include <immintrin.h>
 #endif
-
-extern "C" {
-    void start_rapl();
-    void stop_rapl();
-}
 
 namespace {
     using std::istream;
@@ -284,32 +280,23 @@ namespace revcomp {
 
 std::string input_data;
 
-void initialize() {
-    // No initialization needed here
-}
-
 void run_benchmark() {
     std::istringstream in(input_data);
     revcomp::reverse_complement_fasta_stream(in, std::cout);
 }
 
-void cleanup() {
-}
-
 int main(int argc, char *argv[]) {
-    int iterations = atoi(argv[1]);
-
     // Read input data once
     std::cin.sync_with_stdio(false);
     std::cout.sync_with_stdio(false);
     input_data.assign(std::istreambuf_iterator<char>(std::cin), std::istreambuf_iterator<char>());
 
-    for (int i = 0; i < iterations; ++i) {
-        initialize();
-        start_rapl();
+    while (1) {
+        if (start_rapl() == 0) {
+            break;
+        }
         run_benchmark();
         stop_rapl();
-        cleanup();
     }
     return 0;
 }

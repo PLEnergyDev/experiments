@@ -14,6 +14,7 @@ public final class program implements Runnable {
     private static final int NCHUNKS = 150;
     private static int CHUNKSZ;
     private static int NTASKS;
+    private static int n;
     private static int[] Fact;
     private static int[] maxFlips;
     private static int[] chkSums;
@@ -123,7 +124,7 @@ public final class program implements Runnable {
     static int res;
     static int chk;
 
-    public static void initialize(int n) {
+    public static void initialize() {
         if (n < 0 || n > 12) {
             res = -1;
             chk = -1;
@@ -170,6 +171,7 @@ public final class program implements Runnable {
         for (int v : chkSums) {
             chk += v;
         }
+        printResult(n, res, chk);
     }
 
     public static void cleanup() {
@@ -200,10 +202,10 @@ public final class program implements Runnable {
                 FunctionDescriptor.ofVoid()
         );
 
-        int n = Integer.parseInt(args[0]);
+        n = Integer.parseInt(args[0]);
 
         while (true) {
-            initialize(n);
+            initialize();
             if ((int) start_rapl.invokeExact() == 0) {
                 break;
             }

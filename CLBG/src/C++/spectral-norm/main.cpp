@@ -13,11 +13,8 @@
 #include <sched.h>
 #include <omp.h>
 #include <emmintrin.h>
+#include <rapl-interface.h>
 
-extern "C" {
-    void start_rapl();
-    void stop_rapl();
-}
 
 template <bool modei> int Index(int i, int j) {
     return (((i + j) * (i + j + 1)) >> 1) + (modei ? i : j) + 1;
@@ -84,14 +81,7 @@ int GetThreadCount() {
     return count;
 }
 
-int N;
-double result;
-
-void initialize(int argc, char* argv[]) {
-    N = ((argc >= 3) ? atoi(argv[2]) : 2000);
-}
-
-void run_benchmark() {
+void run_benchmark(int N) {
     __attribute__((aligned(16))) double u[N];
     __attribute__((aligned(16))) double v[N], tmp[N];
     double vBv = 0.0;
@@ -127,21 +117,18 @@ void run_benchmark() {
         }
     }
 
-    result = sqrt(vBv / vv);
-}
-
-void cleanup() {
+    double result = sqrt(vBv / vv);
+    printf("%.9f\n", result);
 }
 
 int main(int argc, char* argv[]) {
-    int iterations = atoi(argv[1]);
-    for (int i = 0; i < iterations; ++i) {
-        initialize(argc, argv);
-        start_rapl();
-        run_benchmark();
-        printf("%.9f\n", result);
+    int N = atoi(argv[1]);
+    while (1) {
+        if (start_rapl() == 0) {
+            break;
+        }
+        run_benchmark(N);
         stop_rapl();
-        cleanup();
     }
     return 0;
 }

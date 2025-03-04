@@ -14,8 +14,12 @@ use std::fs::File;
 use std::io::{self, Read};
 use std::sync::Arc;
 use std::thread;
-use rapl_lib::ffi::start_rapl;
-use rapl_lib::ffi::stop_rapl;
+
+#[link(name="rapl_interface")]
+extern "C" {
+    fn start_rapl() -> i32;
+    fn stop_rapl();
+}
 
 macro_rules! regex {
     ($re:expr) => {
@@ -82,18 +86,13 @@ fn run_benchmark(seq_arc: &Arc<Vec<u8>>, ilen: usize, clen: usize) {
     println!("\n{}\n{}\n{}", ilen, clen, seq.len());
 }
 
-fn cleanup() {}
-
 fn main() {
-    let iterations = std::env::args().nth(1)
-        .and_then(|n| n.parse().ok())
-        .unwrap_or(1);
-
-    for _ in 0..iterations {
+    loop {
         let (seq_arc, ilen, clen) = initialize();
-        start_rapl();
+        if unsafe { start_rapl() } == 0 {
+            break;
+        }
         run_benchmark(&seq_arc, ilen, clen);
-        stop_rapl();
-        cleanup();
+        unsafe { stop_rapl() };
     }
 }

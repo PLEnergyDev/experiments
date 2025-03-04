@@ -18,22 +18,18 @@ using namespace std;
 
 const size_t    LINE_SIZE = 64;
 
-class Apr
-{
-public:
-    Apr()
-    {
-        apr_initialize();
-    }
+class Apr {
+    public:
+        Apr() {
+            apr_initialize();
+        }
 
-    ~Apr()
-    {
-        apr_terminate();
-    }
+        ~Apr() {
+            apr_terminate();
+        }
 };
 
-struct Node
-{
+struct Node {
     Node *l, *r;
 
     int check() const
@@ -45,59 +41,55 @@ struct Node
     }
 };
 
-class NodePool
-{
-public:
-    NodePool()
-    {
-        apr_pool_create_unmanaged(&pool);
+class NodePool {
+    public:
+        NodePool()
+        {
+            apr_pool_create_unmanaged(&pool);
+        }
+
+        ~NodePool()
+        {
+            apr_pool_destroy(pool);
+        }
+
+        Node* alloc()
+        {
+            return (Node *)apr_palloc(pool, sizeof(Node));
+        }
+
+        void clear()
+        {
+            apr_pool_clear(pool);
+        }
+
+    private:
+        apr_pool_t* pool;
+    };
+
+    Node* make(int d, NodePool &store) {
+        Node* root = store.alloc();
+
+        if(d>0){
+            root->l=make(d-1, store);
+            root->r=make(d-1, store);
+        }else{
+            root->l=root->r=0;
+        }
+
+        return root;
     }
-
-    ~NodePool()
-    {
-        apr_pool_destroy(pool);
-    }
-
-    Node* alloc()
-    {
-        return (Node *)apr_palloc(pool, sizeof(Node));
-    }
-
-    void clear()
-    {
-        apr_pool_clear(pool);
-    }
-
-private:
-    apr_pool_t* pool;
-};
-
-Node* make(int d, NodePool &store)
-{
-    Node* root = store.alloc();
-
-    if(d>0){
-        root->l=make(d-1, store);
-        root->r=make(d-1, store);
-    }else{
-        root->l=root->r=0;
-    }
-
-    return root;
-}
 
 int min_depth;
 int max_depth;
 int stretch_depth;
 Apr* apr;
 
-void initialize()
-{
+void initialize() {
     apr = new Apr();
 }
 
-void run_benchmark()
-{
+void run_benchmark() {
     NodePool store;
     {
         Node *c = make(stretch_depth, store);
@@ -129,31 +121,29 @@ void run_benchmark()
            iterations, d, c);
     }
 
-    for (int d = min_depth; d <= max_depth; d += 2)
+    for (int d = min_depth; d <= max_depth; d += 2) {
         printf("%s", outputstr + (d * LINE_SIZE) );
+    }
     free(outputstr);
 
     std::cout << "long lived tree of depth " << max_depth << "\t "
               << "check: " << (long_lived_tree->check()) << "\n";
 }
 
-void cleanup()
-{
+void cleanup() {
     delete apr;
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     min_depth = 4;
-    max_depth = std::max(min_depth+2,
-                         (argc == 3 ? atoi(argv[2]) : 10));
-    stretch_depth = max_depth+1;
+    max_depth = std::max(min_depth + 2, atoi(argv[1]));
+    stretch_depth = max_depth + 1;
 
-    int iterations = atoi(argv[1]);
-    for (int i = 0; i < iterations; ++i)
-    {
+    while (1) {
         initialize();
-        start_rapl();
+        if (start_rapl() == 0) {
+            break;
+        }
         run_benchmark();
         stop_rapl();
         cleanup();

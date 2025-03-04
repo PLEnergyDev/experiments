@@ -11,11 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-
-extern "C" {
-    void start_rapl();
-    void stop_rapl();
-}
+#include <rapl-interface.h>
 
 using namespace std;
 
@@ -115,13 +111,12 @@ inline int64_t Permutation::countFlips() const
     return flips;
 }
 
-int n;
 int64_t maxFlips;
 int64_t checksum;
 int64_t blockLength;
 int64_t blockCount;
 
-void initialize()
+void initialize(int n)
 {
     initializeFact(n);
 
@@ -134,7 +129,7 @@ void initialize()
     checksum = 0;
 }
 
-void run_benchmark()
+void run_benchmark(int n)
 {
     #pragma omp parallel for \
         reduction(max:maxFlips) \
@@ -173,21 +168,16 @@ void run_benchmark()
     cout << "Pfannkuchen(" << n << ") = " << maxFlips << endl;
 }
 
-void cleanup()
-{
-}
-
 int main(int argc, char **argv)
 {
-    int iterations = atoi(argv[1]);
-    n = atoi(argv[2]);
-    for (int i = 0; i < iterations; ++i)
-    {
-        initialize();
-        start_rapl();
-        run_benchmark();
+    int n = atoi(argv[1]);
+    while (1) {
+        initialize(n);
+        if (start_rapl() == 0) {
+            break;
+        }
+        run_benchmark(n);
         stop_rapl();
-        cleanup();
     }
 
     return 0;

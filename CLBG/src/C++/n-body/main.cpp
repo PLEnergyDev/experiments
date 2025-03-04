@@ -10,11 +10,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <utility>
-
-extern "C" {
-    void start_rapl();
-    void stop_rapl();
-}
+#include <rapl-interface.h>
 
 constexpr double PI = 3.141592653589793;
 constexpr double SOLAR_MASS = 4 * PI * PI;
@@ -163,17 +159,15 @@ void run_benchmark(int n) {
     std::printf("%.9f\n", energy(bodies));
 }
 
-void cleanup() {}
-
 int main(int argc, char *argv[]) {
-    int iterations = std::atoi(argv[1]);
-    const auto n = std::atoi(argv[2]);
-    for (int i = 0; i < iterations; ++i) {
+    const auto n = std::atoi(argv[1]);
+    while (1) {
         initialize();
-        start_rapl();
+        if (start_rapl() == 0) {
+            break;
+        }
         run_benchmark(n);
         stop_rapl();
-        cleanup();
     }
     return 0;
 }

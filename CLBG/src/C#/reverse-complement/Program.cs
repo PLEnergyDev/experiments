@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
-static class revcomp
+static class Program
 {
     [DllImport("librapl_interface", EntryPoint = "start_rapl")]
     public static extern bool start_rapl();
@@ -38,19 +38,17 @@ static class revcomp
             }
         }
 
-        int iterations = int.Parse(args[0]);
-        for (int i = 0; i < iterations; i++)
-        {
+        while (true) {
             initialize();
-            start_rapl();
+            if (!start_rapl()) {
+                break;
+            }
             run_benchmark();
             stop_rapl();
-            cleanup();
         }
     }
 
-    static void initialize()
-    {
+    static void initialize() {
         InitComplements();
         RCBlock.ResetSequenceNumbers();
     }
@@ -59,10 +57,6 @@ static class revcomp
     {
         var processor = new ReverseComplementProcessor(inputData);
         processor.Process();
-    }
-
-    static void cleanup()
-    {
     }
 
     static void InitComplements()

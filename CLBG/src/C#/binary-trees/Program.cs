@@ -11,8 +11,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
-public static class BinaryTrees
-{
+public static class Program {
     [DllImport("librapl_interface", EntryPoint = "start_rapl")]
     public static extern bool start_rapl();
 
@@ -23,32 +22,26 @@ public static class BinaryTrees
     static int maxDepth;
     static int stretchDepth;
 
-    public static void Main(string[] args)
-    {
-        int n = 0;
-        int iterations = int.Parse(args[0]);
-        if (args.Length > 0) n = int.Parse(args[1]);
+    public static void Main(string[] args) {
+        int n = int.Parse(args[0]);
 
-        for (int i = 0; i < iterations; i++)
-        {
+        while (true) {
             initialize(n);
-            start_rapl();
+            if (!start_rapl()) {
+                break;
+            }
             run_benchmark();
             stop_rapl();
-            cleanup();
         }
     }
 
-    static void initialize(int n)
-    {
+    static void initialize(int n) {
         maxDepth = n < (MinDepth + 2) ? MinDepth + 2 : n;
         stretchDepth = maxDepth + 1;
     }
 
-    static void run_benchmark()
-    {
-        var tcheck = new[]
-        {
+    static void run_benchmark() {
+        var tcheck = new[] {
             Task.Run(() => TreeNode.BottomUpTree(stretchDepth).ItemCheck()),
             Task.Run(() => TreeNode.BottomUpTree(maxDepth).ItemCheck())
         };
@@ -58,18 +51,14 @@ public static class BinaryTrees
 
         var results = new Task<string>[(maxDepth - MinDepth) / 2 + 1];
 
-        for (int depth = MinDepth; depth <= maxDepth; depth += 2)
-        {
+        for (int depth = MinDepth; depth <= maxDepth; depth += 2) {
             int iterations = 1 << (maxDepth - depth + MinDepth);
             int check = 0, safeDept = depth;
 
-            results[(safeDept - MinDepth) / 2] = Task.Run(() =>
-            {
+            results[(safeDept - MinDepth) / 2] = Task.Run(() => {
                 int i = 1;
-                while (i <= iterations)
-                {
-                    if (safeDept > 18)
-                    {
+                while (i <= iterations) {
+                    if (safeDept > 18) {
                         var split = new[]
                         {
                             Task.Run(() => TreeNode.BottomUpTree(safeDept).ItemCheck()),
@@ -80,8 +69,7 @@ public static class BinaryTrees
                         Task.WaitAll(split);
                         check += split[0].Result + split[1].Result;
                     }
-                    else
-                    {
+                    else {
                         check += TreeNode.BottomUpTree(safeDept).ItemCheck();
                         i++;
                     }
@@ -90,8 +78,7 @@ public static class BinaryTrees
             });
         }
 
-        for (int i = 0; i < results.Length; i++)
-        {
+        for (int i = 0; i < results.Length; i++) {
             results[i].Wait();
             Console.WriteLine(results[i].Result);
         }
@@ -100,44 +87,31 @@ public static class BinaryTrees
         Console.WriteLine("long lived tree of depth {0}\t check: {1}", maxDepth, tcheck[1].Result);
     }
 
-    static void cleanup()
-    {
-    }
-
-    struct TreeNode
-    {
-        class Next
-        {
+    struct TreeNode {
+        class Next {
             public TreeNode left, right;
         }
 
         private Next next;
 
-        internal static TreeNode BottomUpTree(int depth)
-        {
-            if (depth > 0)
-            {
+        internal static TreeNode BottomUpTree(int depth) {
+            if (depth > 0) {
                 return new TreeNode(BottomUpTree(depth - 1), BottomUpTree(depth - 1));
             }
-            else
-            {
+            else {
                 return new TreeNode();
             }
         }
 
-        TreeNode(TreeNode left, TreeNode right)
-        {
+        TreeNode(TreeNode left, TreeNode right) {
             next = new Next { left = left, right = right };
         }
 
-        internal int ItemCheck()
-        {
-            if (next == null)
-            {
+        internal int ItemCheck() {
+            if (next == null) {
                 return 1;
             }
-            else
-            {
+            else {
                 return 1 + next.left.ItemCheck() + next.right.ItemCheck();
             }
         }

@@ -15,11 +15,7 @@
 #include <ext/pb_ds/assoc_container.hpp>
 #include <future>
 #include <unistd.h>
-
-extern "C" {
-    void start_rapl();
-    void stop_rapl();
-}
+#include <rapl-interface.h>
 
 unsigned char tonum[256], tochar[4];
 
@@ -153,12 +149,7 @@ void run_benchmark()
     write_count(input, "GGTATTTTAATTTATAGT");
 }
 
-void cleanup()
-{
-}
-
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     char buffer[256];
     while (fgets(buffer, 100, stdin) && memcmp(">THREE", buffer, 6) != 0)
         ;
@@ -171,14 +162,13 @@ int main(int argc, char *argv[])
     }
     std::transform(original_input.begin(), original_input.end(), original_input.begin(), ::toupper);
 
-    int iterations = std::atoi(argv[1]);
-    for (int i = 0; i < iterations; ++i)
-    {
+    while (1) {
         initialize();
-        start_rapl();
+        if (start_rapl() == 0) {
+            break;
+        }
         run_benchmark();
         stop_rapl();
-        cleanup();
     }
 
     return 0;

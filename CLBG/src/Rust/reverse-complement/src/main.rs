@@ -11,11 +11,11 @@ extern crate rayon;
 use std::cmp::min;
 use std::io::{Result, Write, stdin, stdout, Read};
 use std::mem::replace;
-use rapl_lib::ffi::start_rapl;
-use rapl_lib::ffi::stop_rapl;
 
-fn initialize() {
-    // Initialization code (if needed)
+#[link(name="rapl_interface")]
+extern "C" {
+    fn start_rapl() -> i32;
+    fn stop_rapl();
 }
 
 fn run_benchmark(buffer: &[u8]) -> Result<()> {
@@ -27,24 +27,16 @@ fn run_benchmark(buffer: &[u8]) -> Result<()> {
     Ok(())
 }
 
-fn cleanup() {
-    // Cleanup code (if needed)
-}
-
 fn main() -> Result<()> {
     let mut buffer = Vec::new();
     stdin().read_to_end(&mut buffer)?;
 
-    let iterations: usize = std::env::args()
-        .nth(1)
-        .and_then(|n| n.parse().ok())
-        .unwrap_or(1);
-    for _ in 0..iterations {
-        initialize();
-        start_rapl();
-        run_benchmark(&buffer)?;
-        stop_rapl();
-        cleanup();
+    loop {
+        if unsafe { start_rapl() } == 0 {
+            break;
+        }
+        let _ = run_benchmark(&buffer);
+        unsafe { stop_rapl() };
     }
     Ok(())
 }

@@ -9,20 +9,18 @@ extern crate rayon;
 
 use std::{cmp, mem};
 use rayon::prelude::*;
-use rapl_lib::ffi::start_rapl;
-use rapl_lib::ffi::stop_rapl;
+
+#[link(name="rapl_interface")]
+extern "C" {
+    fn start_rapl() -> i32;
+    fn stop_rapl();
+}
 
 const NUM_BLOCKS: u32 = 24;
-
-fn initialize() {
-}
 
 fn run_benchmark(n: i32) {
     let (checksum, maxflips) = fannkuch(n);
     println!("{}\nPfannkuchen({}) = {}", checksum, n, maxflips);
-}
-
-fn cleanup() {
 }
 
 fn fannkuch(n: i32) -> (i32, i32) {
@@ -126,18 +124,15 @@ fn fannkuch(n: i32) -> (i32, i32) {
 }
 
 fn main() {
-    let iterations = std::env::args().nth(1)
+    let n = std::env::args().nth(1)
         .and_then(|n| n.parse().ok())
-        .unwrap_or(1);
-    let n = std::env::args().nth(2)
-        .and_then(|n| n.parse().ok())
-        .unwrap_or(7);
+        .unwrap();
 
-    for _ in 0..iterations {
-        initialize();
-        start_rapl();
+    loop {
+        if unsafe { start_rapl() } == 0 {
+            break;
+        }
         run_benchmark(n);
-        stop_rapl();
-        cleanup();
+        unsafe { stop_rapl() };
     }
 }

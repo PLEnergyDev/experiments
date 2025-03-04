@@ -11,8 +11,12 @@ extern crate rayon;
 
 use typed_arena::Arena;
 use rayon::prelude::*;
-use rapl_lib::ffi::start_rapl;
-use rapl_lib::ffi::stop_rapl;
+
+#[link(name="rapl_interface")]
+extern "C" {
+    fn start_rapl() -> i32;
+    fn stop_rapl();
+}
 
 struct Tree<'a> {
     children: Option<(&'a Tree<'a>, &'a Tree<'a>)>,
@@ -28,7 +32,7 @@ fn item_check(tree: &Tree) -> i32 {
 
 fn bottom_up_tree<'r>(arena: &'r Arena<Tree<'r>>, depth: i32)
                   -> &'r Tree<'r> {
-    let mut tree = arena.alloc(Tree { children: None });
+    let tree = arena.alloc(Tree { children: None });
     if depth > 0 {
         let right = bottom_up_tree(arena, depth - 1);
         let left = bottom_up_tree(arena, depth - 1);
@@ -44,10 +48,6 @@ fn inner(depth: i32, iterations: i32) -> String {
         item_check(a)
     }).sum();
     format!("{}\t trees of depth {}\t check: {}", iterations, depth, chk)
-}
-
-fn initialize() {
-    // Initialization phase (no global state to initialize)
 }
 
 fn run_benchmark(n: i32) {
@@ -77,23 +77,16 @@ fn run_benchmark(n: i32) {
     println!("long lived tree of depth {}\t check: {}", max_depth, item_check(long_lived_tree));
 }
 
-fn cleanup() {
-    // Cleanup phase (no resources to release)
-}
-
 fn main() {
-    let iterations = std::env::args().nth(1)
+    let n = std::env::args().nth(1)
         .and_then(|n| n.parse().ok())
-        .unwrap_or(1);
-    let n = std::env::args().nth(2)
-        .and_then(|n| n.parse().ok())
-        .unwrap_or(10);
+        .unwrap();
 
-    for _ in 0..iterations {
-        initialize();
-        start_rapl();
+    loop {
+        if unsafe { start_rapl() } == 0 {
+            break;
+        }
         run_benchmark(n);
-        stop_rapl();
-        cleanup();
+        unsafe { stop_rapl() };
     }
 }
