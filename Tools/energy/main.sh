@@ -241,16 +241,12 @@ help_energy() {
     cat << HELP
 
 Usage:
-    $SCRIPT_NAME [OPTIONS] [COMMAND] [ARGS]
+    $SCRIPT_NAME {--version|--help} [COMMAND] [OPTIONS]
 
 Commands:
     measure   Use 'rapl-interface' and 'perf' command to measure programs
     report    Compile raw measurements into useful reports
     export    Export program assembly
-
-Options:
-    -v, --version
-    -h, --help
 
 HELP
 }
