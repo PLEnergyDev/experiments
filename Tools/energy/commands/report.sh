@@ -20,6 +20,9 @@ report_description() {
 
 report_help() {
     cat << HELP
+Attention!
+    This command is quite heavy so expect it to hang.
+
 Usage:
     $TOOL_NAME report [DIR] [OPTIONS]
 
@@ -132,72 +135,95 @@ report_main() {
     report_ensure_dependencies
 
     if [[ ${#REPORT_LANG[@]} -eq 0 && ${#REPORT_BENCH[@]} -eq 0 ]]; then
-        rapl_csv=$(find . -maxdepth 1 -name "Intel_*.csv" -o -name "AMD_*.csv")
-        if [[ ! -z "$rapl_csv" && -f "perf.txt" ]]; then
-
-            $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/compile.py" "$rapl_csv" || error "Failed to compile rapl measurements."
-
+        # Find CSV files in current dir (flat mode). We use -print0 to safely split names.
+        IFS=$'\0' read -r -d '' -a rapl_csv_arr < <(find . -maxdepth 1 -type f \( -name "Intel_*.csv" -o -name "AMD_*.csv" \) -print0 && printf '\0')
+        if [[ ${#rapl_csv_arr[@]} -gt 0 && -f "perf.txt" ]]; then
+            $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/compile.py" "${rapl_csv_arr[@]}" || error "Failed to compile rapl measurements."
             if $REPORT_AVERAGE; then
-                $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/average.py" "$rapl_csv" -s "$REPORT_SKIP" || error "Failed to average rapl measurements."
+                $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/average.py" "${rapl_csv_arr[@]}" -s "$REPORT_SKIP" || error "Failed to average rapl measurements."
             fi
-
             if $REPORT_VIOLIN; then
-                $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/violin.py" "$rapl_csv" -s "$REPORT_SKIP" || error "Failed to create violin plot."
+                $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/violin.py" "${rapl_csv_arr[@]}" -s "$REPORT_SKIP" || error "Failed to create violin plot."
             fi
-
+            if $REPORT_INTERACTIVE; then
+                $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/interactive.py" "${rapl_csv_arr[@]}" "perf.txt" -s "$REPORT_SKIP" || error "Failed to create interactive plot."
+            fi
             exit 0
         fi
     fi
 
+    # Determine languages (exclude the "plots" directory)
     if [[ ${#REPORT_LANG[@]} -eq 0 ]]; then
-        REPORT_LANG=($(find "$REPORT_DIR" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort))
+        REPORT_LANG=($(find "$REPORT_DIR" -mindepth 1 -maxdepth 1 -type d ! -name "plots" -exec basename {} \; | sort))
         if [[ ${#REPORT_LANG[@]} -eq 0 ]]; then
             error "No language dirs found in \"$REPORT_DIR\"."
         fi
     fi
 
+    # Determine benchmarks across all languages (again excluding "plots")
     if [[ ${#REPORT_BENCH[@]} -eq 0 ]]; then
         declare -A BENCHMARK_SET
-
         for lang in "${REPORT_LANG[@]}"; do
             if [[ -d "$REPORT_DIR/$lang" ]]; then
-                for benchmark in $(find "$REPORT_DIR/$lang" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort); do
+                for benchmark in $(find "$REPORT_DIR/$lang" -mindepth 1 -maxdepth 1 -type d ! -name "plots" -exec basename {} \; | sort); do
                     BENCHMARK_SET["$benchmark"]=1
                 done
             fi
         done
-
         REPORT_BENCH=("${!BENCHMARK_SET[@]}")
-
         if [[ ${#REPORT_BENCH[@]} -eq 0 ]]; then
             error "No benchmarks found under any language directory."
         fi
     fi
 
-    rm -f "rapl.csv"
-    rm -f "averaged.csv"
-    rm -f "normalized.csv"
+    # Remove any pre-existing output CSV files
+    rm -f "rapl.csv" "averaged.csv" "normalized.csv"
 
-    local rapl_csvs=()
+    # For each language, collect CSV files from the corresponding benchmark subdirectories
     for lang in "${REPORT_LANG[@]}"; do
-        rapl_csvs=()
+        local rapl_csvs=()
         for bench in "${REPORT_BENCH[@]}"; do
-            bench_dir="$lang/$bench"
+            bench_dir="$REPORT_DIR/$lang/$bench"
             if [[ ! -d "$bench_dir" ]]; then
                 continue
             fi
-            rapl_csv=$(find "$bench_dir" -maxdepth 1 -name "Intel_*.csv" -o -name "AMD_*.csv")
-            rapl_csvs+=("$rapl_csv")
 
+            # Append each found CSV file individually into the array
+            while IFS= read -r file; do
+                rapl_csvs+=("$file")
+            done < <(find "$bench_dir" -maxdepth 1 -type f \( -name "Intel_*.csv" -o -name "AMD_*.csv" \))
+
+            # Generate violin plots if requested
             if $REPORT_VIOLIN; then
-                $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/violin.py" "$rapl_csv" -s "$REPORT_SKIP" || error "Failed to create violin plot."
-                mkdir -p "plots/$lang/$bench/violins"
-                mv violin.png "plots/$lang/$bench/violins"
+                for csv in "${rapl_csvs[@]}"; do
+                    if [[ ! -f "$csv" ]]; then
+                        warning "Missing required rapl measurement for \"$lang\" \"$bench\"."
+                        continue
+                    fi
+                    $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/violin.py" "$csv" -s "$REPORT_SKIP" || error "Failed to create violin plot."
+                    mkdir -p "plots/$lang/$bench/violins"
+                    mv violin.png "plots/$lang/$bench/violins"
+                done
+            fi
+
+            # Generate interactive plots if requested
+            if $REPORT_INTERACTIVE; then
+                for csv in "${rapl_csvs[@]}"; do
+                    perf_txt="$bench_dir/perf.txt"
+                    if [[ ! -f "$perf_txt" ]]; then
+                        warning "Missing required \"perf.txt\" for \"$lang\" \"$bench\"."
+                        continue
+                    fi
+                    $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/interactive.py" "$csv" "$perf_txt" -s "$REPORT_SKIP" || error "Failed to create interactive plot."
+                    mkdir -p "plots/$lang/$bench/interactive"
+                    mv interactive.html "plots/$lang/$bench/interactive"
+                done
             fi
         done
 
+        # Compile all CSV files for the current language
         $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/compile.py" "${rapl_csvs[@]}" || error "Failed to compile rapl measurements."
-
+        # Average measurements if requested, passing the current language as a parameter
         if $REPORT_AVERAGE; then
             $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/average.py" "${rapl_csvs[@]}" -s "$REPORT_SKIP" -l "$lang" || error "Failed to average rapl measurements."
         fi
