@@ -19,7 +19,7 @@ if [[ ! -e "$SOURCE_DIR" ]]; then
 fi
 
 # Create the archive
-tar --exclude="*results*" --exclude="*.txt" -czf "$ARCHIVE_NAME" -C "$(dirname "$SOURCE_DIR")" "$(basename "$SOURCE_DIR")" || {
+tar --exclude="*results*" -czf "$ARCHIVE_NAME" -C "$(dirname "$SOURCE_DIR")" "$(basename "$SOURCE_DIR")" || {
     echo "[ERROR] Failed to create archive";
     exit 1;
 }

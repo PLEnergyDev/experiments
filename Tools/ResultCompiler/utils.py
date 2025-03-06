@@ -30,7 +30,7 @@ class Compiler:
         """Read CSV file if it exists, otherwise return None."""
         if not os.path.exists(path):
             return None
-        return pd.read_csv(path, header=0, comment="T")
+        return pd.read_csv(path, header=0)
 
     def calculate_energy(self, df):
         """Calculate energy consumption from raw data."""
