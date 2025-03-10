@@ -21,6 +21,7 @@ Ensure the following dependencies are installed:
 - `modprobe`
 - `kmod`
 - `linux-tools`
+- `nix`
 
 ## Installation
 
@@ -43,7 +44,7 @@ energy {--version|--help} COMMAND [ARGS]
 |---------|-------------|
 | `measure` | Measure program performance |
 | `report` | Compile raw measurements |
-| `export` | Export program assembly |
+| `assembly` | See program assembly |
 | `help` | Display help for specific commands |
 
 ### Directory Structure

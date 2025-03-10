@@ -31,13 +31,13 @@ DIR:
     The base directory path to start the measurements in. Default current dir
 
 Options:
-    -n, --no-warmup          Only measures using \"no-warmup\" config
-    -w, --warmup             Only measures using \"warmup\" config
+    -n, --no-warmup          Only measures using "no-warmup" config
+    -w, --warmup             Only measures using "warmup" config
     -l, --lang <languages>   Comma-separated list of languages. Default takes all dirs under DIR
     -b, --bench <benchmarks> Comma-separated list of benchmarks. Default takes all dirs under LANGUAGES
-        --lab                OS will enter the \"lab\" environment before measuring. Default production
-        --prod               OS will enter the \"production\" environment before measuring. Default production
-        --light              OS will enter the \"lightweight\" environment before measuring. Default production
+        --lab                OS will enter the "lab" environment before measuring. Default production
+        --prod               OS will enter the "production" environment before measuring. Default production
+        --light              OS will enter the "lightweight" environment before measuring. Default production
     -s, --sleep <seconds>    Number of seconds to sleep between each successful measurement. Default 60
         --stop               Stop after a failed measurement
     -c, --count <count>      Number of measurement repetitions. Default 45
@@ -85,6 +85,10 @@ measure_ensure_dependencies() {
     if ! modprobe msr; then
         error "Failed to load \"msr\" kernel module. Ensure it is available and try again."
     fi
+
+    if ! command -v nix &>/dev/null; then
+        error "\"nix\" is not installed. Install Nix package manager and try again."
+    fi
 }
 
 measure_build_command() {
@@ -95,10 +99,10 @@ measure_build_command() {
 
     case "$1" in
         no-warmup)
-            command="$MEASURE_PRIORITY $perf_command bash -c 'for i in \$(seq 1 $MEASURE_COUNT); do make measure || exit 1; done'"
+            command="$MEASURE_PRIORITY $perf_command env LD_LIBRARY_PATH=/usr/local/lib bash -c 'for i in \$(seq 1 $MEASURE_COUNT); do make measure || exit 1; done'"
             ;;
         warmup)
-            command="$MEASURE_PRIORITY $perf_command env RAPL_ITERATIONS=$MEASURE_COUNT make measure"
+            command="$MEASURE_PRIORITY $perf_command env LD_LIBRARY_PATH=/usr/local/lib RAPL_ITERATIONS=$MEASURE_COUNT make measure"
             ;;
         *)
             command=""
@@ -174,7 +178,7 @@ measure_main() {
     measure_ensure_dependencies
 
     info "Sourcing the ${MEASURE_SETUP} environment.\n"
-    source "${0%/*}/../setups/${MEASURE_SETUP}.sh"
+    source "$LIB_DIR/setups/${MEASURE_SETUP}.sh"
 
     MEASURE_DRIVER=$(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_driver)
     if [[ "$MEASURE_DRIVER" == "amd-pstate-epp" ]]; then
@@ -184,9 +188,7 @@ measure_main() {
     MEASURE_GOVERNOR=$(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor)
     MEASURE_MIN_FREQ=$(( $(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq) / 1000 ))
     MEASURE_MAX_FREQ=$(( $(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq) / 1000 ))
-
     MEASURE_ASLR=$(cat /proc/sys/kernel/randomize_va_space 2>/dev/null || echo "N/A")
-    MEASURE_TURBO=$(cat /sys/devices/system/cpu/$MEASURE_DRIVER/no_turbo 2>/dev/null || echo "N/A")
 
     case "$MEASURE_ASLR" in
         0) MEASURE_ASLR="Disabled (No randomization)" ;;
@@ -195,9 +197,7 @@ measure_main() {
         *) MEASURE_ASLR="Unknown" ;;
     esac
 
-    if ! cpupower frequency-info | grep "Supported: yes" &>/dev/null; then
-        MEASURE_TURBO="Unknown"
-    elif cpupower frequency-info | grep "Active: yes" &>/dev/null; then
+    if cpupower frequency-info | grep -q "Active: yes"; then
         MEASURE_TURBO="Enabled"
     else
         MEASURE_TURBO="Disabled"
@@ -269,6 +269,7 @@ measure_main() {
 
                 pushd "$bench_dir" >/dev/null
 
+                make clean || error "Cleaning failed."
                 command=$(measure_build_command "$conf")
 
                 info "Measuring $lang $bench with $conf.\n"
