@@ -73,7 +73,8 @@ def main():
         "C7 Residency": "steelblue",
     }
     parsed_data = []
-
+    start_time = int(time.iloc[0]) * args.skip / 1000
+    end_time = int(time.iloc[-1]) * (len(time) + args.skip) / 1000
     with open(args.perf, "r") as file:
         for line in file:
             parts = re.split(r"\s+", line.strip())
@@ -96,8 +97,14 @@ def main():
             elif "cycles" in line and parsed_data:
                 parsed_data[-1]["Cpu Frequency"] = float(parts[4])
 
+    clamped_data = [
+        item for item in parsed_data if start_time <= item["timestamp"] <= end_time
+    ]
+    for item in clamped_data:
+        item["timestamp"] -= start_time
+
     # Extract aligned data
-    for entry in parsed_data:
+    for entry in clamped_data:
         timestamps.append(entry["timestamp"])
         for key in metrics.keys():
             metrics[key].append(entry.get(key, 0))  # Default missing data to 0

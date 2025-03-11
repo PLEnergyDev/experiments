@@ -47,7 +47,8 @@ typedef struct
 static char* make_Sequence_Buffer(const char string_To_Repeat[])
 {
     const intnative_t string_To_Repeat_Length = strlen(string_To_Repeat);
-
+    
+    // JG: Changed to that this writes a sequence to a buffer, which is used
     intnative_t number_Of_Characters_To_Create = string_To_Repeat_Length * MAXIMUM_LINE_WIDTH;
     char* buffer = (char*) malloc(number_Of_Characters_To_Create + 
         number_Of_Characters_To_Create / MAXIMUM_LINE_WIDTH + 1);
@@ -55,6 +56,11 @@ static char* make_Sequence_Buffer(const char string_To_Repeat[])
         exit(-1);
     char* bufferOffset = buffer;
 
+    // Create an extended_String_To_Repeat which is a copy of string_To_Repeat
+    // but extended with another copy of the first MAXIMUM_LINE_WIDTH characters
+    // of string_To_Repeat appended to the end. Later on this allows us to
+    // generate a line of output just by doing simple memory copies using an
+    // appropriate offset into extended_String_To_Repeat.
     char extended_String_To_Repeat[string_To_Repeat_Length + MAXIMUM_LINE_WIDTH];
     for (intnative_t column = 0; column<string_To_Repeat_Length + MAXIMUM_LINE_WIDTH;
         column++)
@@ -69,6 +75,9 @@ static char* make_Sequence_Buffer(const char string_To_Repeat[])
         number_Of_Characters_To_Create;
         current_Number_Of_Characters_To_Create>0;)
     {
+        // Figure out the length of the line we need to write. If it's less than
+        // MAXIMUM_LINE_WIDTH then we also need to add a line feed in the right
+        // spot too.
         intnative_t line_Length = MAXIMUM_LINE_WIDTH;
         if (current_Number_Of_Characters_To_Create<MAXIMUM_LINE_WIDTH)
         {
@@ -78,11 +87,15 @@ static char* make_Sequence_Buffer(const char string_To_Repeat[])
 
         memcpy(line, extended_String_To_Repeat + offset, line_Length);
 
+        // Update the offset, reducing it by string_To_Repeat_Length if
+        // necessary.
         offset += line_Length;
         if (offset>string_To_Repeat_Length)
             offset -= string_To_Repeat_Length;
 
-        memcpy(bufferOffset, line, line_Length + 1);
+        // "Output" that line to our buffer and update the
+        // current_Number_Of_Characters_To_Create.
+        memcpy(bufferOffset, line, line_Length + 1); //  JG: used to be fwrite(line, line_Length + 1, 1, stdout);
         bufferOffset += line_Length + 1;
         current_Number_Of_Characters_To_Create -= line_Length;
     }
@@ -92,6 +105,8 @@ static char* make_Sequence_Buffer(const char string_To_Repeat[])
 
 void repeat_And_Wrap_String(const char string_To_Repeat[], intnative_t number_Of_Characters_To_Create) 
 {
+    /* JG: fasta_repeat repeats every len(alu) * line-length = 287 * 61 = 17507 characters.
+           So, calculate this once, then just print that buffer over and over. */
     char* sequence = make_Sequence_Buffer(string_To_Repeat);
     intnative_t sequenceLen = (intnative_t) strlen(sequence);
     intnative_t outputBytes = number_Of_Characters_To_Create + number_Of_Characters_To_Create / 60;
@@ -137,7 +152,7 @@ static void rng_init(void)
 
 static intnative_t rng_gen_blk(uint32_t * buf, intnative_t len, int curr_tid)
 {
-    intnative_t gen_cnt = -1;
+    intnative_t gen_cnt = -1;//Error by default
     RNG_LOCK();
 
     if (rng_tid == curr_tid)
@@ -155,7 +170,7 @@ static intnative_t rng_gen_blk(uint32_t * buf, intnative_t len, int curr_tid)
         while (0 != len--)
         {
             seed = (seed*IA + IC) % IM;
-            *(buf++) = seed;
+            *(buf++) = seed;//This is stupid actually!
         }
     }
 
@@ -163,8 +178,8 @@ static intnative_t rng_gen_blk(uint32_t * buf, intnative_t len, int curr_tid)
     return gen_cnt;
 }
 
-int out_tid;
-int out_tnum = 1;
+int out_tid; //Thread ID
+int out_tnum = 1; //Thread number
 #ifdef _OPENMP
 omp_lock_t out_lock;
 #define OUT_LOCK_INIT() omp_init_lock(&out_lock)
@@ -184,7 +199,7 @@ static void out_init(void)
 
 static intnative_t out_write(char * buf, intnative_t len, int curr_tid)
 {
-    intnative_t wr_cnt = -1;
+    intnative_t wr_cnt = -1;//Error by default
     OUT_LOCK();
 
     if (out_tid == curr_tid)
@@ -197,7 +212,7 @@ static intnative_t out_write(char * buf, intnative_t len, int curr_tid)
     }
 
     OUT_FREE();
-    return wr_cnt;
+    return wr_cnt; //-1 - thread error, 0 - IO error, 1 - ОК
 }
 
 static void generate_And_Wrap_Pseudorandom_DNA_Sequence(
@@ -246,7 +261,7 @@ static void generate_And_Wrap_Pseudorandom_DNA_Sequence(
 
             if (0 == cnt)
             {
-                break;
+                break;//Work finished!
             }
 
             line = block;
@@ -271,15 +286,18 @@ static void generate_And_Wrap_Pseudorandom_DNA_Sequence(
                     *line++ = '\n';
                 }
             }
+            //Check if we need to end the line
             if (0 != col)
             {
+                //Last iteration didn't end the line, so finish the job.
                 *line++ = '\n';
             }
+            //Print results
             do
             {
                 cnt = out_write(block, line - block, cur_tid);
             } while (-1 == cnt);
-
+            //Check  fot IO error
             if (0 == cnt)
             {
                 exit(1);
@@ -288,7 +306,7 @@ static void generate_And_Wrap_Pseudorandom_DNA_Sequence(
     }
 }
 
-void initialize(int n) {
+void initialize() {
     rng_init();
     out_init();
 }
@@ -325,7 +343,7 @@ void run_benchmark(int n) {
 int main(int argc, char ** argv) {
     const intnative_t n = atoi(argv[1]);
     while (1) {
-        initialize(n);
+        initialize();
         if (start_rapl() == 0) {
             break;
         }

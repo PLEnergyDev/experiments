@@ -84,7 +84,7 @@ report_ensure_dependencies() {
 }
 
 report_main() {
-    local options=$(getopt -o l:b:s:anvi --long lang:,bench:,skip:,averaged,normalized,violin,interactive -- "$@")
+    local options=$(getopt -o l:b:s:anvi --long lang:,bench:,skip:,average,normalized,violin,interactive -- "$@")
     eval set -- "$options"
 
     while true; do
@@ -177,21 +177,28 @@ report_main() {
     fi
 
     # Remove any pre-existing output CSV files
-    rm -f "rapl.csv" "averaged.csv" "normalized.csv"
+    rm -f "rapl.csv" "averaged_rapl.csv" "averaged_perf.csv" "normalized.csv"
 
-    # For each language, collect CSV files from the corresponding benchmark subdirectories
+    # For each language, collect CSV files and perf.txt files
     for lang in "${REPORT_LANG[@]}"; do
         local rapl_csvs=()
+        local perf_txts=()
         for bench in "${REPORT_BENCH[@]}"; do
             bench_dir="$REPORT_DIR/$lang/$bench"
             if [[ ! -d "$bench_dir" ]]; then
                 continue
             fi
 
-            # Append each found CSV file individually into the array
+            # Gather RAPL CSV files
             while IFS= read -r file; do
                 rapl_csvs+=("$file")
             done < <(find "$bench_dir" -maxdepth 1 -type f \( -name "Intel_*.csv" -o -name "AMD_*.csv" \))
+
+            # Gather perf.txt files
+            perf_txt="$bench_dir/perf.txt"
+            if [[ -f "$perf_txt" ]]; then
+                perf_txts+=("$perf_txt")
+            fi
 
             # Generate violin plots if requested
             if $REPORT_VIOLIN; then
@@ -200,7 +207,8 @@ report_main() {
                         warning "Missing required rapl measurement for \"$lang\" \"$bench\"."
                         continue
                     fi
-                    $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/violin.py" "$csv" -s "$REPORT_SKIP" || error "Failed to create violin plot."
+                    $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/violin.py" "$csv" -s "$REPORT_SKIP" \
+                        || error "Failed to create violin plot."
                     mkdir -p "plots/$lang/$bench/violins"
                     mv violin.png "plots/$lang/$bench/violins"
                 done
@@ -209,12 +217,13 @@ report_main() {
             # Generate interactive plots if requested
             if $REPORT_INTERACTIVE; then
                 for csv in "${rapl_csvs[@]}"; do
-                    perf_txt="$bench_dir/perf.txt"
-                    if [[ ! -f "$perf_txt" ]]; then
+                    if [[ ! -f "$bench_dir/perf.txt" ]]; then
                         warning "Missing required \"perf.txt\" for \"$lang\" \"$bench\"."
                         continue
                     fi
-                    $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/interactive.py" "$csv" "$perf_txt" -s "$REPORT_SKIP" || error "Failed to create interactive plot."
+                    $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/interactive.py" \
+                        "$csv" "$bench_dir/perf.txt" -s "$REPORT_SKIP" \
+                        || error "Failed to create interactive plot."
                     mkdir -p "plots/$lang/$bench/interactive"
                     mv interactive.html "plots/$lang/$bench/interactive"
                 done
@@ -222,10 +231,18 @@ report_main() {
         done
 
         # Compile all CSV files for the current language
-        $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/compile.py" "${rapl_csvs[@]}" || error "Failed to compile rapl measurements."
+        $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/compile.py" "${rapl_csvs[@]}" \
+            || error "Failed to compile rapl measurements."
+
         # Average measurements if requested, passing the current language as a parameter
         if $REPORT_AVERAGE; then
-            $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/average.py" "${rapl_csvs[@]}" -s "$REPORT_SKIP" -l "$lang" || error "Failed to average rapl measurements."
+            # Pass rapl_csvs first, then perf_txts
+            $REPORT_PYTHON "$REPORT_SCRIPTS_DIR/average.py" \
+                --rapl "${rapl_csvs[@]}" \
+                --perf "${perf_txts[@]}" \
+                -s "$REPORT_SKIP" -l "$lang" \
+                || error "Failed to average measurements."
         fi
     done
+
 }

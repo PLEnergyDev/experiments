@@ -14,7 +14,7 @@ RAPL_SO := $(RAPL_DIR)/target/release/$(RAPL_LIB_NAME)
 PYTHON_SCRIPTS_DIR := python-scripts
 
 # Rapl Interface Header
-HEADER_NAME :=rapl-interface.h
+HEADER_NAME := rapl-interface.h
 
 # Energy Script
 ENERGY_MAIN := main.sh
