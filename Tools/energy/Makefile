@@ -1,57 +1,55 @@
-PREFIX ?= /usr/local
-BINDIR := $(PREFIX)/bin
-LIBDIR := $(PREFIX)/lib
-INCLUDEDIR := $(PREFIX)/include
+NAME := energy
 
-USER := $(shell whoami)
+PREFIX := /usr/local
+BIN_DIR := $(PREFIX)/bin
+LIB_DIR := $(PREFIX)/lib/$(NAME)
+INCLUDE_DIR := $(PREFIX)/include/$(NAME)
+SHARE_DIR := $(PREFIX)/share/$(NAME)
+CONFIG_DIR := $(PREFIX)/etc/$(NAME)
 
 # Rapl Interface Library
 RAPL_DIR := rapl-interface
-RAPL_LIB_NAME := librapl_interface.so
-RAPL_SO := $(RAPL_DIR)/target/release/$(RAPL_LIB_NAME)
+RAPL_SO := $(RAPL_DIR)/target/release/librapl_interface.so
+RAPL_HEADER := $(RAPL_DIR)/rapl-interface.h
 
-# Python Scripts
-PYTHON_SCRIPTS_DIR := python-scripts
-
-# Rapl Interface Header
-HEADER_NAME := rapl-interface.h
-
-# Energy Script
-ENERGY_MAIN := main.sh
-ENERGY_SETUPS_DIR := setups
-ENERGY_COMMANDS_DIR := commands
-ENERGY_TOOL_NAME := energy
-
+COMMANDS_DIR := $(LIB_DIR)/commands
+SCRIPTS_DIR := $(LIB_DIR)/scripts
+SETUPS_DIR := $(LIB_DIR)/setups
 
 all: $(RAPL_SO)
 
 $(RAPL_SO):
 	cargo build --release --manifest-path $(RAPL_DIR)/Cargo.toml
 
-install: $(RAPL_SO) $(ENERGY_MAIN)
-	install -d $(BINDIR) $(LIBDIR)/$(ENERGY_APP_NAME) $(INCLUDEDIR)
-	install -d $(LIBDIR)/$(ENERGY_TOOL_NAME)/$(ENERGY_COMMANDS_DIR)
-	install -d $(LIBDIR)/$(ENERGY_TOOL_NAME)/$(ENERGY_SETUPS_DIR)
-	install -d $(LIBDIR)/$(ENERGY_TOOL_NAME)/$(PYTHON_SCRIPTS_DIR)
+install: $(RAPL_SO) main.sh
+	install -d -m 755 $(LIB_DIR) $(INCLUDE_DIR) $(SHARE_DIR) $(CONFIG_DIR)
+	install -d -m 755 $(SETUPS_DIR) $(COMMANDS_DIR) $(SCRIPTS_DIR)
 
-	install $(ENERGY_MAIN) $(BINDIR)/$(ENERGY_TOOL_NAME)
+	sed -e "s|{{LIB_DIR}}|$(LIB_DIR)|g" \
+	    -e "s|{{NAME}}|$(NAME)|g" \
+	    -e "s|{{COMMANDS_DIR}}|$(COMMANDS_DIR)|g" \
+	    -e "s|{{SCRIPTS_DIR}}|$(SCRIPTS_DIR)|g" \
+	    -e "s|{{SETUPS_DIR}}|$(SETUPS_DIR)|g" \
+	    main.sh > $(LIB_DIR)/$(NAME)
+	chmod 755 $(LIB_DIR)/$(NAME)
 
-	install $(ENERGY_COMMANDS_DIR)/* $(LIBDIR)/$(ENERGY_TOOL_NAME)/$(ENERGY_COMMANDS_DIR)/
-	install $(ENERGY_SETUPS_DIR)/* $(LIBDIR)/$(ENERGY_TOOL_NAME)/$(ENERGY_SETUPS_DIR)/
-	install $(PYTHON_SCRIPTS_DIR)/* $(LIBDIR)/$(ENERGY_TOOL_NAME)/$(PYTHON_SCRIPTS_DIR)/
+	install -m 644 commands/* $(COMMANDS_DIR)
+	install -m 644 scripts/* $(SCRIPTS_DIR)
+	install -m 644 setups/* $(SETUPS_DIR)
 
-	install $(RAPL_SO) $(LIBDIR)/
-	install -m 644  $(HEADER_NAME) $(INCLUDEDIR)/
+	install -m 755 $(RAPL_SO) $(LIB_DIR)
+	install -m 644 $(RAPL_HEADER) $(INCLUDE_DIR)
+
+	ln -sf $(LIB_DIR)/$(NAME) $(BIN_DIR)/$(NAME)
+	ln -sf $(LIB_DIR)/librapl_interface.so $(PREFIX)/lib/librapl_interface.so
 
 	ldconfig # Refresh linker cache
 
 uninstall:
-	rm -f $(BINDIR)/$(ENERGY_TOOL_NAME)
+	rm -f $(BIN_DIR)/$(NAME)
+	rm -f $(PREFIX)/lib/librapl_interface.so
 
-	rm -rf $(LIBDIR)/$(ENERGY_TOOL_NAME)
-	rm -f $(LIBDIR)/$(RAPL_LIB_NAME)
-
-	rm -f $(INCLUDEDIR)/$(HEADER_NAME)
+	rm -rf $(LIB_DIR) $(INCLUDE_DIR) $(SHARE_DIR) $(CONFIG_DIR)
 
 	ldconfig # Refresh linker cache
 
@@ -59,3 +57,4 @@ clean:
 	cargo clean --manifest-path $(RAPL_DIR)/Cargo.toml
 
 .PHONY: all install uninstall clean
+.SILENT:

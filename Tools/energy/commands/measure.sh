@@ -25,7 +25,7 @@ measure_description() {
 measure_help() {
     cat << HELP
 Usage:
-    $TOOL_NAME measure [DIR] [OPTIONS]
+    $NAME measure [DIR] [OPTIONS]
 
 DIR:
     The base directory path to start the measurements in. Default current dir
@@ -33,7 +33,7 @@ DIR:
 Options:
     -n, --no-warmup          Only measures using "no-warmup" config
     -w, --warmup             Only measures using "warmup" config
-    -l, --lang <languages>   Comma-separated list of languages. Default takes all dirs under DIR
+    -l, --lang  <languages>  Comma-separated list of languages. Default takes all dirs under DIR
     -b, --bench <benchmarks> Comma-separated list of benchmarks. Default takes all dirs under LANGUAGES
         --lab                OS will enter the "lab" environment before measuring. Default production
         --prod               OS will enter the "production" environment before measuring. Default production
@@ -41,19 +41,47 @@ Options:
     -s, --sleep <seconds>    Number of seconds to sleep between each successful measurement. Default 60
         --stop               Stop after a failed measurement
     -c, --count <count>      Number of measurement repetitions. Default 45
-    -f, --freq <freq>        perf measurement frequency in milliseconds. Default 500
+    -f, --freq  <freq>       perf measurement frequency in milliseconds. Default 500
     -h, --help               Show this help message
 
 HELP
 }
 
-measure_intro() {
+measure_init() {
+    info "Sourcing the ${MEASURE_SETUP} environment.\n"
+    source "${SETUPS_DIR}/${MEASURE_SETUP}.sh"
+
+    MEASURE_DRIVER=$(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_driver)
+    if [[ "$MEASURE_DRIVER" == "amd-pstate-epp" ]]; then
+        MEASURE_DRIVER="amd_pstate"
+    fi
+    MEASURE_DRIVER_STATUS=$(cat /sys/devices/system/cpu/$MEASURE_DRIVER/status 2>/dev/null || echo "N/A")
+    MEASURE_GOVERNOR=$(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor)
+    MEASURE_MIN_FREQ=$(( $(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq) / 1000 ))
+    MEASURE_MAX_FREQ=$(( $(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq) / 1000 ))
+    MEASURE_ASLR=$(cat /proc/sys/kernel/randomize_va_space 2>/dev/null || echo "N/A")
+
+    case "$MEASURE_ASLR" in
+        0) MEASURE_ASLR="Disabled (No randomization)" ;;
+        1) MEASURE_ASLR="Enabled (Partial randomization)" ;;
+        2) MEASURE_ASLR="Fully Enabled (Full randomization)" ;;
+        *) MEASURE_ASLR="Unknown" ;;
+    esac
+
+    if cpupower frequency-info | grep -q "Active: yes"; then
+        MEASURE_TURBO="Enabled"
+    else
+        MEASURE_TURBO="Disabled"
+    fi
+
+    MEASURE_CONF=($(shuf -e "${MEASURE_CONF[@]}"))
+
     clear
     cat << HELP
 ========== Measurement Setup ==================
 Configuration File    | ${MEASURE_CONF[*]}
 OS Environment        | $MEASURE_SETUP
-Repetitions           | $MEASURE_COUNT
+Iterations            | $MEASURE_COUNT
 Measurement Freq      | $MEASURE_FREQ ms
 Measurement Sleep     | $MEASURE_SLEEP s
 Stop After Fail       | $MEASURE_STOP
@@ -64,6 +92,7 @@ Scaling Governor      | $MEASURE_GOVERNOR
 Frequency Range       | $MEASURE_MIN_FREQ MHz - $MEASURE_MAX_FREQ MHz
 Boost State           | $MEASURE_TURBO
 Process Priority      | ${MEASURE_PRIORITY:-default}
+Process Affinity      | ${MEASURE_AFFINITY:-default}
 ASLR                  | $MEASURE_ASLR
 
 ========== Running Configuration ==============
@@ -92,24 +121,43 @@ measure_ensure_dependencies() {
 }
 
 measure_build_command() {
-    perf_command="perf stat --all-cpus -I $MEASURE_FREQ \
+    local perf_command="perf stat --all-cpus -I $MEASURE_FREQ \
         --append --output perf.txt \
         -e cache-misses,branch-misses,LLC-loads-misses,msr/cpu_thermal_margin/,cpu-clock,cycles \
         -e cstate_core/c3-residency/,cstate_core/c6-residency/,cstate_core/c7-residency/"
+    local proc_environment="env LD_LIBRARY_PATH=$LIB_DIR:LD_LIBRARY_PATH $MEASURE_PRIORITY $MEASURE_AFFINITY"
+    local measure_command=""
 
     case "$1" in
         no-warmup)
-            command="$MEASURE_PRIORITY $perf_command env LD_LIBRARY_PATH=/usr/local/lib bash -c 'for i in \$(seq 1 $MEASURE_COUNT); do make measure || exit 1; done'"
+            measure_command="$proc_environment $perf_command  \
+            bash -c 'for i in \$(seq 1 $MEASURE_COUNT); do make measure >> output.txt || exit 1; done'"
             ;;
         warmup)
-            command="$MEASURE_PRIORITY $perf_command env LD_LIBRARY_PATH=/usr/local/lib RAPL_ITERATIONS=$MEASURE_COUNT make measure"
-            ;;
-        *)
-            command=""
+            measure_command="$proc_environment $perf_command  \
+            env RAPL_ITERATIONS=$MEASURE_COUNT make measure >> output.txt"
             ;;
     esac
 
-    echo "$command"
+    echo "$measure_command"
+}
+
+measure_verify_command() {
+    for _ in $(seq 1 "$MEASURE_COUNT"); do
+        cat expected.txt
+    done | md5sum > digest
+    cat output.txt | md5sum -c digest
+    local result=$?
+    rm -f digest
+    return $result
+}
+
+measure_failed_to() {
+    if $MEASURE_STOP; then
+        error "Failed to $1."
+    else
+        warning "Failed to $1."
+    fi
 }
 
 measure_main() {
@@ -161,7 +209,7 @@ measure_main() {
                 break
                 ;;
             *)
-                error "\"$1\" is not a known option. See \"$TOOL_NAME measure --help\"."
+                error "\"$1\" is not a known option. See \"$NAME measure --help\"."
                 ;;
         esac
         shift
@@ -177,49 +225,42 @@ measure_main() {
 
     measure_ensure_dependencies
 
-    info "Sourcing the ${MEASURE_SETUP} environment.\n"
-    source "$LIB_DIR/setups/${MEASURE_SETUP}.sh"
-
-    MEASURE_DRIVER=$(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_driver)
-    if [[ "$MEASURE_DRIVER" == "amd-pstate-epp" ]]; then
-        MEASURE_DRIVER="amd_pstate"
-    fi
-    MEASURE_DRIVER_STATUS=$(cat /sys/devices/system/cpu/$MEASURE_DRIVER/status 2>/dev/null || echo "N/A")
-    MEASURE_GOVERNOR=$(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor)
-    MEASURE_MIN_FREQ=$(( $(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq) / 1000 ))
-    MEASURE_MAX_FREQ=$(( $(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq) / 1000 ))
-    MEASURE_ASLR=$(cat /proc/sys/kernel/randomize_va_space 2>/dev/null || echo "N/A")
-
-    case "$MEASURE_ASLR" in
-        0) MEASURE_ASLR="Disabled (No randomization)" ;;
-        1) MEASURE_ASLR="Enabled (Partial randomization)" ;;
-        2) MEASURE_ASLR="Fully Enabled (Full randomization)" ;;
-        *) MEASURE_ASLR="Unknown" ;;
-    esac
-
-    if cpupower frequency-info | grep -q "Active: yes"; then
-        MEASURE_TURBO="Enabled"
-    else
-        MEASURE_TURBO="Disabled"
-    fi
-
-    MEASURE_CONF=($(shuf -e "${MEASURE_CONF[@]}"))
-
     if [[ ${#MEASURE_LANG[@]} -eq 0 && ${#MEASURE_BENCH[@]} -eq 0 ]]; then
         if [[ -f "Makefile" || -f "makefile" || -f "GNUmakefile" ]]; then
-            measure_intro
+            measure_init
 
             for conf in "${MEASURE_CONF[@]}"; do
-                info "Measuring in current directory with $conf.\n"
+                info "Measuring in '$MEASURE_DIR' with $conf.\n"
 
-                command=$(measure_build_command "$conf")
-                if ! eval "$command"; then
-                    warning "Failed to measure in current directory with $conf."
-                    if $MEASURE_STOP == true; then
+                if ! make clean >/dev/null; then
+                    measure_failed_to "clean"; continue
+                fi
+ 
+                if ! make all >/dev/null; then
+                    measure_failed_to "build"; continue
+                fi
+
+                if ! eval $(measure_build_command "$conf"); then
+                    rm -f perf.txt output.txt
+                    measure_failed_to "measure"; continue
+                fi
+
+                local measurement=( $(find . -maxdepth 1 -type f -name "Intel_*.csv" -o -name "AMD_*.csv") )
+                if [[ ! -f "$measurement" ]]; then
+                    rm -f perf.txt output.txt
+                    measure_failed_to "measure"; continue                   
+                fi
+ 
+                if ! measure_verify_command; then
+                    rm -f "$measurement" perf.txt output.txt
+                    if $MEASURE_STOP; then
                         exit 1
                     fi
+                    continue
                 fi
+                rm -f output.txt
             done
+
             exit 0
         fi
     fi
@@ -252,10 +293,11 @@ measure_main() {
     MEASURE_LANG=($(shuf -e "${MEASURE_LANG[@]}"))
     MEASURE_BENCH=($(shuf -e "${MEASURE_BENCH[@]}"))
 
-    measure_intro
+    measure_init
 
-    info "Starting measurements in $MEASURE_SLEEP s."
-    sleep $MEASURE_SLEEP
+    if [[ $MEASURE_SLEEP -gt 0 ]]; then
+        info "Starting measurements in ${MEASURE_SLEEP}s."; sleep $MEASURE_SLEEP
+    fi
 
     pushd "$MEASURE_DIR" >/dev/null
 
@@ -269,30 +311,42 @@ measure_main() {
 
                 pushd "$bench_dir" >/dev/null
 
-                make clean || error "Cleaning failed."
-                command=$(measure_build_command "$conf")
-
                 info "Measuring $lang $bench with $conf.\n"
-                if eval "$command"; then
-                    measurement=$(find . -maxdepth 1 -name '*.csv' -printf '%T+ %p\n' | sort -r | head -n 1 | cut -d' ' -f2-)
-                    if [[ -f "$measurement" ]]; then
-                        info "Finished measuring for $lang $bench with $conf."
-                        results_dir="../../../results/$conf/$lang/$bench"
-                        mkdir -p "$results_dir"
-                        mv "$measurement" "perf.txt" "$results_dir"
-                        info "Sleeping for $MEASURE_SLEEP s."
-                        sleep "$MEASURE_SLEEP"
-                    else
-                        warning "No measurement generated for $lang $bench with $conf."
-                        if $MEASURE_STOP; then
-                            exit 1
-                        fi
-                    fi
-                else
-                    warning "Failed to measure for $lang $bench with $conf."
+
+                if ! make clean >/dev/null; then
+                    measure_failed_to "clean"; continue
+                fi
+
+                if ! make all >/dev/null; then
+                    measure_failed_to "build"; continue
+                fi
+
+                if ! eval $(measure_build_command "$conf"); then
+                    rm -f perf.txt output.txt
+                    measure_failed_to "measure"; continue                    
+                fi
+
+                local measurement=( $(find . -maxdepth 1 -type f -name "Intel_*.csv" -o -name "AMD_*.csv") )
+                if [[ ! -f "$measurement" ]]; then
+                    rm -f perf.txt output.txt
+                    measure_failed_to "measure"; continue                   
+                fi
+
+                if ! measure_verify_command; then
+                    rm -f "$measurement" perf.txt output.txt
                     if $MEASURE_STOP; then
                         exit 1
                     fi
+                    continue
+                fi
+
+                rm -f output.txt
+                local results_dir="../../../results/$conf/$lang/$bench"
+                mkdir -p "$results_dir"
+                mv "$measurement" perf.txt "$results_dir"
+
+                if [[ $MEASURE_SLEEP -gt 0 ]]; then
+                    info "Sleeping for ${MEASURE_SLEEP}s."; sleep $MEASURE_SLEEP
                 fi
 
                 popd >/dev/null

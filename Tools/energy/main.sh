@@ -1,16 +1,18 @@
 #!/bin/bash
 
-LIB_DIR="${0%/*}/../lib/energy"
-TOOL_NAME="energy"
-COMMANDS_DIR="${LIB_DIR}/commands"
+LIB_DIR="{{LIB_DIR}}"
+NAME="{{NAME}}"
+COMMANDS_DIR="{{COMMANDS_DIR}}"
+SCRIPTS_DIR="{{SCRIPTS_DIR}}"
+SETUPS_DIR="{{SETUPS_DIR}}"
 
 error() {
-    echo -e "\nError: $1" >&2
+    echo -e "Error: $1" >&2
     exit 1
 }
 
 warning() {
-    echo -e "\nWarning: $1"
+    echo -e "Warning: $1"
 }
 
 info() {
@@ -20,7 +22,7 @@ info() {
 energy_help() {
     cat << HELP
 Usage:
-    $TOOL_NAME [--version|--help] COMMAND [OPTIONS]
+    $NAME [--version|--help] COMMAND [OPTIONS]
 
 Commands:
 HELP

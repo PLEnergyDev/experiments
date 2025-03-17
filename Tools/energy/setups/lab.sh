@@ -30,3 +30,4 @@ cpupower frequency-set --min "$min_freq" >/dev/null || error "Failed to set min 
 cpupower frequency-set --max "$min_freq" >/dev/null || error "Failed to set max CPU frequency to min."
 
 MEASURE_PRIORITY="nice -n -20"
+MEASURE_AFFINITY="taskset -c $(seq -s, 0 $(( $(nproc) > 4 ? 3 : $(nproc)-1 )))"
