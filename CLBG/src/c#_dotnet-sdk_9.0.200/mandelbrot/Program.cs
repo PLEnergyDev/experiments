@@ -1,121 +1,102 @@
 /* The Computer Language Benchmarks Game
-   http://benchmarksgame.alioth.debian.org/
+   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
    started with Java #2 program (Krause/Whipkey/Bennet/AhnTran/Enotus/Stalcup)
    adapted for C# by Jan de Vaan
+   simplified and optimised to use TPL by Anthony Lloyd
+   optimized to use Vector<double> by Tanner Gooding
+   small optimisations by Anthony Lloyd
+   modified by Grigory Perepechko
 */
 
 using System;
-using System.Threading;
+using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+
 using System.Runtime.InteropServices;
 
-public class Program {
+public class Program
+{
     [DllImport("librapl_interface", EntryPoint = "start_rapl")]
-    public static extern bool start_rapl();
+    private static extern bool start_rapl();
 
     [DllImport("librapl_interface", EntryPoint = "stop_rapl")]
-    public static extern void stop_rapl();
-
-    private static byte[][] data;
-    private static int lineCount;
-    private static double[] Crb;
-    private static double[] Cib;
+    private static extern void stop_rapl();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static int getByte(int x, int y) {
-        int res = 0;
-        for (int i = 0; i < 8; i += 2)
+    static unsafe byte GetByte(double* pCrb, double Ciby)
+    {
+        var res = 0;
+        for (var i=0; i<8; i+=2)
         {
-            double Zr1 = Crb[x + i];
-            double Zi1 = Cib[y];
-
-            double Zr2 = Crb[x + i + 1];
-            double Zi2 = Cib[y];
-
-            int b = 0;
-            int j = 49;
+            var vCrbx = Unsafe.Read<Vector<double>>(pCrb+i);
+            var vCiby = new Vector<double>(Ciby);
+            var Zr = vCrbx;
+            var Zi = vCiby;
+            int b = 0, j = 49;
             do
             {
-                double nZr1 = Zr1 * Zr1 - Zi1 * Zi1 + Crb[x + i];
-                double nZi1 = Zr1 * Zi1 + Zr1 * Zi1 + Cib[y];
-                Zr1 = nZr1; Zi1 = nZi1;
+                for (int counter = 0; counter < 7; counter++)
+                {
+                    var nZr = Zr * Zr - Zi * Zi + vCrbx;
+                    var ZrZi = Zr * Zi;
+                    Zi = ZrZi + ZrZi + vCiby;
+                    Zr = nZr;
+                    j--;
+                }
 
-                double nZr2 = Zr2 * Zr2 - Zi2 * Zi2 + Crb[x + i + 1];
-                double nZi2 = Zr2 * Zi2 + Zr2 * Zi2 + Cib[y];
-                Zr2 = nZr2; Zi2 = nZi2;
-
-                if (Zr1 * Zr1 + Zi1 * Zi1 > 4) { b |= 2; if (b == 3) break; }
-                if (Zr2 * Zr2 + Zi2 * Zi2 > 4) { b |= 1; if (b == 3) break; }
-            } while (--j > 0);
+                var t = Zr * Zr + Zi * Zi;
+                if (t[0]>4.0) { b|=2; if (b==3) break; }
+                if (t[1]>4.0) { b|=1; if (b==3) break; }
+            } while (j>0);
             res = (res << 2) + b;
         }
-        return res ^ -1;
+        return (byte)(res^-1);
     }
 
-    public static void Main(String[] args) {
-        int n = int.Parse(args[0]);
-
-        while (true) {
-            initialize(n);
-            if (!start_rapl()) {
-                break;
-            }
-            run_benchmark(n);
+    public static unsafe void Main(string[] args)
+    {
+        while (start_rapl())
+        {
+            run_benchmark(args);
             stop_rapl();
-            cleanup();
         }
     }
 
-    static void initialize(int n)
+    private static unsafe void run_benchmark(string[] args)
     {
-        lineCount = -1;
-        int lineLen = (n - 1) / 8 + 1;
-        data = new byte[n][];
-        Crb = new double[n + 7];
-        Cib = new double[n + 7];
-
-        double invN = 2.0 / n;
-        for (int i = 0; i < n; i++)
+        var size = args.Length==0 ? 200 : int.Parse(args[0]);
+        Console.Out.WriteAsync(String.Concat("P4\n",size," ",size,"\n"));
+        var Crb = new double[size+2];
+        var lineLength = size >> 3;
+        var data = new byte[size * lineLength];
+        fixed (double* pCrb = &Crb[0])
+        fixed (byte* pdata = &data[0])
         {
-            Cib[i] = i * invN - 1.0;
-            Crb[i] = i * invN - 1.5;
-        }
-    }
-
-    static void run_benchmark(int n)
-    {
-        var threads = new Thread[Environment.ProcessorCount];
-        int lineLen = (n - 1) / 8 + 1;
-
-        for (int i = 0; i < threads.Length; i++)
-        {
-            threads[i] = new Thread(() =>
+            var value = new Vector<double>(
+                  new double[] {0,1,0,0,0,0,0,0}
+            );
+            var invN = new Vector<double>(2.0/size);
+            var onePtFive = new Vector<double>(1.5);
+            var step = new Vector<double>(2);
+            for (var i=0; i<size; i+=2)
             {
-                int y;
-                while ((y = Interlocked.Increment(ref lineCount)) < n)
+                Unsafe.Write(pCrb+i, value*invN-onePtFive);
+                value += step;
+            }
+            var _Crb = pCrb;
+            var _pdata = pdata;
+            Parallel.For(0, size, y =>
+            {
+                var Ciby = _Crb[y]+0.5;
+                for (var x=0; x<lineLength; x++)
                 {
-                    var buffer = new byte[lineLen];
-                    for (int x = 0; x < lineLen; x++)
-                    {
-                        buffer[x] = (byte)getByte(x * 8, y);
-                    }
-                    data[y] = buffer;
+                    _pdata[y*lineLength+x] = GetByte(_Crb+x*8, Ciby);
                 }
             });
-            threads[i].Start();
+            Console.OpenStandardOutput().Write(data, 0, data.Length);
         }
-
-        foreach (var t in threads) t.Join();
-
-        Console.Out.WriteLine("P4\n{0} {0}", n);
-        var s = Console.OpenStandardOutput();
-        for (int y = 0; y < n; y++) s.Write(data[y], 0, data[y].Length);
-    }
-
-    static void cleanup() {
-        data = null;
-        Crb = null;
-        Cib = null;
     }
 }
+    

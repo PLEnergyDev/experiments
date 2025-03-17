@@ -1,173 +1,192 @@
 /* The Computer Language Benchmarks Game
    https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
    contributed by Martin Jambrek
-   based off the Java #2 program contributed by Mark C. Lewis and modified
-   slightly by Chad Whipkey
-   modified by Basit Ayantunde
+   based off the Java #2 program contributed by Mark C. Lewis and modified slightly by Chad Whipkey
 */
 
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <utility>
+
 #include <rapl-interface.h>
 
-constexpr double PI = 3.141592653589793;
-constexpr double SOLAR_MASS = 4 * PI * PI;
-constexpr double DAYS_PER_YEAR = 365.24;
+static constexpr double PI = 3.141592653589793;
+static constexpr double SOLAR_MASS = 4 * PI * PI;
+static constexpr double DAYS_PER_YEAR = 365.24;
 
-struct vec3 {
-    double x = 0, y = 0, z = 0, __pad = 0;
-    constexpr vec3() {}
-    constexpr vec3(double x, double y, double z) : x{x}, y{y}, z{z} {}
-
-    constexpr vec3 operator+(vec3 const &other) const {
-        return {x + other.x, y + other.y, z + other.z};
-    }
-
-    constexpr vec3 operator-(vec3 const &other) const {
-        return {x - other.x, y - other.y, z - other.z};
-    }
-
-    constexpr vec3 operator*(vec3 const &other) const {
-        return {x * other.x, y * other.y, z * other.z};
-    }
-
-    constexpr vec3 operator*(double other) const {
-        return {x * other, y * other, z * other};
-    }
-
-    constexpr double sum() const { return x + y + z; }
-
-    constexpr vec3 sqrt() const {
-        return {std::sqrt(x), std::sqrt(y), std::sqrt(z)};
-    }
-
-    constexpr double distance(vec3 const &other) const {
-        vec3 d = *this - other;
-        return std::sqrt((d * d).sum());
-    }
-};
-
-struct Body {
-    vec3 x;
-    vec3 v;
-    double mass = 0;
-};
-
-constexpr size_t N_BODIES = 5;
-
-constexpr Body jupiter{{4.84143144246472090e+00, -1.16032004402742839e+00,
-                        -1.03622044471123109e-01},
-                       {1.66007664274403694e-03 * DAYS_PER_YEAR,
-                        7.69901118419740425e-03 * DAYS_PER_YEAR,
-                        -6.90460016972063023e-05 * DAYS_PER_YEAR},
-                       9.54791938424326609e-04 * SOLAR_MASS};
-
-constexpr Body saturn{{8.34336671824457987e+00, 4.12479856412430479e+00,
-                       -4.03523417114321381e-01},
-                      {-2.76742510726862411e-03 * DAYS_PER_YEAR,
-                       4.99852801234917238e-03 * DAYS_PER_YEAR,
-                       2.30417297573763929e-05 * DAYS_PER_YEAR},
-                      2.85885980666130812e-04 * SOLAR_MASS};
-
-constexpr Body uranus{{1.28943695621391310e+01, -1.51111514016986312e+01,
-                       -2.23307578892655734e-01},
-                      {2.96460137564761618e-03 * DAYS_PER_YEAR,
-                       2.37847173959480950e-03 * DAYS_PER_YEAR,
-                       -2.96589568540237556e-05 * DAYS_PER_YEAR},
-                      4.36624404335156298e-05 * SOLAR_MASS};
-
-constexpr Body neptune{{1.53796971148509165e+01, -2.59193146099879641e+01,
-                        1.79258772950371181e-01},
-                       {2.68067772490389322e-03 * DAYS_PER_YEAR,
-                        1.62824170038242295e-03 * DAYS_PER_YEAR,
-                        -9.51592254519715870e-05 * DAYS_PER_YEAR},
-                       5.15138902046611451e-05 * SOLAR_MASS};
-
-Body bodies[N_BODIES];
-
-void offset_momentum(Body bodies[N_BODIES]) {
-    Body &sun = bodies[0];
-    for (size_t i = 1; i < N_BODIES; i++) {
-        double m_ratio = bodies[i].mass / SOLAR_MASS;
-        sun.v = sun.v - bodies[i].v * m_ratio;
+template <auto start, auto stop, auto step = 1, class F>
+constexpr void static_for(F&& f)
+{
+    if constexpr (start < stop) {
+        f(std::integral_constant<decltype(start), start>());
+        static_for<start + step, stop, step>(std::move(f));
     }
 }
 
-double energy(Body const bodies[N_BODIES]) {
-    double e = 0;
-    for (size_t i = 0; i < N_BODIES; i++) {
-        Body const &body = bodies[i];
-        e += body.mass * (body.v * body.v).sum() * 0.5;
-        for (size_t j = i + 1; j < N_BODIES; j++) {
-            double distance = body.x.distance(bodies[j].x);
-            e -= body.mass * bodies[j].mass / distance;
-        }
+struct alignas(32) Body {
+    double x, y, z, pad0;
+    double vx, vy, vz, pad1;
+    double mass;
+
+    constexpr Body(double x, double y, double z,
+        double vx, double vy, double vz,
+        double mass)
+        : x(x)
+        , y(y)
+        , z(z)
+        , pad0()
+        , vx(vx)
+        , vy(vy)
+        , vz(vz)
+        , pad1()
+        , mass(mass)
+    {
     }
+};
+
+static constexpr size_t N_BODIES = 5;
+using System = Body[N_BODIES];
+
+static constexpr Body sun = {
+    0, 0, 0, 0, 0, 0, SOLAR_MASS
+};
+
+static constexpr Body jupiter = {
+    4.84143144246472090e+00,
+    -1.16032004402742839e+00,
+    -1.03622044471123109e-01,
+    1.66007664274403694e-03 * DAYS_PER_YEAR,
+    7.69901118419740425e-03 * DAYS_PER_YEAR,
+    -6.90460016972063023e-05 * DAYS_PER_YEAR,
+    9.54791938424326609e-04 * SOLAR_MASS
+};
+
+static constexpr Body saturn = {
+    8.34336671824457987e+00,
+    4.12479856412430479e+00,
+    -4.03523417114321381e-01,
+    -2.76742510726862411e-03 * DAYS_PER_YEAR,
+    4.99852801234917238e-03 * DAYS_PER_YEAR,
+    2.30417297573763929e-05 * DAYS_PER_YEAR,
+    2.85885980666130812e-04 * SOLAR_MASS
+};
+
+static constexpr Body uranus = {
+    1.28943695621391310e+01,
+    -1.51111514016986312e+01,
+    -2.23307578892655734e-01,
+    2.96460137564761618e-03 * DAYS_PER_YEAR,
+    2.37847173959480950e-03 * DAYS_PER_YEAR,
+    -2.96589568540237556e-05 * DAYS_PER_YEAR,
+    4.36624404335156298e-05 * SOLAR_MASS
+};
+
+static constexpr Body neptune = {
+    1.53796971148509165e+01,
+    -2.59193146099879641e+01,
+    1.79258772950371181e-01,
+    2.68067772490389322e-03 * DAYS_PER_YEAR,
+    1.62824170038242295e-03 * DAYS_PER_YEAR,
+    -9.51592254519715870e-05 * DAYS_PER_YEAR,
+    5.15138902046611451e-05 * SOLAR_MASS
+};
+
+constexpr void offset_momentum(System& bodies)
+{
+    double px = 0.0;
+    double py = 0.0;
+    double pz = 0.0;
+
+    static_for<0, N_BODIES>([&](auto i) {
+        px += bodies[i].vx * bodies[i].mass;
+        py += bodies[i].vy * bodies[i].mass;
+        pz += bodies[i].vz * bodies[i].mass;
+    });
+
+    bodies[0].vx = -px / SOLAR_MASS;
+    bodies[0].vy = -py / SOLAR_MASS;
+    bodies[0].vz = -pz / SOLAR_MASS;
+}
+
+constexpr void advance(System& bodies, double dt)
+{
+    static_for<0, N_BODIES>([&](auto i) {
+        static_for<i + 1, N_BODIES>([&](auto j) {
+            double dx = bodies[i].x - bodies[j].x;
+            double dy = bodies[i].y - bodies[j].y;
+            double dz = bodies[i].z - bodies[j].z;
+
+            double dSquared = dx * dx + dy * dy + dz * dz;
+            double mag = dt / (dSquared * std::sqrt(dSquared));
+
+            bodies[i].vx -= dx * bodies[j].mass * mag;
+            bodies[i].vy -= dy * bodies[j].mass * mag;
+            bodies[i].vz -= dz * bodies[j].mass * mag;
+
+            bodies[j].vx += dx * bodies[i].mass * mag;
+            bodies[j].vy += dy * bodies[i].mass * mag;
+            bodies[j].vz += dz * bodies[i].mass * mag;
+        });
+    });
+
+    static_for<0, N_BODIES>([&](auto i) {
+        bodies[i].x += dt * bodies[i].vx;
+        bodies[i].y += dt * bodies[i].vy;
+        bodies[i].z += dt * bodies[i].vz;
+    });
+}
+
+constexpr double energy(const System& bodies)
+{
+    double e = 0.0;
+
+    static_for<0, N_BODIES>([&](auto i) {
+        const Body& iBody = bodies[i];
+        e += 0.5 * iBody.mass * (iBody.vx * iBody.vx + iBody.vy * iBody.vy + iBody.vz * iBody.vz);
+
+        static_for<i + 1, N_BODIES>([&](auto j) {
+            double dx = iBody.x - bodies[j].x;
+            double dy = iBody.y - bodies[j].y;
+            double dz = iBody.z - bodies[j].z;
+
+            double distance = std::sqrt(dx * dx + dy * dy + dz * dz);
+            e -= (iBody.mass * bodies[j].mass) / distance;
+        });
+    });
+
     return e;
 }
 
-void advance(Body bodies[N_BODIES], double dt) {
-    constexpr size_t N = N_BODIES * (N_BODIES - 1) / 2;
-    vec3 r[N] = {};
-    size_t i = 0;
-    for (size_t j = 0; j < N_BODIES; j++) {
-        for (size_t k = j + 1; k < N_BODIES; k++) {
-            r[i] = bodies[j].x - bodies[k].x;
-            i += 1;
-        }
-    }
-    double mag[N] = {};
-    i = 0;
-    while (i < N) {
-        double d2s_x = (r[i] * r[i]).sum();
-        double d2s_y = (r[i + 1] * r[i + 1]).sum();
-        double dmag_x = dt / (d2s_x * std::sqrt(d2s_x));
-        double dmag_y = dt / (d2s_y * std::sqrt(d2s_y));
-        mag[i] = dmag_x;
-        mag[i + 1] = dmag_y;
-        i += 2;
-    }
-    i = 0;
-    for (size_t j = 0; j < N_BODIES; j++) {
-        for (size_t k = j + 1; k < N_BODIES; k++) {
-            vec3 f = r[i] * mag[i];
-            bodies[j].v = bodies[j].v - f * bodies[k].mass;
-            bodies[k].v = bodies[k].v + f * bodies[j].mass;
-            i += 1;
-        }
-    }
-    for (size_t i = 0; i < N_BODIES; i++) {
-        bodies[i].x = bodies[i].x + bodies[i].v * dt;
-    }
-}
-
-void initialize() {
-    bodies[0] = Body{{}, {}, SOLAR_MASS};
-    bodies[1] = jupiter;
-    bodies[2] = saturn;
-    bodies[3] = uranus;
-    bodies[4] = neptune;
-    offset_momentum(bodies);
-}
-
-void run_benchmark(int n) {
-    std::printf("%.9f\n", energy(bodies));
-    for (size_t i = 0; i < n; ++i)
-        advance(bodies, 0.01);
-    std::printf("%.9f\n", energy(bodies));
-}
-
-int main(int argc, char *argv[]) {
+void run_benchmark(char* argv[])
+{
     const auto n = std::atoi(argv[1]);
-    while (1) {
-        initialize();
-        if (start_rapl() == 0) {
-            break;
-        }
-        run_benchmark(n);
+
+    System system = {
+        sun,
+        jupiter,
+        saturn,
+        uranus,
+        neptune
+    };
+
+    offset_momentum(system);
+
+    std::printf("%.9f\n", energy(system));
+
+    for (size_t i = 0; i < n; ++i)
+        advance(system, 0.01);
+
+    std::printf("%.9f\n", energy(system));
+}
+
+int main(int argc, char* argv[])
+{
+    while (start_rapl()) {
+        run_benchmark(argv);
         stop_rapl();
     }
+    
     return 0;
 }

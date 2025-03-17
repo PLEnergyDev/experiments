@@ -1,8 +1,9 @@
 ﻿/* The Computer Language Benchmarks Game
-   http://benchmarksgame.alioth.debian.org/
-
-   submitted by Josh Goldfoot
-*/
+   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+ *
+ * submitted by Josh Goldfoot
+ * 
+ */
 
 using System;
 using System.IO;
@@ -11,36 +12,47 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 
-public class Program {
+public class Program
+{
     [DllImport("librapl_interface", EntryPoint = "start_rapl")]
-    public static extern bool start_rapl();
+    private static extern bool start_rapl();
 
     [DllImport("librapl_interface", EntryPoint = "stop_rapl")]
-    public static extern void stop_rapl();
+    private static extern void stop_rapl();
 
-    static byte[] buffer;
-    static byte[] tonum = new byte[256];
-    static char[] tochar = new char[4];
-    static byte[] cachedThreeBuffer = null;
+    public static void Main(string[] args)
+    {
+        byte[] inputData;
+        using (var ms = new MemoryStream())
+        {
+            Console.OpenStandardInput().CopyTo(ms);
+            inputData = ms.ToArray();
+        }
 
-    public static void Main(string[] args) {
-        while (true) {
-            initialize();
-            if (!start_rapl()) {
-                break;
-            }
-            run_benchmark();
+        while (true)
+        {
+            var inputStream = initialize(inputData);
+            if (!start_rapl()) break;
+            run_benchmark(inputStream);
             stop_rapl();
-            cleanup();
+            cleanup(inputStream);
         }
     }
 
-    static void initialize() {
-        PrepareLookups();
-        buffer = GetBytesForThirdSequence();
+    private static MemoryStream initialize(byte[] inputData)
+    {
+        return new MemoryStream(inputData);
     }
 
-    static void run_benchmark() {
+    private static void cleanup(MemoryStream inputStream)
+    {
+        inputStream.Dispose();
+    }
+
+    private static void run_benchmark(MemoryStream inputStream)
+    {
+        PrepareLookups();
+        var buffer = GetBytesForThirdSequence(inputStream);
         var fragmentLengths = new[] { 1, 2, 3, 4, 6, 12, 18 };
         var dicts =
             (from fragmentLength in fragmentLengths.AsParallel()
@@ -55,12 +67,9 @@ public class Program {
         WriteCount(dicts[6], "GGTATTTTAATTTATAGT");
     }
 
-    static void cleanup() {
-        buffer = null;
-    }
-
     private static void WriteFrequencies(Dictionary<ulong, Wrapper> freq, int buflen, int fragmentLength)
     {
+
         double percent = 100.0 / (buflen - fragmentLength + 1);
         foreach (var line in (from k in freq.Keys
                               orderby freq[k].V descending
@@ -80,8 +89,8 @@ public class Program {
             key |= tonum[keybytes[i]];
         }
         Wrapper w;
-        Console.WriteLine("{0}\t{1}",
-            dictionary.TryGetValue(key, out w) ? w.V : 0,
+        Console.WriteLine("{0}\t{1}", 
+            dictionary.TryGetValue(key, out w) ? w.V : 0, 
             fragment);
     }
 
@@ -125,18 +134,18 @@ public class Program {
         return dictionary;
     }
 
-    private static byte[] GetBytesForThirdSequence()
+    private static byte[] GetBytesForThirdSequence(MemoryStream inputStream)
     {
-        if (cachedThreeBuffer != null)
-            return cachedThreeBuffer;
-
         const int buffersize = 2500120;
         byte[] threebuffer = null;
         var buffer = new byte[buffersize];
         int amountRead, threebuflen, indexOfFirstByteInThreeSequence, indexOfGreaterThan, threepos, tocopy;
         amountRead = threebuflen = indexOfFirstByteInThreeSequence = indexOfGreaterThan = threepos = tocopy = 0;
         bool threeFound = false;
-        var source = new BufferedStream(Console.OpenStandardInput());
+        
+        // Use the provided memory stream
+        var source = new BufferedStream(inputStream);
+        
         while (!threeFound && (amountRead = source.Read(buffer, 0, buffersize)) > 0)
         {
             indexOfGreaterThan = Array.LastIndexOf(buffer, (byte)'>');
@@ -160,13 +169,14 @@ public class Program {
         }
         int toread = threebuflen - tocopy;
         source.Read(threebuffer, tocopy, toread);
-
-        cachedThreeBuffer = threebuffer;
-
+        
         return threebuffer;
     }
-
-    private static void PrepareLookups() {
+    
+    private static byte[] tonum = new byte[256];
+    private static char[] tochar = new char[4];
+    private static void PrepareLookups()
+    {
         tonum['a'] = 0;
         tonum['c'] = 1;
         tonum['g'] = 2;
@@ -178,7 +188,8 @@ public class Program {
     }
 }
 
-public class Wrapper {
+public class Wrapper
+{
     public int V;
     public Wrapper(int v) { V = v; }
 }

@@ -2,30 +2,24 @@
 The Computer Language Benchmarks Game
 https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
-Based on C# entry by Isaac Gouy
-contributed by Jarkko Miettinen
-Parallel by The Anh Tran
+contributed by Ziad Hatahet
+based on the Go entry by K P anonymous
 */
+
+import java.text.DecimalFormat;
 
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.concurrent.CyclicBarrier;
 
 public class program {
-    private static final NumberFormat formatter = new DecimalFormat("#.000000000");
-
-    public static void run_benchmark(int n) {
-        double result = spectralnormGame(n);
-        System.out.println(formatter.format(result));
-    }
+    private static final DecimalFormat formatter = new DecimalFormat("#.000000000");
+    private static final int NCPU = Runtime.getRuntime().availableProcessors();
 
     static {
         System.loadLibrary("rapl_interface");
     }
 
-    public static void main(final String[] args) throws Throwable {
+    public static void main(String[] args) throws Throwable {
         SymbolLookup lookup = SymbolLookup.loaderLookup();
 
         MethodHandle start_rapl = Linker.nativeLinker().downcallHandle(
@@ -38,114 +32,81 @@ public class program {
                 FunctionDescriptor.ofVoid()
         );
 
-        int n = Integer.parseInt(args[0]);
-
-        while (true) {
-            if ((int) start_rapl.invokeExact() == 0) {
-                break;
-            }
-            run_benchmark(n);
+        while ((int) start_rapl.invokeExact() > 0) {
+            run_benchmark(args);
             stop_rapl.invokeExact();
         }
     }
 
-    private static final double spectralnormGame(int n) {
-        double[] u = new double[n];
-        double[] v = new double[n];
-        double[] tmp = new double[n];
-
+    private static void run_benchmark(String[] args) throws InterruptedException {
+        final int n = args.length > 0 ? Integer.parseInt(args[0]) : 100;
+        final var u = new double[n];
         for (int i = 0; i < n; i++)
             u[i] = 1.0;
-
-        int nthread = Runtime.getRuntime().availableProcessors();
-        Approximate.barrier = new CyclicBarrier(nthread);
-
-        int chunk = n / nthread;
-        Approximate[] ap = new Approximate[nthread];
-
-        for (int i = 0; i < nthread; i++) {
-            int r1 = i * chunk;
-            int r2 = (i < (nthread - 1)) ? r1 + chunk : n;
-
-            ap[i] = new Approximate(u, v, tmp, r1, r2);
+        final var v = new double[n];
+        for (int i = 0; i < 10; i++) {
+            aTimesTransp(v, u);
+            aTimesTransp(u, v);
         }
 
-        double vBv = 0, vv = 0;
-        for (int i = 0; i < nthread; i++) {
-            try {
-                ap[i].join();
-                vBv += ap[i].m_vBv;
-                vv += ap[i].m_vv;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        double vBv = 0.0, vv = 0.0;
+        for (int i = 0; i < n; i++) {
+            final var vi = v[i];
+            vBv += u[i] * vi;
+            vv += vi * vi;
         }
-
-        return Math.sqrt(vBv / vv);
+        System.out.println(formatter.format(Math.sqrt(vBv / vv)));
     }
 
-    private static class Approximate extends Thread {
-        private static CyclicBarrier barrier;
-        private double[] _u;
-        private double[] _v;
-        private double[] _tmp;
-        private int range_begin, range_end;
-        private double m_vBv = 0, m_vv = 0;
+    private static void aTimesTransp(double[] v, double[] u) throws InterruptedException {
+        final var x = new double[u.length];
+        final var t = new Thread[NCPU];
+        for (int i = 0; i < NCPU; i++) {
+            t[i] = new Times(x, i * v.length / NCPU, (i + 1) * v.length / NCPU, u, false);
+            t[i].start();
+        }
+        for (int i = 0; i < NCPU; i++)
+            t[i].join();
 
-        public Approximate(double[] u, double[] v, double[] tmp, int rbegin, int rend) {
-            super();
-            _u = u;
-            _v = v;
-            _tmp = tmp;
-            range_begin = rbegin;
-            range_end = rend;
-            start();
+        for (int i = 0; i < NCPU; i++) {
+            t[i] = new Times(v, i * v.length / NCPU, (i + 1) * v.length / NCPU, x, true);
+            t[i].start();
+        }
+        for (int i = 0; i < NCPU; i++)
+            t[i].join();
+    }
+
+    private final static class Times extends Thread {
+        private final double[] v, u;
+        private final int ii, n;
+        private final boolean transpose;
+
+        public Times(double[] v, int ii, int n, double[] u, boolean transpose) {
+            this.v = v;
+            this.u = u;
+            this.ii = ii;
+            this.n = n;
+            this.transpose = transpose;
         }
 
+        @Override
         public void run() {
-            for (int i = 0; i < 10; i++) {
-                MultiplyAtAv(_u, _tmp, _v);
-                MultiplyAtAv(_v, _tmp, _u);
-            }
-
-            for (int i = range_begin; i < range_end; i++) {
-                m_vBv += _u[i] * _v[i];
-                m_vv += _v[i] * _v[i];
-            }
-        }
-
-        private final static double eval_A(int i, int j) {
-            int div = (((i + j) * (i + j + 1) >>> 1) + i + 1);
-            return 1.0 / div;
-        }
-
-        private final void MultiplyAv(final double[] v, double[] Av) {
-            for (int i = range_begin; i < range_end; i++) {
-                double sum = 0;
-                for (int j = 0; j < v.length; j++)
-                    sum += eval_A(i, j) * v[j];
-                Av[i] = sum;
+            final var ul = u.length;
+            for (int i = ii; i < n; i++) {
+                double vi = 0.0;
+                for (int j = 0; j < ul; j++) {
+                    if (transpose)
+                        vi += u[j] / a(j, i);
+                    else
+                        vi += u[j] / a(i, j);
+                }
+                v[i] = vi;
             }
         }
 
-        private final void MultiplyAtv(final double[] v, double[] Atv) {
-            for (int i = range_begin; i < range_end; i++) {
-                double sum = 0;
-                for (int j = 0; j < v.length; j++)
-                    sum += eval_A(j, i) * v[j];
-                Atv[i] = sum;
-            }
-        }
-
-        private final void MultiplyAtAv(final double[] v, double[] tmp, double[] AtAv) {
-            try {
-                MultiplyAv(v, tmp);
-                barrier.await();
-                MultiplyAtv(tmp, AtAv);
-                barrier.await();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        private static int a(int i, int j) {
+            return (i + j) * (i + j + 1) / 2 + i + 1;
         }
     }
 }
+    

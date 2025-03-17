@@ -1,5 +1,5 @@
 include ../Makefile
 
-OPT_FLAGS += -fopenmp -mno-fma --std=c++14
+OPT_FLAGS += -fopenmp
 
 INPUT = 16000

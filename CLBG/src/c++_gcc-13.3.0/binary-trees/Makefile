@@ -1,9 +1,6 @@
 include ../Makefile
 
-NIX_PKGS += apr
-
-OPT_FLAGS += -std=c++14 -fopenmp
-LIB_FLAGS += -lapr-1
+OPT_FLAGS += -std=c++17
+LIB_FLAGS += -lpthread
 
 INPUT = 21
-

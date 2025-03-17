@@ -1,302 +1,232 @@
 // The Computer Language Benchmarks Game
 // https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 //
-// contributed by Adam Kewley
+// contributed by John Schmerge
 
+#include <cstdint>
+#include <cstdio>
 #include <iostream>
-#include <string>
+#include <atomic>
 #include <vector>
-#include <sstream>
+#include <algorithm>
+#include <string>
+#include <mutex>
+#include <thread>
+#include <list>
+#include <condition_variable>
 #include <rapl-interface.h>
 
-#ifdef SIMD
-#include <immintrin.h>
-#endif
+constexpr size_t line_length = 60;
+constexpr unsigned long expected_chunk_size = (1 << 11);
 
-namespace {
-    using std::istream;
-    using std::ostream;
-    using std::runtime_error;
-    using std::string;
-    using std::bad_alloc;
-    using std::vector;
+static constexpr char lookup[] = {
+    ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ', // 0
+    ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ', // 16
+    ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ', // 32
+    ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ', // 48
 
-    constexpr size_t basepairs_in_line = 60;
-    constexpr size_t line_len = basepairs_in_line + sizeof('\n');
+    ' ', 'T', 'V', 'G', 'H', ' ', ' ', 'C', // @ABCDEFG (64-71)
+    'D', ' ', ' ', 'M', ' ', 'K', 'N', ' ', // HIJKLMNO (72-79)
+    ' ', ' ', 'Y', 'S', 'A', 'A', 'B', 'W', // PQRSTUVW (80-87)
+    ' ', 'R', ' ', ' ', ' ', ' ', ' ', ' ', // XYZ[\]^_ (88-95)
+    ' ', 'T', 'V', 'G', 'H', ' ', ' ', 'C', // `abcdefg (96-103)
+    'D', ' ', ' ', 'M', ' ', 'K', 'N', ' ', // hijklmno (104-111)
+    ' ', ' ', 'Y', 'S', 'A', 'A', 'B', 'W', // pqrstuvw (112-119)
+    ' ', 'R', ' ', ' ', ' ', ' ', ' ', ' ', // xyz{|}~  (120-127)
 
-    class unsafe_vector {
-    public:
-        unsafe_vector() {
-            _buf = (char*)malloc(_capacity);
-            if (_buf == nullptr) {
-                throw bad_alloc{};
-            }
-        }
+    ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ', // 128
+    ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ', // 144
+    ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ', // 160
+    ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ', // 176
+    ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ', // 192
+    ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ', // 208
+    ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ', // 224
+    ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ', // 240
+};
 
-        unsafe_vector(const unsafe_vector& other) = delete;
-        unsafe_vector(unsafe_vector&& other) = delete;
-        unsafe_vector& operator=(unsafe_vector& other) = delete;
-        unsafe_vector& operator=(unsafe_vector&& other) = delete;
+const struct complement {
+    unsigned char operator () (unsigned char c) const {
+        return lookup[static_cast<unsigned>(c)];
+    }
+} complement_functor{};
 
-        ~unsafe_vector() noexcept {
-            free(_buf);
-        }
+struct item {
+    std::string name;
+    std::string sequence;
+};
 
-        char* data() {
-            return _buf;
-        }
+struct item_block {
+    item_block(uint32_t seq)
+      : sequence_number(seq)
+      , unprocessed_count(0)
+      , item_list() { }
 
-        void resize_UNSAFE(size_t count) {
-            size_t rem = _capacity - _size;
-            if (count > rem) {
-                grow(count);
-            }
-            _size = count;
-        }
+    item_block(uint32_t seq, std::vector<item> && items)
+      : sequence_number(seq)
+      , unprocessed_count(items.size())
+      , item_list(std::move(items)) { }
 
-        size_t size() const {
-            return _size;
-        }
+    item_block(const item_block & other) = delete;
+    item_block & operator = (const item_block & other) = delete;
 
-    private:
-        void grow(size_t min_cap) {
-            size_t new_cap = _capacity;
-            while (new_cap < min_cap) {
-                new_cap *= 2;
-            }
+    uint32_t sequence_number;
+    std::atomic<uint32_t> unprocessed_count;
+    std::vector<item> item_list;
+};
 
-            char* new_buf = (char*)realloc(_buf, new_cap);
-            if (new_buf != nullptr) {
-                _capacity = new_cap;
-                _buf = new_buf;
-            } else {
-                throw bad_alloc{};
-            }
-        }
+std::mutex input_lock;
+std::condition_variable input_available;
+std::list<item_block> input_chunks;
 
-        char* _buf = nullptr;
-        size_t _size = 0;
-        size_t _capacity = 1024;
-    };
+std::mutex output_lock;
+std::condition_variable output_available;
+std::list<std::vector<item>> output_chunks;
 
-    char complement(char character) {
-        static const char complement_lut[] = {
-            '\0', '\0', '\0', '\0',  '\0', '\0', '\0', '\0',
-            '\0', '\0', '\n', '\0',  '\0', '\0', '\0', '\0',
-            '\0', '\0', '\0', '\0',  '\0', '\0', '\0', '\0',
-            '\0', '\0', '\0', '\0',  '\0', '\0', '\0', '\0',
+void do_reverse_complement(item & w) {
+    std::reverse(w.sequence.begin(), w.sequence.end());
+    std::transform(w.sequence.begin(), w.sequence.end(), w.sequence.begin(),
+                   complement_functor);
 
-            '\0', '\0', '\0', '\0',  '\0', '\0', '\0', '\0',
-            '\0', '\0', '\0', '\0',  '\0', '\0', '\0', '\0',
-            '\0', '\0', '\0', '\0',  '\0', '\0', '\0', '\0',
-            '\0', '\0', '\0', '\0',  '\0', '\0', '\0', '\0',
+    w.name += '\n';
+    std::string s;
+    s.reserve(w.sequence.size() + 1 + (w.sequence.size() / line_length));
 
-            '\0', 'T', 'V', 'G',     'H', '\0', '\0', 'C',
-            'D', '\0', '\0', 'M',    '\0', 'K', 'N', '\0',
-            '\0', '\0', 'Y', 'S',    'A', 'A', 'B', 'W',
-            '\0', 'R', '\0', '\0',   '\0', '\0', '\0', '\0',
-
-            '\0', 'T', 'V', 'G',     'H', '\0', '\0', 'C',
-            'D', '\0', '\0', 'M',   '\0', 'K', 'N', '\0',
-            '\0', '\0', 'Y', 'S',    'A', 'A', 'B', 'W',
-            '\0', 'R', '\0', '\0',   '\0', '\0', '\0', '\0'
-        };
-
-        return complement_lut[character];
+    for (size_t i = 0; i < w.sequence.size(); i += line_length) {
+        s += w.sequence.substr(i, std::min(line_length, w.sequence.size() - i));
+        s += '\n';
     }
 
-    void complement_swap(char* a, char* b) {
-        char tmp = complement(*a);
-        *a = complement(*b);
-        *b = tmp;
-    }
-
-#ifdef SIMD
-    __m128i packed(char c) {
-        return _mm_set1_epi8(c);
-    }
-
-    __m128i reverse_complement_simd(__m128i v) {
-        v = _mm_shuffle_epi8(v, _mm_setr_epi8(
-            15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0));
-
-        v = _mm_and_si128(v, packed(0x1f));
-
-        __m128i lt16_mask = _mm_cmplt_epi8(v, packed(16));
-        __m128i lt16_els = _mm_and_si128(v, lt16_mask);
-        __m128i lt16_lut = _mm_setr_epi8(
-            '\0', 'T', 'V', 'G', 'H', '\0', '\0', 'C',
-            'D', '\0', '\0', 'M', '\0', 'K', 'N', '\0');
-        __m128i lt16_vals = _mm_shuffle_epi8(lt16_lut, lt16_els);
-
-        __m128i g16_els = _mm_sub_epi8(v, packed(16));
-        __m128i g16_lut = _mm_setr_epi8(
-            '\0', '\0', '\0', '\0', '\0', '\0', 'R', '\0',
-            'W', 'B', 'A', 'A', 'S', 'Y', '\0', '\0');
-        __m128i g16_vals = _mm_shuffle_epi8(g16_lut, g16_els);
-
-        return _mm_or_si128(lt16_vals, g16_vals);
-    }
-#endif
-
-    void reverse_complement_bps(char* start, char* end, size_t num_bps) {
-#ifdef SIMD
-        while (num_bps >= 16) {
-            end -= 16;
-
-            __m128i tmp = _mm_loadu_si128((__m128i*)start);
-            _mm_storeu_si128((__m128i*)start, reverse_complement_simd(_mm_loadu_si128((__m128i*)end)));
-            _mm_storeu_si128((__m128i*)end, reverse_complement_simd(tmp));
-
-            num_bps -= 16;
-            start += 16;
-        }
-#endif
-        while (num_bps >= 1) {
-            complement_swap(start++, --end);
-            num_bps -= 1;
-        }
-    }
-
-    struct Sequence {
-        string header;
-        unsafe_vector seq;
-    };
-
-    void reverse_complement(Sequence& s) {
-        char* begin = s.seq.data();
-        char* end = s.seq.data() + s.seq.size();
-
-        if (begin == end) {
-            return;
-        }
-
-        size_t len = end - begin;
-        size_t trailer_len = len % line_len;
-
-        end--;
-
-        if (trailer_len == 0) {
-            size_t num_pairs = len / 2;
-            reverse_complement_bps(begin, end, num_pairs);
-
-            bool has_middle_bp = (len % 2) > 0;
-            if (has_middle_bp) {
-                begin[num_pairs] = complement(begin[num_pairs]);
-            }
-
-            return;
-        }
-
-        size_t trailer_bps = trailer_len > 0 ? trailer_len - 1 : 0;
-
-        size_t rem_bps = basepairs_in_line - trailer_bps;
-        size_t rem_bytes = rem_bps + 1;
-
-        size_t num_whole_lines = len / line_len;
-        size_t num_steps = num_whole_lines / 2;
-
-        for (size_t i = 0; i < num_steps; ++i) {
-            reverse_complement_bps(begin, end, trailer_bps);
-            begin += trailer_bps;
-            end -= trailer_len;
-
-            reverse_complement_bps(begin, end, rem_bps);
-            begin += rem_bytes;
-            end -= rem_bps;
-        }
-
-        bool has_unpaired_line = (num_whole_lines % 2) > 0;
-        if (has_unpaired_line) {
-            reverse_complement_bps(begin, end, trailer_bps);
-            begin += trailer_bps;
-            end -= trailer_len;
-        }
-
-        size_t bps_in_last_line = end - begin;
-        size_t swaps_in_last_line = bps_in_last_line / 2;
-        reverse_complement_bps(begin, end, swaps_in_last_line);
-
-        bool has_unpaired_byte = (bps_in_last_line % 2) > 0;
-        if (has_unpaired_byte) {
-            begin[swaps_in_last_line] = complement(begin[swaps_in_last_line]);
-        }
-    }
-
-    void read_up_to(istream& in, unsafe_vector& out, char delim) {
-        constexpr size_t read_size = 1 << 16;
-
-        size_t bytes_read = 0;
-        out.resize_UNSAFE(read_size);
-        while (in) {
-            in.getline(out.data() + bytes_read, read_size, delim);
-            bytes_read += in.gcount();
-
-            if (in.fail()) {
-                out.resize_UNSAFE(bytes_read + read_size);
-                in.clear(in.rdstate() & ~std::ios::failbit);
-            } else if (in.eof()) {
-                break;
-            } else {
-                --bytes_read;
-                break;
-            }
-        }
-        out.resize_UNSAFE(bytes_read);
-    }
-
-    void read_sequence(istream& in, Sequence& out) {
-        out.header.clear();
-        std::getline(in, out.header);
-        read_up_to(in, out.seq, '>');
-    }
-
-    void write_sequence(ostream& out, Sequence& s) {
-        out << '>';
-        out << s.header;
-        out << '\n';
-        out.write(s.seq.data(), s.seq.size());
-    }
+    w.sequence.swap(s);
 }
 
-namespace revcomp {
-    void reverse_complement_fasta_stream(istream& in, ostream& out) {
-        char c = in.get();
-        if (c != '>') {
-            throw runtime_error{"unexpected input: next char should be the start of a sequence header"};
-        }
-        in.unget();
+void process_input(const size_t num_workers, std::istream & f) {
+    uint32_t sequence_number = ~0;
+    std::string line;
+    std::vector<item> items;
+    items.reserve(expected_chunk_size);
 
-        Sequence s;
-        while (not in.eof()) {
-            read_sequence(in, s);
-            reverse_complement(s);
-            write_sequence(out, s);
+    while (std::getline(f, line)) {
+        ++sequence_number;
+        if (! line.empty() && line[0] == '>') {
+            if (items.size() == expected_chunk_size) {
+                std::unique_lock<std::mutex> ul(input_lock);
+                input_chunks.emplace_back(sequence_number, std::move(items));
+                input_available.notify_all();
+                items.clear();
+                items.reserve(expected_chunk_size);
+            }
+
+            items.emplace_back();
+            items.back().name = std::move(line);
+            items.back().sequence.reserve(1024);
+        } else {
+            items.back().sequence += line;
         }
     }
+    std::unique_lock<std::mutex> ul(input_lock);
+    input_chunks.emplace_back(sequence_number, std::move(items));
+    for (size_t i = 0; i < num_workers; ++i)
+        input_chunks.emplace_back(sequence_number + i);
+    input_available.notify_all();
 }
 
-#include <fstream>
+void worker_main(const size_t id, const size_t num_workers) {
+    uint32_t last_sequence = 0;
+    size_t chunk_size = 0;
 
-std::string input_data;
+    std::unique_lock<std::mutex> ul(input_lock);
+
+    do {
+        input_available.wait(ul, [&] {
+            return ( (! input_chunks.empty()) 
+                  && last_sequence < input_chunks.front().sequence_number);
+        } );
+        auto chunk = input_chunks.begin();
+        chunk_size = chunk->item_list.size();
+        last_sequence = chunk->sequence_number;
+        ul.unlock();
+
+        uint32_t items_processed = 0;
+
+        for (size_t i = id; i < chunk_size; i += num_workers)
+        {
+            do_reverse_complement(chunk->item_list[i]);
+            ++items_processed;
+        }
+
+        auto old_value = chunk->unprocessed_count.fetch_sub(
+                           items_processed, std::memory_order_acq_rel);
+
+        ul.lock();
+        if (old_value == items_processed) {
+            std::unique_lock<std::mutex> oul(output_lock);
+            output_chunks.emplace_back(std::move(chunk->item_list));
+            output_available.notify_one();
+            oul.unlock();
+            input_chunks.erase(chunk);
+        }
+    } while (chunk_size == expected_chunk_size);
+}
+
+void output()
+{
+    size_t chunk_size = 0;
+    std::unique_lock<std::mutex> ul(output_lock);
+    do {
+        output_available.wait(ul, [&] { return (! output_chunks.empty()); } );
+        chunk_size = output_chunks.front().size();
+        ul.unlock();
+
+        for (auto & seq : output_chunks.front()) {
+            fwrite(seq.name.c_str(), 1, seq.name.size(), stdout);
+            fwrite(seq.sequence.c_str(), 1, seq.sequence.size(), stdout);
+        }
+
+        ul.lock();
+        output_chunks.pop_front();
+    } while (chunk_size == expected_chunk_size);
+}
+
+template<typename T>
+ constexpr T saturate(const T & value, size_t shift = 1) {
+    return ( ( shift >= (sizeof(value) << 3) ) ? value :
+             saturate(static_cast<T>(value | (value >> shift)), shift << 1) );
+}
+
+template <typename T>
+ constexpr T next_power_of_two(const T & x) {
+    return (1 + saturate(x - 1));
+}
 
 void run_benchmark() {
-    std::istringstream in(input_data);
-    revcomp::reverse_complement_fasta_stream(in, std::cout);
+    input_chunks.clear();
+    output_chunks.clear();
+    size_t num_workers = next_power_of_two(std::thread::hardware_concurrency());
+    std::ios::sync_with_stdio(false);
+    std::thread input_thread(process_input, num_workers, std::ref(std::cin));
+    std::thread output_thread(output);
+    std::vector<std::thread> workers;
+
+    for (size_t i = 0; i < num_workers; ++i)
+        workers.emplace_back(worker_main, i, num_workers);
+
+    for (auto & t : workers) t.join();
+    input_thread.join();
+    output_thread.join();
 }
 
-int main(int argc, char *argv[]) {
-    // Read input data once
-    std::cin.sync_with_stdio(false);
-    std::cout.sync_with_stdio(false);
-    input_data.assign(std::istreambuf_iterator<char>(std::cin), std::istreambuf_iterator<char>());
+void cleanup() {
+    std::cin.clear();
+    std::cin.seekg(0, std::ios::beg);
+}
 
-    while (1) {
-        if (start_rapl() == 0) {
-            break;
-        }
+int main()
+{
+    while (start_rapl()) {
         run_benchmark();
         stop_rapl();
+        cleanup();
     }
+    
     return 0;
 }

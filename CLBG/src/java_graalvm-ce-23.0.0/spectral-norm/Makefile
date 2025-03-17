@@ -1,3 +1,3 @@
-INPUT = 5500
-
 include ../Makefile
+
+INPUT = 5500

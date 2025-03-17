@@ -1,5 +1,5 @@
 include ../Makefile
 
-OPT_FLAGS += -fopenmp
+LIB_FLAGS += -pthread
 
 INPUT = < revcomp-input25000000.txt

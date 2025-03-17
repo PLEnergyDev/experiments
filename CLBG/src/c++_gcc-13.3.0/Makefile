@@ -25,9 +25,6 @@ all: $(TARGET)
 $(TARGET): $(SRC)
 	$(call run_nix, $(CC) $(SRC) -o $(TARGET) $(CFLAGS))
 
-run: $(TARGET)
-	$(call run_nix, ./$(TARGET) $(INPUT))
-
 mem: $(TARGET)
 	$(call run_nix, time -v ./$(TARGET) $(INPUT))
 

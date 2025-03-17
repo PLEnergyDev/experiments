@@ -24,9 +24,6 @@ all: $(CLASS)
 $(CLASS): $(SRC)
 	$(call run_nix, $(JAVAC) $(CFLAGS) $(SRC))
 
-run: $(CLASS)
-	$(call run_nix, $(JAVA) $(RFLAGS) $(CLASS) $(INPUT))
-
 mem: $(CLASS)
 	$(call run_nix, time -v $(JAVA) $(RFLAGS) $(CLASS) $(INPUT))
 

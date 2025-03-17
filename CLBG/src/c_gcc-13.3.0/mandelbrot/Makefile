@@ -1,5 +1,5 @@
 include ../Makefile
 
-OPT_FLAGS += -mno-fma -fno-finite-math-only -fopenmp
+OPT_FLAGS += -fopenmp
 
 INPUT = 16000

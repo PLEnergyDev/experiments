@@ -1,8 +1,8 @@
 include ../Makefile
 
-NIX_PKGS += boost
+NIX_PKGS += pcre2 boost
 
-OPT_FLAGS += -fopenmp
-LIB_FLAGS += -lboost_regex
+OPT_FLAGS += -std=c++17
+LIB_FLAGS += -lpcre2-8 -lpthread
 
 INPUT = < regexredux-input5000000.txt

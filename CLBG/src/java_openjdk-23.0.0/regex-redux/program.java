@@ -5,15 +5,19 @@
    contributed by Francois Green
 */
 
-import java.lang.foreign.*;
-import java.lang.invoke.MethodHandle;
+
 import java.io.*;
+
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.Map.Entry;
 import java.util.function.*;
 import java.util.regex.*;
+
 import static java.util.stream.Collectors.*;
+
+import java.lang.foreign.*;
+import java.lang.invoke.MethodHandle;
 
 public class program {
     static String input;
@@ -94,10 +98,7 @@ public class program {
         }
         input = baos.toString("US-ASCII");
 
-        while (true) {
-            if ((int) start_rapl.invokeExact() == 0) {
-                break;
-            }
+        while ((int) start_rapl.invokeExact() > 0) {
             run_benchmark();
             stop_rapl.invokeExact();
         }

@@ -1,4 +1,3 @@
-SHELL := /bin/bash
 THIS_DIR = $(shell pwd)
 
 NIX_PKGS = dotnet-sdk_9
@@ -20,9 +19,6 @@ all: $(TARGET)
 
 $(TARGET): $(SRC)
 	$(call run_nix, $(CC) build $(CFLAGS))
-
-run: $(TARGET)
-	$(call run_nix, ./$(TARGET) $(INPUT))
 
 mem: $(TARGET)
 	$(call run_nix, time -v ./$(TARGET) $(INPUT))

@@ -1,124 +1,186 @@
 ﻿/* The Computer Language Benchmarks Game
-   http://benchmarksgame.alioth.debian.org/
+   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
-   Regex-Redux
-   by Josh Goldfoot
+   Contributed by Michael Ganss, derived from
+   Regex-Redux by Josh Goldfoot
+   order variants by execution time by Anthony Lloyd
 */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Text.RegularExpressions;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Collections.Generic;
 
-class Program
+public static class RegexRedux
 {
     [DllImport("librapl_interface", EntryPoint = "start_rapl")]
-    public static extern bool start_rapl();
+    private static extern bool start_rapl();
 
     [DllImport("librapl_interface", EntryPoint = "stop_rapl")]
-    public static extern void stop_rapl();
+    private static extern void stop_rapl();
 
-    static string sequence;
-    static string originalSequence;
-    static int initialLength;
-    static int codeLength;
+    private static byte[] inputData = null;
+    private static long inputLength = 0;
 
     public static void Main(string[] args)
     {
-        initialize();
-        while (true) {
-            prepareIteration();
-            if (!start_rapl()) {
-                break;
-            }
+        (inputData, inputLength) = Read(Console.OpenStandardInput());
+        while (start_rapl())
+        {
             run_benchmark();
             stop_rapl();
-            cleanup();
         }
     }
 
-    static void initialize()
+    private static void run_benchmark()
     {
-        originalSequence = Console.In.ReadToEnd(); // Read and cache the input sequence
-        initialLength = originalSequence.Length;
-    }
+        var initialLength = inputLength;
+        var (sequences, seqLen) = (inputData, inputLength);
 
-    static void prepareIteration()
-    {
-        // Reset the sequence for each iteration to ensure consistency
-        sequence = originalSequence;
-        sequence = Regex.Replace(sequence, ">.*\n|\n", "");
-        codeLength = sequence.Length;
-    }
+        (sequences, seqLen) = new Pcre(">.*\n|\n").Replace(sequences, seqLen, new byte[] { });
 
-    static void run_benchmark()
-    {
-        Task<int> substitution = Task.Run(() => {
-            string newseq = Regex.Replace(sequence, "tHa[Nt]", "<4>");
-            newseq = Regex.Replace(newseq, "aND|caN|Ha[DS]|WaS", "<3>");
-            newseq = Regex.Replace(newseq, "a[NSt]|BY", "<2>");
-            newseq = Regex.Replace(newseq, "<[^>]*>", "|");
-            newseq = Regex.Replace(newseq, "\\|[^|][^|]*\\|", "-");
-            return newseq.Length;
+        var magicTask = Task.Run(() =>
+        {
+            var replacements = new (string regex, string replacement)[]
+            {
+                ("tHa[Nt]", "<4>"),
+                ("aND|caN|Ha[DS]|WaS", "<3>"),
+                ("a[NSt]|BY", "<2>"),
+                ("<[^>]*>", "|"),
+                ("\\|[^|][^|]*\\|", "-")
+            };
+            return replacements.Aggregate((seq: sequences, len: seqLen),
+                (s, r) => new Pcre(r.regex).Replace(s.seq, s.len, Encoding.ASCII.GetBytes(r.replacement))).len;
         });
 
-        int[][] sums = Chunks(sequence).AsParallel().Select(CountRegexes).ToArray();
-
-        var variants = Variants.variantsCopy();
-        for (int i = 0; i < 9; i++)
-            Console.WriteLine("{0} {1}", variants[i], sums.Sum(a => a[i]));
-
-        Console.WriteLine("\n{0}\n{1}\n{2}",
-           initialLength, codeLength, substitution.Result);
-    }
-
-    static void cleanup()
-    {
-        sequence = null;
-    }
-
-    private static IEnumerable<string> Chunks(string sequence)
-    {
-        int numChunks = Environment.ProcessorCount;
-        int start = 0;
-        int chunkSize = sequence.Length / numChunks;
-        while (--numChunks >= 0)
+        var regexes = new[]
         {
-            if (numChunks > 0)
-                yield return sequence.Substring(start, chunkSize);
-            else
-                yield return sequence.Substring(start);
-            start += chunkSize;
-        }
-    }
-
-    private static int[] CountRegexes(string chunk)
-    {
-        int[] counts = new int[9];
-        string[] variants = Variants.variantsCopy();
-
-        for (int i = 0; i < 9; i++)
-            for (var m = Regex.Match(chunk, variants[i]); m.Success; m = m.NextMatch()) counts[i]++;
-        return counts;
-    }
-}
-
-public class Variants
-{
-    public static string[] variantsCopy()
-    {
-        return new string[] {
-          "agggtaaa|tttaccct"
-         ,"[cgt]gggtaaa|tttaccc[acg]"
-         ,"a[act]ggtaaa|tttacc[agt]t"
-         ,"ag[act]gtaaa|tttac[agt]ct"
-         ,"agg[act]taaa|ttta[agt]cct"
-         ,"aggg[acg]aaa|ttt[cgt]ccct"
-         ,"agggt[cgt]aa|tt[acg]accct"
-         ,"agggta[cgt]a|t[acg]taccct"
-         ,"agggtaa[cgt]|[acg]ttaccct"
+            "agggtaaa|tttaccct",
+            "[cgt]gggtaaa|tttaccc[acg]",
+            "a[act]ggtaaa|tttacc[agt]t",
+            "ag[act]gtaaa|tttac[agt]ct",
+            "agg[act]taaa|ttta[agt]cct",
+            "aggg[acg]aaa|ttt[cgt]ccct",
+            "agggt[cgt]aa|tt[acg]accct",
+            "agggta[cgt]a|t[acg]taccct",
+            "agggtaa[cgt]|[acg]ttaccct"
         };
+
+        var counts = regexes.AsParallel().AsOrdered()
+            .Select(r => r + " " + new Pcre(r).Matches(sequences, seqLen).Count());
+
+        foreach (var count in counts)
+            Console.Out.WriteLine(count);
+
+        Console.Out.WriteLine($"\n{initialLength}\n{seqLen}\n{magicTask.Result}");
+    }
+
+    static (byte[] buf, long len) Read(Stream stream)
+    {
+        var buf = new byte[1024 * 1024];
+        var len = 0L;
+        var bytesRead = 0;
+
+        while ((bytesRead = stream.Read(buf, (int)len, buf.Length - (int)len)) > 0)
+            if ((len += bytesRead) == buf.Length)
+                Array.Resize(ref buf, buf.Length * 2);
+
+        return (buf, len);
+    }
+
+    class Pcre
+    {
+        readonly IntPtr pcre;
+        readonly IntPtr match_data;
+        readonly IntPtr ovector;
+
+        const int ErrorMsgMaxLen = 1024;
+        const int PCRE2_JIT_COMPLETE = 0x00000001;
+        const int PCRE2_SUBSTITUTE_GLOBAL = 0x00000100;
+        const int PCRE2_NO_UTF_CHECK = 0x40000000;
+        const long PCRE2_ZERO_TERMINATED = (~0L);
+
+        string GetErrorMessage(int errorcode)
+        {
+            var errmsg = new StringBuilder(ErrorMsgMaxLen);
+            PcreGetErrorMessage(errorcode, errmsg, ErrorMsgMaxLen);
+            return errmsg.ToString();
+        }
+
+        public Pcre(string pattern)
+        {
+            pcre = PcreCompile(pattern, PCRE2_ZERO_TERMINATED, 0, out int errorcode, out long erroffset, IntPtr.Zero);
+            if (pcre == IntPtr.Zero)
+                throw new ArgumentException($@"Error compiling pattern ""{pattern}"": {GetErrorMessage(errorcode)} at offset {erroffset}");
+
+            var ret = PcreJitCompile(pcre, PCRE2_JIT_COMPLETE);
+            if (ret < 0)
+                throw new ArgumentException($@"Error jit compiling pattern ""{pattern}"": {GetErrorMessage(ret)}");
+
+            match_data = PcreMatchDataCreate(16, IntPtr.Zero);
+            if (match_data == IntPtr.Zero)
+                throw new ArgumentException($@"Match data could not be obtained for pattern ""{pattern}""");
+
+            ovector = PcreGetOvectorPointer(match_data);
+        }
+
+        public IEnumerable<(long start, long end)> Matches(byte[] subject, long length)
+        {
+            for (var offset = 0L; Exec(subject, length, offset) >= 0; offset = Marshal.ReadInt64(ovector, 8))
+                yield return (Marshal.ReadInt64(ovector), Marshal.ReadInt64(ovector, 8));
+        }
+
+        public (byte[] str, long length) Replace(byte[] subject, long length, byte[] replacement)
+        {
+            var outlength = length * 2;
+            var output = new byte[outlength];
+
+            unsafe
+            {
+                fixed (byte* s = subject, r = replacement, o = output)
+                {
+                    var ret = PcreSubstitute(pcre, s, length, 0L, PCRE2_SUBSTITUTE_GLOBAL | PCRE2_NO_UTF_CHECK, match_data, IntPtr.Zero,
+                        r, replacement.Length, o, out outlength);
+                    return (output, outlength);
+                }
+            }
+        }
+
+        int Exec(byte[] subject, long length, long startoffset)
+        {
+            unsafe
+            {
+                fixed (byte* b = subject)
+                    return PcreJitMatch(pcre, b, length, startoffset, PCRE2_NO_UTF_CHECK, match_data, IntPtr.Zero);
+            }
+        }
+
+        [DllImport("pcre2-8", EntryPoint = "pcre2_compile_8", CharSet = CharSet.Ansi)]
+        extern static IntPtr PcreCompile(string pattern, long length, uint options,
+            out int errorcode, out long erroroffset, IntPtr ccontext);
+
+        [DllImport("pcre2-8", EntryPoint = "pcre2_jit_compile_8", CharSet = CharSet.Ansi)]
+        extern static int PcreJitCompile(IntPtr code, uint options);
+
+        [DllImport("pcre2-8", EntryPoint = "pcre2_jit_match_8", CharSet = CharSet.Ansi)]
+        extern unsafe static int PcreJitMatch(IntPtr code, byte* subject,
+            long length, long startoffset, int options, IntPtr match_data, IntPtr mcontext);
+
+        [DllImport("pcre2-8", EntryPoint = "pcre2_match_data_create_8", CharSet = CharSet.Ansi)]
+        extern unsafe static IntPtr PcreMatchDataCreate(uint ovecsize, IntPtr mcontext);
+
+        [DllImport("pcre2-8", EntryPoint = "pcre2_get_error_message_8", CharSet = CharSet.Ansi)]
+        extern unsafe static int PcreGetErrorMessage(int errorcode, StringBuilder buffer, long bufflen);
+
+        [DllImport("pcre2-8", EntryPoint = "pcre2_get_ovector_pointer_8", CharSet = CharSet.Ansi)]
+        extern unsafe static IntPtr PcreGetOvectorPointer(IntPtr match_data);
+
+        [DllImport("pcre2-8", EntryPoint = "pcre2_substitute_8", CharSet = CharSet.Ansi)]
+        extern unsafe static int PcreSubstitute(IntPtr code, byte* subject,
+            long length, long startoffset, int options, IntPtr match_data, IntPtr mcontext,
+            byte* replacement, long rlength, byte* outputbuffer, out long outlength);
     }
 }

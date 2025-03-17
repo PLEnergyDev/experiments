@@ -1,210 +1,171 @@
-﻿/* The Computer Language Benchmarks Game
-   http://benchmarksgame.alioth.debian.org/
-
-   contributed by Isaac Gouy, transliterated from Oleg Mazurov's Java program
-   concurrency fix and minor improvements by Peperud
-*/
+﻿// The Computer Language Benchmarks Game
+// https://benchmarksgame-team.pages.debian.net/benchmarksgame/
+//
+// contributed by Flim Nik
+// small optimisations by Anthony Lloyd
 
 using System;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
+
 using System.Runtime.InteropServices;
 
-class Program {
+public unsafe static class Program
+{
     [DllImport("librapl_interface", EntryPoint = "start_rapl")]
-    public static extern bool start_rapl();
+    private static extern bool start_rapl();
 
     [DllImport("librapl_interface", EntryPoint = "stop_rapl")]
-    public static extern void stop_rapl();
+    private static extern void stop_rapl();
 
-    static int NCHUNKS = 150;
-    static int CHUNKSZ;
-    static int NTASKS;
-    static int n = 7;
-    static int[] Fact;
-    static int[] maxFlips;
-    static int[] chkSums;
-    static int taskId;
+    static int taskCount;
+    static int[] fact, chkSums, maxFlips;
 
-    int[] p, pp, count;
-
-    const int INT_SIZE = 4;
-
-    void FirstPermutation(int idx) {
-        for (int i = 0; i < p.Length; ++i) {
-            p[i] = i;
-        }
-
-        for (int i = count.Length - 1; i > 0; --i) {
-            int d = idx / Fact[i];
+    static void FirstPermutation(short* p, short* pp, int* count, int n, int idx)
+    {
+        for (int i = 0; i < n; ++i) p[i] = (byte)i;
+        for (int i = n - 1; i > 0; --i)
+        {
+            int d = idx / fact[i];
             count[i] = d;
-            idx = idx % Fact[i];
-
-            Buffer.BlockCopy(p, 0, pp, 0, (i + 1) * INT_SIZE);
-
-            for (int j = 0; j <= i; ++j) {
-                p[j] = j + d <= i ? pp[j + d] : pp[j + d - i - 1];
+            if (d > 0)
+            {
+                idx %= fact[i];
+                for (int j = i; j >= 0; --j) pp[j] = p[j];
+                for (int j = 0; j <= i; ++j) p[j] = pp[(j + d) % (i + 1)];
             }
         }
     }
 
-    bool NextPermutation() {
-        int first = p[1];
+    static void NextPermutation(short* p, int* count)
+    {
+        var first = p[1];
         p[1] = p[0];
         p[0] = first;
-
         int i = 1;
-        while (++count[i] > i) {
+        while (++count[i] > i)
+        {
             count[i++] = 0;
-            int next = p[0] = p[1];
-            for (int j = 1; j < i; ++j) {
-                p[j] = p[j + 1];
-            }
+            var next = p[1];
+            p[0] = next;
+            for (int j = 1; j < i;) p[j] = p[++j];
             p[i] = first;
             first = next;
         }
-        return true;
     }
 
-    int CountFlips() {
+    static void Copy(short* p, short* pp, int n)
+    {
+        var startL = (long*)p;
+        var stateL = (long*)pp;
+        var lengthL = n / 4;
+        int i = 0;
+        for (; i < lengthL; i++)
+        {
+            stateL[i] = startL[i];
+        }
+        for (i = lengthL * 4; i < n; i++)
+        {
+            pp[i] = p[i];
+        }
+    }
+
+    static int CountFlips(short* p, short* pp, int n)
+    {
         int flips = 1;
-        int first = p[0];
-        if (p[first] != 0) {
-            Buffer.BlockCopy(p, 0, pp, 0, pp.Length * INT_SIZE);
+        int first = *p;
+        short temp;
+        if (p[first] != 0)
+        {
+            Copy(p, pp, n);
             do
             {
                 ++flips;
-                for (int lo = 1, hi = first - 1; lo < hi; ++lo, --hi)
+                if (first > 2)
                 {
-                    int t = pp[lo];
-                    pp[lo] = pp[hi];
-                    pp[hi] = t;
+                    short* lo = pp + 1, hi = pp + first - 1;
+                    do
+                    {
+                        temp = *lo;
+                        *lo = *hi;
+                        *hi = temp;
+                    } while (++lo < --hi);
                 }
-                int tp = pp[first];
-                pp[first] = first;
-                first = tp;
+                temp = pp[first];
+                pp[first] = (short)first;
+                first = temp;
             } while (pp[first] != 0);
         }
         return flips;
     }
 
-    void RunTask(int task) {
-        int idxMin = task * CHUNKSZ;
-        int idxMax = Math.Min(Fact[n], idxMin + CHUNKSZ);
-
-        FirstPermutation(idxMin);
-
-        int maxflips = 1;
-        int chksum = 0;
-        for (int i = idxMin; ;)
+    static void Run(int n, int taskSize)
+    {
+        int* count = stackalloc int[n];
+        int taskId, chksum = 0, maxflips = 0;
+        short* p = stackalloc short[n];
+        short* pp = stackalloc short[n];
+        while ((taskId = Interlocked.Decrement(ref taskCount)) >= 0)
         {
-            if (p[0] != 0)
+            FirstPermutation(p, pp, count, n, taskId * taskSize);
+            if (*p != 0)
             {
-                int flips = CountFlips();
-
-                if (maxflips < flips) maxflips = flips;
-
-                chksum += i % 2 == 0 ? flips : -flips;
+                var flips = CountFlips(p, pp, n);
+                chksum += flips;
+                if (flips > maxflips) maxflips = flips;
             }
-
-            if (++i == idxMax)
+            for (int i = 1; i < taskSize; i++)
             {
-                break;
+                NextPermutation(p, count);
+                if (*p != 0)
+                {
+                    var flips = CountFlips(p, pp, n);
+                    chksum += (1 - (i & 1) * 2) * flips;
+                    if (flips > maxflips) maxflips = flips;
+                }
             }
-
-            NextPermutation();
         }
-        maxFlips[task] = maxflips;
-        chkSums[task] = chksum;
+        chkSums[-taskId - 1] = chksum;
+        maxFlips[-taskId - 1] = maxflips;
     }
 
-    public void Run() {
-        p = new int[n];
-        pp = new int[n];
-        count = new int[n];
+    private static void run_benchmark(string[] args)
+    {
+        int n = args.Length > 0 ? int.Parse(args[0]) : 7;
+        fact = new int[n + 1];
+        fact[0] = 1;
 
-        int task;
-        while ((task = Interlocked.Increment(ref taskId)) < NTASKS) {
-            RunTask(task);
+        for (int i = 1; i < fact.Length; i++)
+        {
+            fact[i] = fact[i - 1] * i;
         }
+
+        var PC = Environment.ProcessorCount;
+        taskCount = n > 11 ? fact[n] / (9 * 8 * 7 * 6 * 5 * 4 * 3 * 2) : PC;
+        int taskSize = fact[n] / taskCount;
+        chkSums = new int[PC];
+        maxFlips = new int[PC];
+        var threads = new Thread[PC];
+        for (int i = 1; i < PC; i++)
+        {
+            (threads[i] = new Thread(() => Run(n, taskSize))).Start();
+        }
+        Run(n, taskSize);
+
+        for (int i = 1; i < threads.Length; i++)
+        {
+            threads[i].Join();
+        }
+        Console.WriteLine(chkSums.Sum() + "\nPfannkuchen(" + n + ") = " + maxFlips.Max());
     }
 
-    static void Main(string[] args) {
-        n = int.Parse(args[0]);
-
-        while (true) {
-            initialize();
-            if (!start_rapl()) {
-                break;
-            }
-            run_benchmark();
+    public static void Main(string[] args)
+    {
+        while (start_rapl())
+        {
+            run_benchmark(args);
             stop_rapl();
-            cleanup();
         }
-    }
-
-    static void initialize()
-    {
-        var nLen = n + 1;
-
-        Fact = new int[nLen];
-        Fact[0] = 1;
-        for (int i = 1; i < nLen; ++i)
-        {
-            Fact[i] = Fact[i - 1] * i;
-        }
-
-        CHUNKSZ = (Fact[n] + NCHUNKS - 1) / NCHUNKS;
-        NTASKS = (Fact[n] + CHUNKSZ - 1) / CHUNKSZ;
-        maxFlips = new int[NTASKS];
-        chkSums = new int[NTASKS];
-        taskId = -1;
-    }
-
-    static void run_benchmark()
-    {
-        int nthreads = Environment.ProcessorCount + 1;
-
-        Task[] tasks = new Task[nthreads];
-        for (int i = 0; i < nthreads; ++i)
-        {
-            tasks[i] = Task.Run(() =>
-            {
-                new Program().Run();
-            });
-        }
-        Task.WaitAll(tasks);
-
-        int res = 0, chk = 0;
-
-        Task[] t2 =
-        {
-            Task.Run(() =>
-            {
-                for (int v = 0; v < NTASKS; v++)
-                {
-                    chk += chkSums[v];
-                }
-            }),
-
-            Task.Run(() =>
-            {
-                for (int v = 0; v < NTASKS; v++)
-                {
-                    if (res < maxFlips[v]) res = maxFlips[v];
-                }
-            })
-        };
-
-        Task.WaitAll(t2);
-
-        Console.WriteLine("{0}\nPfannkuchen({1}) = {2}", chk, n, res);
-    }
-
-    static void cleanup()
-    {
-        Fact = null;
-        maxFlips = null;
-        chkSums = null;
     }
 }

@@ -1,167 +1,124 @@
 ﻿// The Computer Language Benchmarks Game
 // https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 //
-// Contributed by Kevin Miller (as C code)
+// contributed by Elam Kolenovic
 //
-// Ported to C++ with minor changes by Dave Compton
+// Changes (2013-05-07)
+//   - changed omp schedule for more even distribution of work
+//   - changed loop variables to signed integer because msvc was complaining
+//     when omp was enabled
+//   - replaced std::copy and std::fill by one loop. slightly faster.
+//   - swapped order of tests in for-i-loop. slightly faster.
+//
+// Changes (2013-04-19)
+//   - using omp
+//   - use buffer and fwrite at end instead of putchar
+//   - pre-calculate cr0[]
+//   - rename variables and use underscore before the index part of the name
+//   - inverted bit tests, better performance under MSVC
+//   - optional argument for file output, usefull in windows shell
+//
+// Changes (2013-04-07):
+//   - removed unnecessary arrays, faster especially on 32 bits
+//   - using putchar instead of iostreams, slightly faster
+//   - using namespace std for readability
+//   - replaced size_t with unsigned
+//   - removed some includes
 
+#include <cstdio>
 #include <cstdlib>
-#include <immintrin.h>
-#include <iostream>
+#include <vector>
+
 #include <rapl-interface.h>
 
-#ifdef __AVX__
-#define VEC_SIZE 4
-typedef __m256d Vec;
-#define VEC_INIT(value) (Vec){value, value, value, value}
-#else
-#define VEC_SIZE 2
-typedef __m128d Vec;
-#define VEC_INIT(value) (Vec){value, value}
-#endif
-
-#define LOOP_SIZE (8 / VEC_SIZE)
+typedef unsigned char Byte;
 
 using namespace std;
 
-bool vec_le(double *v, double f)
+void run_benchmark(int argc, char* argv[])
 {
-    return (
-        v[0] <= f ||
-        v[1] <= f ||
-        v[2] <= f ||
-        v[3] <= f ||
-        v[4] <= f ||
-        v[5] <= f ||
-        v[6] <= f ||
-        v[7] <= f);
-}
+    const int    N              = max(0, (argc > 1) ? atoi(argv[1]) : 0);
+    const int    width          = N;
+    const int    height         = N;
+    const int    max_x          = (width + 7) / 8;
+    const int    max_iterations = 50;
+    const double limit          = 2.0;
+    const double limit_sq       = limit * limit;
 
-int8_t pixels(double *v, double f)
-{
-    int8_t res = 0;
-    if (v[0] <= f)
-        res |= 0b10000000;
-    if (v[1] <= f)
-        res |= 0b01000000;
-    if (v[2] <= f)
-        res |= 0b00100000;
-    if (v[3] <= f)
-        res |= 0b00010000;
-    if (v[4] <= f)
-        res |= 0b00001000;
-    if (v[5] <= f)
-        res |= 0b00000100;
-    if (v[6] <= f)
-        res |= 0b00000010;
-    if (v[7] <= f)
-        res |= 0b00000001;
-    return res;
-}
+    vector<Byte> buffer(height * max_x);
 
-inline void calcSum(double *r, double *i, double *sum, double const *init_r, Vec const &init_i)
-{
-    auto r_v = (Vec *)r;
-    auto i_v = (Vec *)i;
-    auto sum_v = (Vec *)sum;
-    auto init_r_v = (Vec const *)init_r;
-
-    for (auto vec = 0; vec < LOOP_SIZE; vec++)
+    vector<double> cr0(8 * max_x);
+#pragma omp parallel for
+    for (int x = 0; x < max_x; ++x)
     {
-        auto r2 = r_v[vec] * r_v[vec];
-        auto i2 = i_v[vec] * i_v[vec];
-        auto ri = r_v[vec] * i_v[vec];
-
-        sum_v[vec] = r2 + i2;
-
-        r_v[vec] = r2 - i2 + init_r_v[vec];
-        i_v[vec] = ri + ri + init_i;
-    }
-}
-
-inline int8_t mand8(double *init_r, double iy)
-{
-    double r[8], i[8], sum[8];
-    for (auto k = 0; k < 8; k++)
-    {
-        r[k] = init_r[k];
-        i[k] = iy;
-    }
-
-    auto init_i = VEC_INIT(iy);
-
-    int8_t pix = 0xff;
-
-    for (auto j = 0; j < 10; j++)
-    {
-        for (auto k = 0; k < 5; k++)
-            calcSum(r, i, sum, init_r, init_i);
-
-        if (!vec_le(sum, 4.0))
+        for (int k = 0; k < 8; ++k)
         {
-            pix = 0x00;
-            break;
+            const int xk = 8 * x + k;
+            cr0[xk] = (2.0 * xk) / width - 1.5;
         }
     }
-    if (pix)
-    {
-        pix = pixels(sum, 4.0);
-    }
 
-    return pix;
-}
-
-void initialize(int wid_ht, double *&r0, char *&pixels, size_t &dataLength)
-{
-    dataLength = wid_ht * (wid_ht >> 3);
-    pixels = new char[dataLength];
-    r0 = new double[wid_ht];
-    for (auto x = 0; x < wid_ht; x++)
-    {
-        r0[x] = 2.0 / wid_ht * x - 1.5;
-    }
-}
-
-void run_benchmark(int wid_ht, double *r0, char *pixels)
-{
 #pragma omp parallel for schedule(guided)
-    for (auto y = 0; y < wid_ht; y++)
+    for (int y = 0; y < height; ++y)
     {
-        auto iy = 2.0 / wid_ht * y - 1.0;
-        auto rowstart = y * wid_ht / 8;
-        for (auto x = 0; x < wid_ht; x += 8)
+        Byte* line = &buffer[y * max_x];
+
+        const double ci0 = 2.0 * y / height - 1.0;
+
+        for (int x = 0; x < max_x; ++x)
         {
-            pixels[rowstart + x / 8] = mand8(r0 + x, iy);
+            const double* cr0_x = &cr0[8 * x];
+            double cr[8];
+            double ci[8];
+            for (int k = 0; k < 8; ++k)
+            {
+                cr[k] = cr0_x[k];
+                ci[k] = ci0;
+            }
+
+            Byte bits = 0xFF;
+            for (int i = 0; bits && i < max_iterations; ++i)
+            {
+                Byte bit_k = 0x80;
+                for (int k = 0; k < 8; ++k)
+                {
+                    if (bits & bit_k)
+                    {
+                        const double cr_k    = cr[k];
+                        const double ci_k    = ci[k];
+                        const double cr_k_sq = cr_k * cr_k;
+                        const double ci_k_sq = ci_k * ci_k;
+
+                        cr[k] = cr_k_sq - ci_k_sq + cr0_x[k];
+                        ci[k] = 2.0 * cr_k * ci_k + ci0;
+
+                        if (cr_k_sq + ci_k_sq > limit_sq)
+                        {
+                            bits ^= bit_k;
+                        }
+                    }
+                    bit_k >>= 1;
+                }
+            }
+            line[x] = bits;
         }
+    }
+
+    FILE* out = (argc == 3) ? fopen(argv[2], "wb") : stdout;
+    fprintf(out, "P4\n%u %u\n", width, height);
+    fwrite(&buffer[0], buffer.size(), 1, out);
+
+    if (out != stdout)
+    {
+        fclose(out);
     }
 }
 
-void cleanup(int wid_ht, char *pixels, size_t dataLength, double *r0)
+int main(int argc, char* argv[])
 {
-    cout << "P4\n" << wid_ht << " " << wid_ht << "\n";
-    cout.write(pixels, dataLength);
-    delete[] pixels;
-    delete[] r0;
-}
-
-int main(int argc, char **argv) {
-    auto wid_ht = atoi(argv[1]);
-    wid_ht = (wid_ht + 7) & ~7;
-
-
-    double *r0 = nullptr;
-    char *pixels = nullptr;
-    size_t dataLength = 0;
-
-    while (1) {
-        initialize(wid_ht, r0, pixels, dataLength);
-        if (start_rapl() == 0) {
-            break;
-        }
-        run_benchmark(wid_ht, r0, pixels);
+    while (start_rapl()) {
+        run_benchmark(argc, argv);
         stop_rapl();
-        cleanup(wid_ht, pixels, dataLength, r0);
-    } 
-
+    }
     return 0;
 }

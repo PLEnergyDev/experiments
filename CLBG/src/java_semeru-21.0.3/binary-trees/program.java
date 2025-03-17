@@ -7,37 +7,43 @@
  * *reset*
  */
 
-import java.lang.foreign.*;
-import java.lang.invoke.MethodHandle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class program {
-    private static final int MIN_DEPTH = 4;
-    private static int maxDepth;
-    private static int stretchDepth;
-    private static TreeNode longLivedTree;
-    private static String[] results;
-    private static ExecutorService executorService;
+import java.lang.foreign.*;
+import java.lang.invoke.MethodHandle;
 
-    public static void initialize(int n) {
-        maxDepth = n < (MIN_DEPTH + 2) ? MIN_DEPTH + 2 : n;
-        stretchDepth = maxDepth + 1;
-        executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+public class program {
+
+    private static final int MIN_DEPTH = 4;
+    private static ExecutorService EXECUTOR_SERVICE;
+
+    static {
+        System.loadLibrary("rapl_interface");
     }
 
-    public static void run_benchmark() throws Exception {
-        System.out.println("stretch tree of depth " + stretchDepth + "\t check: "
-            + bottomUpTree(stretchDepth).itemCheck());
+    private static void run_benchmark(final String[] args) throws Exception {
+        int n = 0;
+        if (0 < args.length) {
+            n = Integer.parseInt(args[0]);
+        }
 
-        longLivedTree = bottomUpTree(maxDepth);
+        final int maxDepth = n < (MIN_DEPTH + 2) ? MIN_DEPTH + 2 : n;
+        final int stretchDepth = maxDepth + 1;
 
-        results = new String[(maxDepth - MIN_DEPTH) / 2 + 1];
+        System.out.println("stretch tree of depth " + stretchDepth + "\t check: " 
+           + bottomUpTree( stretchDepth).itemCheck());
+
+        final TreeNode longLivedTree = bottomUpTree(maxDepth);
+
+        final String[] results = new String[(maxDepth - MIN_DEPTH) / 2 + 1];
+
+        EXECUTOR_SERVICE = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         for (int d = MIN_DEPTH; d <= maxDepth; d += 2) {
             final int depth = d;
-            executorService.execute(() -> {
+            EXECUTOR_SERVICE.execute(() -> {
                 int check = 0;
 
                 final int iterations = 1 << (maxDepth - depth + MIN_DEPTH);
@@ -45,26 +51,39 @@ public class program {
                     final TreeNode treeNode1 = bottomUpTree(depth);
                     check += treeNode1.itemCheck();
                 }
-                results[(depth - MIN_DEPTH) / 2] =
-                    iterations + "\t trees of depth " + depth + "\t check: " + check;
+                results[(depth - MIN_DEPTH) / 2] = 
+                   iterations + "\t trees of depth " + depth + "\t check: " + check;
             });
         }
 
-        executorService.shutdown();
-        executorService.awaitTermination(120L, TimeUnit.SECONDS);
+        EXECUTOR_SERVICE.shutdown();
+        EXECUTOR_SERVICE.awaitTermination(120L, TimeUnit.SECONDS);
 
         for (final String str : results) {
             System.out.println(str);
         }
 
-        System.out.println("long lived tree of depth " + maxDepth +
+        System.out.println("long lived tree of depth " + maxDepth + 
             "\t check: " + longLivedTree.itemCheck());
     }
 
-    public static void cleanup() {
-        executorService = null;
-        longLivedTree = null;
-        results = null;
+    public static void main(final String[] args) throws Exception, Throwable {
+        SymbolLookup lookup = SymbolLookup.loaderLookup();
+
+        MethodHandle start_rapl = Linker.nativeLinker().downcallHandle(
+                lookup.find("start_rapl").get(),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT)
+        );
+
+        MethodHandle stop_rapl = Linker.nativeLinker().downcallHandle(
+                lookup.find("stop_rapl").get(),
+                FunctionDescriptor.ofVoid()
+        );
+
+        while ((int) start_rapl.invokeExact() > 0) {
+            run_benchmark(args);
+            stop_rapl.invokeExact();
+        }
     }
 
     private static TreeNode bottomUpTree(final int depth) {
@@ -75,7 +94,6 @@ public class program {
     }
 
     private static final class TreeNode {
-
         private final TreeNode left;
         private final TreeNode right;
 
@@ -89,41 +107,11 @@ public class program {
         }
 
         private int itemCheck() {
+            // if necessary deallocate here
             if (null == left) {
                 return 1;
             }
             return 1 + left.itemCheck() + right.itemCheck();
-        }
-
-    }
-
-    static {
-        System.loadLibrary("rapl_interface");
-    }
-
-    public static void main(final String[] args) throws Throwable {
-        SymbolLookup lookup = SymbolLookup.loaderLookup();
-
-        MethodHandle start_rapl = Linker.nativeLinker().downcallHandle(
-                lookup.find("start_rapl").get(),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT)
-        );
-
-        MethodHandle stop_rapl = Linker.nativeLinker().downcallHandle(
-                lookup.find("stop_rapl").get(),
-                FunctionDescriptor.ofVoid()
-        );
-
-        int n = Integer.parseInt(args[0]);
-
-        while (true) {
-            initialize(n);
-            if ((int) start_rapl.invokeExact() == 0) {
-                break;
-            }
-            run_benchmark();
-            stop_rapl.invokeExact();
-            cleanup();            
         }
     }
 }

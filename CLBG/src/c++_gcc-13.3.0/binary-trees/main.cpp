@@ -1,35 +1,29 @@
 /* The Computer Language Benchmarks Game
- * http://benchmarksgame.alioth.debian.org/
+ * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
  *
- * contributed by Jon Harrop
- * modified by Alex Mizrahi
- * modified by Andreas Schäfer
- * very minor omp tweak by The Anh Tran
- * modified to use apr_pools by Dave Compton
+ * contributed by Danial Klimkin (C++)
+ * contributed by the Rust Project Developers (Rust)
+ * contributed by TeXitoi (Rust)
+ * contributed by Cristi Cobzarenco (Rust)
+ * contributed by Matt Brubeck (Rust) 
+ * contributed by Dmytro Ovdiienko
+ *
  */
 
+#include <atomic>
+#include <numeric>
+#include <algorithm>
+#include <functional>
 #include <iostream>
-#include <stdlib.h>
-#include <stdio.h>
-#include <apr_pools.h>
+#include <memory_resource>
+#include <thread>
+
 #include <rapl-interface.h>
 
-using namespace std;
+using MemoryPool = std::pmr::monotonic_buffer_resource;
 
-const size_t    LINE_SIZE = 64;
-
-class Apr {
-    public:
-        Apr() {
-            apr_initialize();
-        }
-
-        ~Apr() {
-            apr_terminate();
-        }
-};
-
-struct Node {
+struct Node
+{
     Node *l, *r;
 
     int check() const
@@ -41,113 +35,89 @@ struct Node {
     }
 };
 
-class NodePool {
-    public:
-        NodePool()
-        {
-            apr_pool_create_unmanaged(&pool);
-        }
-
-        ~NodePool()
-        {
-            apr_pool_destroy(pool);
-        }
-
-        Node* alloc()
-        {
-            return (Node *)apr_palloc(pool, sizeof(Node));
-        }
-
-        void clear()
-        {
-            apr_pool_clear(pool);
-        }
-
-    private:
-        apr_pool_t* pool;
-    };
-
-    Node* make(int d, NodePool &store) {
-        Node* root = store.alloc();
-
-        if(d>0){
-            root->l=make(d-1, store);
-            root->r=make(d-1, store);
-        }else{
-            root->l=root->r=0;
-        }
-
-        return root;
+Node* make(const int d, MemoryPool& store)
+{
+    Node* root = static_cast<Node*>(store.allocate(sizeof(Node)));
+    if (d > 0)
+    {
+        root->l = make(d - 1, store);
+        root->r = make(d - 1, store);
     }
-
-int min_depth;
-int max_depth;
-int stretch_depth;
-Apr* apr;
-
-void initialize() {
-    apr = new Apr();
+    else
+    {
+        root->l = root->r = nullptr;
+    }
+    return root;
 }
 
-void run_benchmark() {
-    NodePool store;
+int run_parallel(unsigned depth, int iterations, unsigned int workers = std::thread::hardware_concurrency())
+{
+    std::vector<std::thread> threads;
+    threads.reserve(workers);
+
+    std::atomic_int counter = iterations;
+    std::atomic_int output = 0;
+
+    for(unsigned i = 0; i < workers; ++i) {
+        threads.push_back(std::thread([&counter, depth, &output] {
+            std::pmr::unsynchronized_pool_resource upperPool;
+            MemoryPool pool {&upperPool};
+            int checksum = 0;
+
+            while(--counter >= 0) {
+                Node* a     = make(depth, pool);
+                checksum    += a->check();
+                pool.release();
+            }
+
+            output += checksum;
+        }));
+    }
+    
+    for(unsigned i = 0; i < workers; ++i) {
+        threads[i].join();
+    }
+
+    return output;
+}
+
+constexpr auto MIN_DEPTH     = 4;
+
+void run_benchmark(int argc, char* argv[])
+{
+    const int max_depth     = std::max(MIN_DEPTH + 2, (argc == 2 ? atoi(argv[1]) : 10));
+    const int stretch_depth = max_depth + 1;
+
+    // Alloc then dealloc stretchdepth tree.
     {
-        Node *c = make(stretch_depth, store);
+        MemoryPool store;
+
+        Node* c = make(stretch_depth, store);
         std::cout << "stretch tree of depth " << stretch_depth << "\t "
                   << "check: " << c->check() << std::endl;
     }
 
-    NodePool long_lived_store;
-    Node *long_lived_tree = make(max_depth, long_lived_store);
+    MemoryPool long_lived_store;
+    Node* long_lived_tree = make(max_depth, long_lived_store);
 
-    char *outputstr = (char*)malloc(LINE_SIZE * (max_depth +1) * sizeof(char));
-
-    #pragma omp parallel for
-    for (int d = min_depth; d <= max_depth; d += 2)
+    for (int d = MIN_DEPTH; d <= max_depth; d += 2)
     {
-        int iterations = 1 << (max_depth - d + min_depth);
-        int c = 0;
+        const int iterations = 1 << (max_depth - d + MIN_DEPTH);
+        auto const c = run_parallel(d, iterations);
 
-        NodePool store;
-
-        for (int i = 1; i <= iterations; ++i)
-        {
-            Node *a = make(d, store);
-            c += a->check();
-            store.clear();
-        }
-
-        sprintf(outputstr + LINE_SIZE * d, "%d\t trees of depth %d\t check: %d\n",
-           iterations, d, c);
+        std::cout << iterations << "\t trees of depth " << d << "\t check: " << c << "\n";
     }
-
-    for (int d = min_depth; d <= max_depth; d += 2) {
-        printf("%s", outputstr + (d * LINE_SIZE) );
-    }
-    free(outputstr);
 
     std::cout << "long lived tree of depth " << max_depth << "\t "
               << "check: " << (long_lived_tree->check()) << "\n";
 }
 
-void cleanup() {
-    delete apr;
-}
-
-int main(int argc, char *argv[]) {
-    min_depth = 4;
-    max_depth = std::max(min_depth + 2, atoi(argv[1]));
-    stretch_depth = max_depth + 1;
-
-    while (1) {
-        initialize();
-        if (start_rapl() == 0) {
-            break;
-        }
-        run_benchmark();
+int main(int argc, char* argv[])
+{
+    while (start_rapl())
+    {
+        run_benchmark(argc, argv);
         stop_rapl();
-        cleanup();
     }
-
     return 0;
 }
