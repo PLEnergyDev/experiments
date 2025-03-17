@@ -41,21 +41,9 @@ HELP
     echo
 }
 
-get_available_commands() {
-    local commands=()
-    for command_sh in "$COMMANDS_DIR"/*.sh; do
-        if [[ -f "$command_sh" ]]; then
-            commands+=("$(basename "$command_sh" .sh)")
-        fi
-    done
-    echo "${commands[@]}"
-}
-
 source_available_commands() {
-    local commands=()
     for command_sh in "$COMMANDS_DIR"/*.sh; do
         if [[ -f "$command_sh" ]]; then
-            commands+=("$(basename "$command_sh" .sh)")
             source "$command_sh"
         fi
     done
@@ -65,7 +53,6 @@ main() {
     local command=""
     local show_help=false
     local args=()
-    local available_commands=$(get_available_commands)
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
