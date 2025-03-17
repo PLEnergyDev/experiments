@@ -35,22 +35,25 @@ Options:
     -w, --warmup             Only measures using "warmup" config
     -l, --lang  <languages>  Comma-separated list of languages. Default takes all dirs under DIR
     -b, --bench <benchmarks> Comma-separated list of benchmarks. Default takes all dirs under LANGUAGES
-        --lab                OS will enter the "lab" environment before measuring. Default production
-        --prod               OS will enter the "production" environment before measuring. Default production
-        --light              OS will enter the "lightweight" environment before measuring. Default production
     -s, --sleep <seconds>    Number of seconds to sleep between each successful measurement. Default 60
         --stop               Stop after a failed measurement
     -c, --count <count>      Number of measurement repetitions. Default 45
     -f, --freq  <freq>       perf measurement frequency in milliseconds. Default 500
+        --setup <name>       OS will enter the specified setup before measuring. Default production
     -h, --help               Show this help message
 
 HELP
 }
 
-measure_init() {
-    info "Sourcing the ${MEASURE_SETUP} environment.\n"
-    source "${SETUPS_DIR}/${MEASURE_SETUP}.sh"
+measure_setup() {
+    if [[ ! -f "$SETUPS_DIR/${MEASURE_SETUP}.sh" ]]; then
+        error "Unknown setup '$MEASURE_SETUP'"
+    fi
 
+    source "$SETUPS_DIR/${MEASURE_SETUP}.sh"
+}
+
+measure_splash() {
     MEASURE_DRIVER=$(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_driver)
     if [[ "$MEASURE_DRIVER" == "amd-pstate-epp" ]]; then
         MEASURE_DRIVER="amd_pstate"
@@ -76,14 +79,18 @@ measure_init() {
 
     MEASURE_CONF=($(shuf -e "${MEASURE_CONF[@]}"))
 
+    GREEN=$(tput setaf 2)
+    YELLOW=$(tput setaf 3)
+    NC=$(tput sgr0) 
+
     clear
     cat << HELP
 ========== Measurement Setup ==================
-Configuration File    | ${MEASURE_CONF[*]}
-OS Environment        | $MEASURE_SETUP
-Iterations            | $MEASURE_COUNT
-Measurement Freq      | $MEASURE_FREQ ms
-Measurement Sleep     | $MEASURE_SLEEP s
+Configuration         | ${GREEN}${MEASURE_CONF[*]}${NC}
+OS Environment        | ${GREEN}$MEASURE_SETUP${NC}
+Iterations            | ${YELLOW}$MEASURE_COUNT${NC}
+Measurement Freq      | ${YELLOW}$MEASURE_FREQ${NC} ms
+Measurement Sleep     | ${YELLOW}$MEASURE_SLEEP${NC} s
 Stop After Fail       | $MEASURE_STOP
 
 ========== CPU Scaling & Performance ==========
@@ -102,7 +109,7 @@ Benchmark Directories | ${MEASURE_BENCH[*]}
 HELP
 }
 
-measure_ensure_dependencies() {
+measure_dependencies() {
     if ! command -v modprobe &>/dev/null; then
         error "\"modprobe\" is not installed. Please install the \"kmod\" package and try again."
     fi
@@ -113,10 +120,6 @@ measure_ensure_dependencies() {
 
     if ! modprobe msr; then
         error "Failed to load \"msr\" kernel module. Ensure it is available and try again."
-    fi
-
-    if ! command -v nix &>/dev/null; then
-        error "\"nix\" is not installed. Install Nix package manager and try again."
     fi
 }
 
@@ -165,7 +168,7 @@ measure_main() {
         error "Measure requires root privileges."
     fi
 
-    local options=$(getopt -o nwl:b:c:s: --long no-warmup,warmup,lab,prod,light,stop,lang:,bench:,count:,freq:,sleep: -- "$@")
+    local options=$(getopt -o nwl:b:c:s: --long no-warmup,warmup,stop,setup:,lang:,bench:,count:,freq:,sleep: -- "$@")
     eval set -- "$options"
 
     while true; do
@@ -195,14 +198,9 @@ measure_main() {
             --stop)
                 MEASURE_STOP=true
                 ;;
-            --lab)
-                MEASURE_SETUP="lab"
-                ;;
-            --prod)
-                MEASURE_SETUP="production"
-                ;;
-            --light)
-                MEASURE_SETUP="lightweight"
+            --setup)
+                read -r MEASURE_SETUP <<< "$2"
+                shift
                 ;;
             --)
                 shift
@@ -223,12 +221,12 @@ measure_main() {
         error "Specified base directory $MEASURE_DIR does not exist."
     fi
 
-    measure_ensure_dependencies
+    measure_dependencies
 
     if [[ ${#MEASURE_LANG[@]} -eq 0 && ${#MEASURE_BENCH[@]} -eq 0 ]]; then
         if [[ -f "Makefile" || -f "makefile" || -f "GNUmakefile" ]]; then
-            measure_init
-
+            measure_setup
+            measure_splash
             for conf in "${MEASURE_CONF[@]}"; do
                 info "Measuring in '$MEASURE_DIR' with $conf.\n"
 
@@ -293,7 +291,8 @@ measure_main() {
     MEASURE_LANG=($(shuf -e "${MEASURE_LANG[@]}"))
     MEASURE_BENCH=($(shuf -e "${MEASURE_BENCH[@]}"))
 
-    measure_init
+    measure_setup
+    measure_splash
 
     if [[ $MEASURE_SLEEP -gt 0 ]]; then
         info "Starting measurements in ${MEASURE_SLEEP}s."; sleep $MEASURE_SLEEP

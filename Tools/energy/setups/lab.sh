@@ -31,3 +31,5 @@ cpupower frequency-set --max "$min_freq" >/dev/null || error "Failed to set max 
 
 MEASURE_PRIORITY="nice -n -20"
 MEASURE_AFFINITY="taskset -c $(seq -s, 0 $(( $(nproc) > 4 ? 3 : $(nproc)-1 )))"
+
+# we could even try to disable some processes here

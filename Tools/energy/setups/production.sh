@@ -22,3 +22,5 @@ elif command -v wrmsr &>/dev/null; then
 fi
 
 echo 2 > /proc/sys/kernel/randomize_va_space || error "Failed to enable ASLR."
+
+# we could even try to disable some processes here
