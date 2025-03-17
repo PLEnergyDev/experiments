@@ -159,7 +159,7 @@ while unsafe { start_rapl() } > 0 {
 
 Once a measurement is successful, the benchmark will receive:
 
-1. If ran *inside* a single benchmark you will generate a `perf.txt` and an `Intel_x.csv` or `AMD_X.csv` depending on your CPU.
+1. If ran *inside* a single benchmark you will generate a `perf.txt` and an `Intel_x.csv` or `AMD_x.csv` depending on your CPU.
 
 ```
 benchmark/
@@ -168,7 +168,7 @@ benchmark/
 └── perf.txt
 ```
 
-2. If ran on a benchmark suite you will generate a `results` dir in the same location as your benchmark suite which will mirror the structure of the suite and contains `perf.txt` and `Intel_x.csv` or `AMD_X.csv` depending on your CPU.
+2. If ran on a benchmark suite you will generate a `results` dir in the same location as your benchmark suite which will mirror the structure of the suite and contains `perf.txt` and `Intel_x.csv` or `AMD_x.csv` depending on your CPU.
 
 ```
 results/
@@ -194,6 +194,8 @@ benchmark_set/
 │   └── ...
 └── ...
 ```
+
+The `_x` part of the measurement file refers to the MSR Power Unit of your CPU and will be used by the `report` command to compile results.
 
 ### Energy Metrics
 - Package Domain (CPU die energy)
