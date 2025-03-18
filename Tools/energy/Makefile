@@ -42,12 +42,14 @@ install: $(RAPL_SO) main.sh
 
 	ln -sf $(LIB_DIR)/$(NAME) $(BIN_DIR)/$(NAME)
 	ln -sf $(LIB_DIR)/librapl_interface.so $(PREFIX)/lib/librapl_interface.so
+	ln -sf $(INCLUDE_DIR)/rapl-interface.h $(PREFIX)/include/rapl-interface.h
 
 	ldconfig # Refresh linker cache
 
 uninstall:
 	rm -f $(BIN_DIR)/$(NAME)
 	rm -f $(PREFIX)/lib/librapl_interface.so
+	rm -f $(PREFIX)/include/rapl-interface.h
 
 	rm -rf $(LIB_DIR) $(INCLUDE_DIR) $(SHARE_DIR) $(CONFIG_DIR)
 

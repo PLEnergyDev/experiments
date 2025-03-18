@@ -225,6 +225,10 @@ measure_main() {
 
     if [[ ${#MEASURE_LANG[@]} -eq 0 && ${#MEASURE_BENCH[@]} -eq 0 ]]; then
         if [[ -f "Makefile" || -f "makefile" || -f "GNUmakefile" ]]; then
+            if [[ ! -f expected.txt ]]; then
+                error "Missing required 'expected.txt' file."
+            fi
+
             measure_setup
             measure_splash
             for conf in "${MEASURE_CONF[@]}"; do
@@ -305,6 +309,11 @@ measure_main() {
             for bench in "${MEASURE_BENCH[@]}"; do
                 bench_dir="$lang/$bench"
                 if [[ ! -d "$bench_dir" ]]; then
+                    continue
+                fi
+
+                if [[ ! -f "$bench_dir/expected.txt" ]]; then
+                    warning "Missing required 'expected.txt' file in "$bench_dir". Skipping."
                     continue
                 fi
 

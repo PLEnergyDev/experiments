@@ -40,7 +40,7 @@ Options:
 HELP
 }
 
-report_ensure_dependencies() {
+report_dependencies() {
     if command -v python3 &>/dev/null; then
         REPORT_PYTHON="python3"
     elif command -v python &>/dev/null; then
@@ -70,14 +70,7 @@ report_ensure_dependencies() {
     done < "$requirements_file"
 
     if ! $all_installed; then
-        info "Missing Python dependencies detected."
-        read -p "Would you like to install them now? [y/N] " -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            sudo $PIP install -r "$requirements_file" || error "Failed to install Python dependencies."
-        else
-            error "Required Python packages must be installed to continue."
-        fi
+        error "Missing Python dependencies detected. Please install them via your package manager."
     fi
 }
 
@@ -130,7 +123,7 @@ report_main() {
         error "Specified base directory $REPORT_DIR does not exist."
     fi
 
-    report_ensure_dependencies
+    report_dependencies
 
     if [[ ${#REPORT_LANG[@]} -eq 0 && ${#REPORT_BENCH[@]} -eq 0 ]]; then
         local intel_csv=( $(find . -maxdepth 1 -type f -name "Intel_*.csv") )
@@ -145,23 +138,25 @@ report_main() {
                 rapl_csv="${intel_csv[0]}"
             elif [[ ${#amd_csv[@]} -eq 1 ]]; then
                 rapl_csv="${amd_csv[0]}"
+            else
+                error "Rapl measurement doesn't exist in current directory."
             fi
 
-            if [[ ! -f "perf.txt" ]]; then
+            if [[ ! -f perf.txt ]]; then
                 error "Perf measurement doesn't exist in current directory."
             fi
 
-            rm -f "rapl.csv"
+            rm -f rapl.csv
             $REPORT_PYTHON "$SCRIPTS_DIR/compile.py" "$rapl_csv" || error "Failed to compile rapl measurements."
             if $REPORT_AVERAGE; then
                 rm -f "averaged_perf.csv" "averaged_rapl.csv"
-                $REPORT_PYTHON "$SCRIPTS_DIR/average.py" --rapl "$rapl_csv" --perf "perf.txt" -s "$REPORT_SKIP" || error "Failed to average rapl measurements."
+                $REPORT_PYTHON "$SCRIPTS_DIR/average.py" --rapl "$rapl_csv" --perf "perf.txt" --skip "$REPORT_SKIP" || error "Failed to average rapl measurements."
             fi
             if $REPORT_VIOLIN; then
-                $REPORT_PYTHON "$SCRIPTS_DIR/violin.py" "$rapl_csv" -s "$REPORT_SKIP" || error "Failed to create violin plot."
+                $REPORT_PYTHON "$SCRIPTS_DIR/violin.py" "$rapl_csv" --skip "$REPORT_SKIP" || error "Failed to create violin plot."
             fi
             if $REPORT_INTERACTIVE; then
-                $REPORT_PYTHON "$SCRIPTS_DIR/interactive.py" "$rapl_csv" perf.txt -s "$REPORT_SKIP" || error "Failed to create interactive plot."
+                $REPORT_PYTHON "$SCRIPTS_DIR/interactive.py" "$rapl_csv" perf.txt --skip "$REPORT_SKIP" || error "Failed to create interactive plot."
             fi
 
             exit 0
@@ -243,7 +238,10 @@ report_main() {
                         warning "Missing required rapl measurement for \"$lang\" \"$bench\"."
                         continue
                     fi
-                    $REPORT_PYTHON "$SCRIPTS_DIR/violin.py" "$csv" -s "$REPORT_SKIP" || error "Failed to create violin plot."
+                    $REPORT_PYTHON "$SCRIPTS_DIR/violin.py" "$csv" \
+                        --skip "$REPORT_SKIP" \
+                        || error "Failed to create violin plot."
+
                     mkdir -p "$violins_dir"
                     mv violin.png "$violins_dir"
                 done
@@ -257,7 +255,9 @@ report_main() {
                         continue
                     fi
                     $REPORT_PYTHON "$SCRIPTS_DIR/interactive.py" \
-                        "$csv" "$bench_dir/perf.txt" -s "$REPORT_SKIP" || error "Failed to create interactive plot."
+                        "$csv" "$bench_dir/perf.txt" \
+                        --skip "$REPORT_SKIP" \
+                        || error "Failed to create interactive plot."
                     mkdir -p "$interactive_dir"
                     mv interactive.html "$interactive_dir"
                 done
@@ -270,13 +270,14 @@ report_main() {
             $REPORT_PYTHON "$SCRIPTS_DIR/average.py" \
                 --rapl "${rapl_csvs[@]}" \
                 --perf "${perf_txts[@]}" \
-                -s "$REPORT_SKIP" -l "$lang" \
+                --skip "$REPORT_SKIP" \
+                --language "$lang" \
                 || error "Failed to average measurements."
         fi
     done
 
     if [[ $REPORT_DIR != "." ]]; then
-        mv "rapl.csv" "$REPORT_DIR"
+        mv rapl.csv "$REPORT_DIR"
 
         if $REPORT_AVERAGE; then
             mv "averaged_rapl.csv" "averaged_perf.csv" "$REPORT_DIR"

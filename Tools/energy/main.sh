@@ -22,7 +22,7 @@ info() {
 energy_help() {
     cat << HELP
 Usage:
-    $NAME [--version|--help] COMMAND [OPTIONS]
+    $NAME [--help] COMMAND [OPTIONS]
 
 Commands:
 HELP

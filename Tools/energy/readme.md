@@ -17,13 +17,21 @@ The `energy` toolkit provides a simple interface for measuring the energy consum
 
 ## Prerequisites
 
-Ensure the following dependencies are installed:
+To use all features, install:
 - `bash`
 - `perf`
 - `cpupower`
 - `modprobe`
 - `kmod`
 - `linux-tools`
+- `build-essential`
+- `cargo`
+- `python-numpy`
+- `python-pandas`
+- `python-seaborn`
+- `python-matplotlib`
+- `python-scipy`
+- `python-plotly`
 
 ## Installation
 
@@ -38,7 +46,7 @@ make install
 ### Command Structure
 
 ```bash
-energy [--version|--help] COMMAND [OPTIONS]
+energy [--help] COMMAND [OPTIONS]
 ```
 
 ### Available Commands
