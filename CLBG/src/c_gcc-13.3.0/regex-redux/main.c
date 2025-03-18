@@ -7,10 +7,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <rapl-interface.h>
 
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include "pcre2.h"
+
+#include <rapl-interface.h>
 
 typedef struct {
     PCRE2_UCHAR *data;

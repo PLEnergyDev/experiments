@@ -20,9 +20,10 @@
 #include <memory>
 #include <sstream>
 #include <vector>
-#include <rapl-interface.h>
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
+
+#include <rapl-interface.h>
 
 // Cast std::string to PCRE2 buffer
 PCRE2_UCHAR8* pcre2_buffer_cast(std::string& str)

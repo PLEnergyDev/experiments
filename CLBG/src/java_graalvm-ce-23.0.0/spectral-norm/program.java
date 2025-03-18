@@ -8,33 +8,22 @@ based on the Go entry by K P anonymous
 
 import java.text.DecimalFormat;
 
-import java.lang.foreign.*;
-import java.lang.invoke.MethodHandle;
-
 public class program {
     private static final DecimalFormat formatter = new DecimalFormat("#.000000000");
     private static final int NCPU = Runtime.getRuntime().availableProcessors();
+
+    // Native method declarations for RAPL interface
+    private static native boolean start_rapl();
+    private static native void stop_rapl();
 
     static {
         System.loadLibrary("rapl_interface");
     }
 
     public static void main(String[] args) throws Throwable {
-        SymbolLookup lookup = SymbolLookup.loaderLookup();
-
-        MethodHandle start_rapl = Linker.nativeLinker().downcallHandle(
-                lookup.find("start_rapl").get(),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT)
-        );
-
-        MethodHandle stop_rapl = Linker.nativeLinker().downcallHandle(
-                lookup.find("stop_rapl").get(),
-                FunctionDescriptor.ofVoid()
-        );
-
-        while ((int) start_rapl.invokeExact() > 0) {
+        while (start_rapl()) {
             run_benchmark(args);
-            stop_rapl.invokeExact();
+            stop_rapl();
         }
     }
 
