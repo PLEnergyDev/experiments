@@ -12,7 +12,7 @@
 
 #include <rapl-interface.h>
 
-inline int A(int i, int j) {
+int A(int i, int j) {
    return ((i+j) * (i+j+1) / 2 + i + 1);
 }
 

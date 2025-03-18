@@ -46,7 +46,7 @@
 struct Cfg {
     static constexpr size_t thread_count = 4;
     static constexpr unsigned to_char[4] = {'A', 'C', 'T', 'G'};
-    static inline unsigned char to_num[128];
+    static unsigned char to_num[128];
     using Data = std::vector<unsigned char>;
 
     Cfg() {

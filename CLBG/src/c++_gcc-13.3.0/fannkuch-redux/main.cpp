@@ -93,7 +93,7 @@ void Permutation::advance()
 // Other than minor cosmetic changes, the following routine is
 // basically lifted from "fannkuch-redux C gcc #5"
 //
-inline int64_t Permutation::countFlips() const
+int64_t Permutation::countFlips() const
 {
     const auto n = current.size();
     auto flips = 0;

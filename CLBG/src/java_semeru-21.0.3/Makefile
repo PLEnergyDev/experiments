@@ -1,4 +1,3 @@
-SHELL := /bin/bash
 THIS_DIR = $(shell pwd)
 
 NIX_PKGS = semeru-bin

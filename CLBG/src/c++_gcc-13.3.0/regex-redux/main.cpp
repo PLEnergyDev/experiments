@@ -25,13 +25,13 @@
 #include <pcre2.h>
 
 // Cast std::string to PCRE2 buffer
-inline PCRE2_UCHAR8* pcre2_buffer_cast(std::string& str)
+PCRE2_UCHAR8* pcre2_buffer_cast(std::string& str)
 {
     return reinterpret_cast<PCRE2_UCHAR8*>(str.data());
 }
 
 // Cast std::string to PCRE2 immutable string
-inline PCRE2_SPTR8 pcre2_string_cast(const std::string& str)
+PCRE2_SPTR8 pcre2_string_cast(const std::string& str)
 {
     return reinterpret_cast<PCRE2_SPTR8>(str.c_str());
 }
@@ -44,13 +44,13 @@ inline PCRE2_SPTR8 pcre2_string_cast(const std::string& str)
 class regex : private boost::noncopyable
 {
 public:
-    inline explicit regex(const std::string& regex_str)
+    explicit regex(const std::string& regex_str)
     {
         compile_regex(regex_str);
         allocate_match_data();
     }
 
-    inline ~regex()
+    ~regex()
     {
         pcre2_code_free(_code);
         pcre2_match_data_free(_match_data);
@@ -59,7 +59,7 @@ public:
     }
 
     // Count matches of this regex within subject
-    inline std::size_t count_matches(const std::string& subject) const
+    std::size_t count_matches(const std::string& subject) const
     {
         // Definition of a functor for counting occurrences
         struct count_functor
@@ -67,7 +67,7 @@ public:
             std::size_t match_cnt = 0;
             /* This method (operator) will be called for every match in the
              subject */
-            inline void operator()(PCRE2_SPTR subject,
+            void operator()(PCRE2_SPTR subject,
                 PCRE2_SIZE match_begin,
                 PCRE2_SIZE match_end)
             {
@@ -90,7 +90,7 @@ public:
     /* Replace all matches of this regex between "subject_begin" and
       "subject_end" with "replacement" and store the result in the
       result_buffer */
-    inline PCRE2_SIZE replace_all(const std::string& replacement,
+    PCRE2_SIZE replace_all(const std::string& replacement,
         const PCRE2_SPTR8 subject_begin,
         const PCRE2_SPTR8 subject_end,
         PCRE2_UCHAR* const result_buffer_begin,
@@ -104,7 +104,7 @@ public:
             const std::string& _replacement;
             PCRE2_SIZE _replacement_size;
 
-            inline replace_functor(PCRE2_UCHAR* const result_buffer_begin,
+            replace_functor(PCRE2_UCHAR* const result_buffer_begin,
                 PCRE2_UCHAR* const result_buffer_end,
                 const std::string& replacement)
                 : _result_buffer_ptr(result_buffer_begin)
@@ -115,7 +115,7 @@ public:
             }
 
             // This operator will be called for every match
-            inline void operator()(const PCRE2_SPTR subject_ptr,
+            void operator()(const PCRE2_SPTR subject_ptr,
                 const PCRE2_SIZE match_begin,
                 const PCRE2_SIZE match_end)
             {
@@ -136,7 +136,7 @@ public:
             }
 
             // Copy characters into the result buffer
-            inline PCRE2_UCHAR* copy_into_result_buffer(
+            PCRE2_UCHAR* copy_into_result_buffer(
                 const PCRE2_SPTR begin, const PCRE2_SPTR end)
             {
                 // Copy remainder
@@ -168,7 +168,7 @@ public:
         return result_buffer_ptr - result_buffer_begin;
     }
 
-    inline std::string replace_all(
+    std::string replace_all(
         const std::string& replacement, const std::string& subject) const
     {
         std::string result;
@@ -186,7 +186,7 @@ public:
 private:
     // Higher order function that allows application of functors to matches
     template <typename FUNCTOR>
-    inline PCRE2_SPTR8 for_each_match(
+    PCRE2_SPTR8 for_each_match(
         PCRE2_SPTR subject_begin, PCRE2_SPTR subject_end, FUNCTOR& action) const
     {
         PCRE2_SPTR subject_ptr = subject_begin;
@@ -215,7 +215,7 @@ private:
         return subject_ptr;
     }
 
-    inline void compile_regex(const std::string& regex_str)
+    void compile_regex(const std::string& regex_str)
     {
         PCRE2_SIZE error_offset;
         int error_number;
@@ -232,7 +232,7 @@ private:
 
     // Allocate PCRE2 objects for applying the regular expression
     // and storing the result
-    inline void allocate_match_data()
+    void allocate_match_data()
     {
         _match_context = pcre2_match_context_create(nullptr);
         require_allocation_good(_match_context);
@@ -247,7 +247,7 @@ private:
     }
 
     // Throw runtime_error with error-message from PCRE2
-    inline static void throw_pcre2_error(int status)
+    static void throw_pcre2_error(int status)
     {
         std::string msg;
         msg.resize(1024);
@@ -256,7 +256,7 @@ private:
     }
 
     // Throw exception if pinter is nullptr
-    inline static void require_allocation_good(void* ptr)
+    static void require_allocation_good(void* ptr)
     {
         if (ptr == nullptr)
         {
@@ -265,7 +265,7 @@ private:
     }
 
     // Throw an exception if a PCRE2 error occurred
-    inline static void require_status_good(int status)
+    static void require_status_good(int status)
     {
         if (status < 0 && status != PCRE2_ERROR_NOMATCH)
         {
@@ -297,7 +297,7 @@ const regex_replace_spec replace_specs[] = { { "tHa[Nt]", "<4>" },
 const auto launch_type = std::launch::async;
 
 // Read all data from input-stream and return as string
-inline std::string slurp(std::istream& in)
+std::string slurp(std::istream& in)
 {
     std::string input_data;
     size_t buffer_size = 1u << 14;
@@ -320,7 +320,7 @@ inline std::string slurp(std::istream& in)
 
 using counter_list = std::vector<size_t>;
 
-inline counter_list count_occurrences(const std::string& subject)
+counter_list count_occurrences(const std::string& subject)
 {
     counter_list counters;
     std::vector<std::future<size_t>> tasks;
@@ -340,7 +340,7 @@ inline counter_list count_occurrences(const std::string& subject)
     return results;
 }
 
-inline std::string replace_patterns(const std::string& subject)
+std::string replace_patterns(const std::string& subject)
 {
     PCRE2_SIZE current_size = subject.size();
     // A heuristic value new size = original_size * 1.1
