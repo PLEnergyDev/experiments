@@ -110,7 +110,7 @@ The toolkit uses the `rapl_interface` library to measure energy consumption.
 #include <rapl-interface.h>
 
 while (start_rapl()) {
-    // Measurement code
+    // Code to measure here
     stop_rapl();
 }
 ```
@@ -123,7 +123,7 @@ public static extern bool start_rapl();
 public static extern void stop_rapl();
 
 while (start_rapl()) {
-    // Measurement code
+    // Code to measure here
     stop_rapl();
 }
 ```
@@ -144,7 +144,7 @@ MethodHandle stop_rapl = Linker.nativeLinker().downcallHandle(
 );
 
 while (start_rapl() > 0) {
-    // Measurement code
+    // Code to measure here
     stop_rapl();
 }
 ```
@@ -158,7 +158,7 @@ extern "C" {
 }
 
 while unsafe { start_rapl() } > 0 {
-    // Measurement code
+    // Code to measure here
     unsafe { stop_rapl() };
 }
 ```
