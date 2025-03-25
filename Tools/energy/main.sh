@@ -6,17 +6,23 @@ COMMANDS_DIR="{{COMMANDS_DIR}}"
 SCRIPTS_DIR="{{SCRIPTS_DIR}}"
 SETUPS_DIR="{{SETUPS_DIR}}"
 
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+YELLOW=$(tput setaf 3)
+BLUE=$(tput setaf 4)
+NC=$(tput sgr0)
+
 error() {
-    echo -e "Error: $1" >&2
+    echo -e "${RED}Error:${NC} $1" >&2
     exit 1
 }
 
 warning() {
-    echo -e "Warning: $1"
+    echo -e "${YELLOW}Warning:${NC} $1"
 }
 
 info() {
-    echo -e "\nInfo: $1"
+    echo -e "\n${BLUE}Info:${NC} $1"
 }
 
 energy_help() {

@@ -57,6 +57,8 @@ struct Cfg {
     }
 } const cfg;
 
+unsigned char Cfg::to_num[128];
+
 template <size_t size>
 struct Key
 {

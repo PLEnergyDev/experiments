@@ -28,6 +28,13 @@ def main():
         power_unit = int(file.split("_")[-1].split(".")[0])
         pkg, core, uncore, dram, time = calculate_energy(df, power_unit)
 
+        # Round all float values to 2 decimal places
+        time = time.round(2)
+        pkg = pkg.round(2)
+        core = core.round(2)
+        uncore = uncore.round(2)
+        dram = dram.round(2)
+
         tmp_df = pd.DataFrame(
             {
                 "Language": language,

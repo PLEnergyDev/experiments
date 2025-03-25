@@ -9,12 +9,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--rapl", nargs="+", help="One or more RAPL CSV files.")
     parser.add_argument("--perf", nargs="+", help="One or more perf text files.")
-    parser.add_argument(
-        "-s", "--skip", type=int, default=0, help="Number of RAPL rows to skip."
-    )
-    parser.add_argument(
-        "-l", "--language", type=str, default="", help="Language identifier."
-    )
+    parser.add_argument("-s", "--skip", type=int, default=0, help="Number of RAPL rows to skip.")
+    parser.add_argument("-l", "--language", type=str, default="", help="Language identifier.")
     return parser.parse_args()
 
 
@@ -100,11 +96,11 @@ def main():
 
         averaged_rapl_data = {
             "Language": args.language,
-            "Average Time (ms)": avg_time,
-            "Average Pkg (J)": avg_pkg,
-            "Average Core (J)": avg_core,
-            "Average Uncore (J)": avg_uncore,
-            "Average Dram (J)": avg_dram,
+            "Average Time (ms)": round(avg_time, 2),
+            "Average Pkg (J)": round(avg_pkg, 2),
+            "Average Core (J)": round(avg_core, 2),
+            "Average Uncore (J)": round(avg_uncore, 2),
+            "Average Dram (J)": round(avg_dram, 2),
         }
 
         rapl_csv = "averaged_rapl.csv"
@@ -145,15 +141,13 @@ def main():
 
             for metric in metrics.keys():
                 if file_metrics[metric]:
-                    metrics[metric].append(
-                        sum(file_metrics[metric]) / len(file_metrics[metric])
-                    )
+                    metrics[metric].append(sum(file_metrics[metric]) / len(file_metrics[metric]))
 
         averaged_perf_data = {"Language": args.language}
         for metric in metrics.keys():
             if metrics[metric]:
-                averaged_perf_data[f"Average {metric}"] = sum(metrics[metric]) / len(
-                    metrics[metric]
+                averaged_perf_data[f"Average {metric}"] = round(
+                    sum(metrics[metric]) / len(metrics[metric]), 2
                 )
             else:
                 averaged_perf_data[f"Average {metric}"] = 0
